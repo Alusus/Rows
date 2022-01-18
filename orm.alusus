@@ -1,0 +1,172 @@
+import "Srl/Console.alusus";
+import "Srl/Array";
+import "Srl/Map";
+import "Srl/String";
+import "mysql";
+import "pgsql";
+module DataType
+{
+    class Integer
+    {	
+      def ExecString : String="INT";
+      def PgSqlString : String ="integer";
+        
+
+    }
+    class BigInteger
+    {	
+      def ExecString : String="BIGINT"; 
+      def PgSqlString : String ="bigint";
+
+    }
+    class SmallInteger
+    {	
+      def ExecString : String="SMALLINT";         
+      def PgSqlString : String ="smallint";
+    }
+    class TinyInteger
+    {	
+      def ExecString : String="TINYINT";
+      def PgSqlString : String ="smallint";
+         
+
+    }
+    class Real
+    {	
+      def ExecString : String="REAL";         
+      def PgSqlString : String ="real";
+    }
+    class Float
+    {	
+      def ExecString : String="FLOAT";
+      def PgSqlString : String ="double precision";         
+
+    }
+    class Decimal
+    {	
+      def ExecString : String="DECIMAL";         
+      def PgSqlString : String ="integer";
+    }
+    class Xml
+    {	
+      def ExecString : String="XML";
+      def PgSqlString : String ="\0";         
+
+    }
+    class VarChar
+    {
+      def length : int=50;	
+      def ExecString : String="VARCHAR";
+      def PgSqlString : String="varchar";
+      handler this~init(length: int) 
+      {
+        this.length=length;
+
+      }
+      handler this~init(length: int) {}
+    class Char
+    {
+      def length : int=1;	
+      def ExecString : String="CHAR";
+      def PgSqlString : String="char";
+      handler this~init(length: int) 
+      {
+        this.length=length;
+
+      }
+      handler this~init(length: int) {}         
+
+    }
+    class Text
+    {
+      def length : int=50;	
+      def ExecString : String="TEXT";
+      def PgSqlString : String="TEXT";
+      handler this~init(length: int) 
+      {
+        this.length=length;
+
+      }
+      handler this~init(length: int) {}         
+
+    }
+    class Dates
+    {	
+      def ExecString : String="DateTime";
+      def PgSqlString : String="date";        
+    }
+}
+module Constraints
+{
+    class BasicConstraints
+    {	
+        def NotNull : int=-1;
+        def Unique : int=-1;
+        def Default : int=-1;
+        def Check : int=-1;
+        def PrimaryKey : bool=0;
+        def StringRep: Array[String]{("NOT NULL" , "UNIQUE" , "DEFAULT" , "CHECK ")};
+        def tableConsString : String="";
+
+        handler this.setNotNullConstraint(){
+            if (this.NotNull ==-1)
+            {
+                this.NotNull=0;
+                this.addConstraint(this.NotNull,"");
+            }
+    
+            }
+        handler this.setUniqueConstraint(){
+            if (this.Unique==-1)
+            {
+                this.Unique=1;
+                this.addConstraint(this.Unique,"");
+            }
+  
+}
+        handler this.setDefaultConstraint(defaultValue : String){
+            if (this.Default==-1)
+            {
+                this.Default=2;
+                this.addConstraint(this.Default,defaultValue);
+            } 
+
+}
+        handler this.setCheckConstraint(cond : String){
+            if (this.Check==-1)
+            {
+                this.Check=3;
+                def conString : String;
+                conString="( " + cond + ")";
+                this.addConstraint(this.Check,conString);
+            }
+             }
+        handler this.setPrimaryKeyConstraint(){
+            if (this.PrimaryKey==0)
+            {
+                this.PrimaryKey=1;
+                this.addConstraint(4 , "");
+            }
+        handler this.addConstraint(constNumber : int , par : String){
+            if (this.constNumber!=4 )
+                this.tableConsString=this.tableConsString + " " + this.StringRep(constNumber) + " " + par;
+            else if (this.constNumber==4 )
+                this.PrimaryKey=1;
+
+            }
+        handler this.gettableConsString() : String{
+            return this.tableConsString;
+ 
+
+            }
+        handler this.isPrimaryKey() : bool{
+            return this.PrimaryKey;
+ 
+
+            }
+       
+    }
+
+
+
+}
