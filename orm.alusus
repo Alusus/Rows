@@ -31,6 +31,47 @@ module DataType
             else if this.DataBaseType==2
                 return this.PgSqlString;
         }
+        handler this.getConstrants() Constraints.FiledConstraints
+        {
+            return this.Constrants;
+        }
+        handler this.getIntValue() int
+        {
+            return this.IntValue;
+
+        }
+        handler this.setIntValue (IntValue : int) 
+        {
+            this.IntValue=IntValue;
+        }
+        handler this.getCharValue() char
+        {
+            return this.CharValue;
+
+        }
+        handler this.setCharValue (CharValue : char) 
+        {
+            this.CharValue=CharValue;
+        }
+        handler this.getStringValue() String
+        {
+            return this.StringValue;
+
+        }
+        handler this.setStringValue (StringValue : String) 
+        {
+            this.StringValue=StringValue;
+        }
+        handler this.getFloatValue() float
+        {
+            return this.StringValue;
+
+        }
+        handler this.setFloatValue (FloatValue : float) 
+        {
+            this.FloatValue=FloatValue;
+        }
+
 
         
         
@@ -43,16 +84,6 @@ module DataType
         this.SqliteString : String ="INTEGER";
         this.PgSqlString : String ="integer";
         this.IsIntValue=1;
-        handler this.getValue () int
-        {
-            return this.IntValue
-        }
-        handler this.setValue (IntValue : int) 
-        {
-            this.IntValue=IntValue
-        }
-          
-
     }
     class BigInteger
     {	
@@ -61,15 +92,6 @@ module DataType
         this.PgSqlString : String ="bigint";
         this.SqliteString : String ="INTEGER";
         this.IsIntValue=1;
-        handler this.getValue () int
-        {
-            return this.IntValue
-        }
-        handler this.setValue (IntValue : int) 
-        {
-            this.IntValue=IntValue
-        }
-
     }
     class SmallInteger
     {
@@ -81,11 +103,11 @@ module DataType
 
         handler this.getValue () int
         {
-            return this.IntValue
+            return this.IntValue;
         }
         handler this.setValue (IntValue : int) 
         {
-            this.IntValue=IntValue
+            this.IntValue=IntValue;
         }
 
     }
@@ -98,11 +120,11 @@ module DataType
         this.IsIntValue=1;
         handler this.getValue () int
         {
-            return this.IntValue
+            return this.IntValue;
         }
         handler this.setValue (IntValue : int) 
         {
-            this.IntValue=IntValue
+            this.IntValue=IntValue;
         }
  
          
@@ -117,11 +139,11 @@ module DataType
         this.IsFloatValue=1;
         handler this.getValue () float
         {
-            return this.FloatValue
+            return this.FloatValue;
         }
         handler this.setValue (FloatValue : float) 
         {
-            this.FloatValue=FloatValue
+            this.FloatValue=FloatValue;
         }
 
     }
@@ -134,11 +156,11 @@ module DataType
         this.IsFloatValue=1;
          handler this.getValue () float
         {
-            return this.FloatValue
+            return this.FloatValue;
         }
         handler this.setValue (FloatValue : float) 
         {
-            this.FloatValue=FloatValue
+            this.FloatValue=FloatValue;
         }         
 
     }
@@ -149,76 +171,92 @@ module DataType
         this.PgSqlString : String ="integer";
         this.SqliteString : String="DECIMAL";
         this.IsIntValue=1;
-        handler this.getValue () int
-        {
-            return this.IntValue
-        }
-        handler this.setValue (IntValue : int) 
-        {
-            this.IntValue=IntValue
-        } 
     }
     class Xml
-    {	
-      def MySqlString : String="XML";
-      def PgSqlString : String ="\0";         
-      def SqliteString : String ="\0";
-      def Value:String ;
-      def Constrants :  Constraints.FiledConstraints;  
+    {
+        @injection def data:Data;	
+        this.MySqlString : String="XML";
+        this.PgSqlString : String ="\0";         
+        this.SqliteString : String ="\0";
+        this.IsStringValue=1;  
     }
     class VarChar
     {
-      def length : int=50;	
-      def MySqlString : String="VARCHAR";
-      def PgSqlString : String="varchar";
-      def SqliteString : String ="VARCHAR";
-      def Value:String ;
-      def Constrants :  Constraints.FiledConstraints; 
-      handler this~init(length: int) 
-      {
-        this.length=length;
+        @injection def data:Data;
+        def length : int=50;	
+        this.MySqlString : String="VARCHAR";
+        this.PgSqlString : String="varchar";
+        this.SqliteString : String ="VARCHAR";
+        this.IsStringValue=1;
+        handler this~init(length: int) 
+        {
+            this.length=length;
+            this.MySqlString=this.MySqlString + "(" + this.length + ")";
+            this.PgSqlString=this.PgSqlString + "(" + this.length + ")";
+            this.SqliteString=this.SqliteString + "(" + this.length + ")";
 
-      }
-      handler this~init(length: int) {}
+        }
+        handler this~init() 
+        {
+            this.MySqlString=this.MySqlString + "(" + this.length + ")";
+            this.PgSqlString=this.PgSqlString + "(" + this.length + ")";
+            this.SqliteString=this.SqliteString + "(" + this.length + ")";
+        }
     class Char
     {
-      def length : int=1;	
-      def MySqlString : String="CHAR";
-      def PgSqlString : String="char";
-     def SqliteString : String ="CHAR";
-      def Value:char ;
-      def Constrants :  Constraints.FiledConstraints; 
-      handler this~init(length: int) 
-      {
-        this.length=length;
+        @injection def data:Data;
+        def length : int=1;	
+        this.MySqlString : String="CHAR";
+        this.PgSqlString : String="char";
+        this.SqliteString : String ="CHAR";
+        this.IsCharValue=1;
+        handler this~init(length: int) 
+        {
+            this.length=length;
+            this.MySqlString=this.MySqlString + "(" + this.length + ")";
+            this.PgSqlString=this.PgSqlString + "(" + this.length + ")";
+            this.SqliteString=this.SqliteString + "(" + this.length + ")";
 
-      }
-      handler this~init(length: int) {}         
+        }
+        handler this~init() 
+        {
+            this.MySqlString=this.MySqlString + "(" + this.length + ")";
+            this.PgSqlString=this.PgSqlString + "(" + this.length + ")";
+            this.SqliteString=this.SqliteString + "(" + this.length + ")";
+        }         
 
     }
     class Text
     {
-      def length : int=50;	
-      def MySqlString : String="TEXT";
-      def PgSqlString : String="TEXT";
-      def SqliteString : String ="TEXT";
-      def Value:String ;
-      def Constrants :  Constraints.FiledConstraints; 
-      handler this~init(length: int) 
-      {
-        this.length=length;
+        @injection def data:Data;
+        def length : int=50;	
+        this.MySqlString : String="TEXT";
+        this.PgSqlString : String="TEXT";
+        this.SqliteString : String ="TEXT";
+        this.IsStringValue=1;
+        handler this~init(length: int) 
+        {
+            this.length=length;
+            this.MySqlString=this.MySqlString + "(" + this.length + ")";
+            this.PgSqlString=this.PgSqlString + "(" + this.length + ")";
+            this.SqliteString=this.SqliteString + "(" + this.length + ")";
 
-      }
-      handler this~init(length: int) {}         
+        }
+        handler this~init() 
+        {
+            this.MySqlString=this.MySqlString + "(" + this.length + ")";
+            this.PgSqlString=this.PgSqlString + "(" + this.length + ")";
+            this.SqliteString=this.SqliteString + "(" + this.length + ")";
+        }        
 
     }
     class Dates
-    {	
-      def MySqlString : String="Date";
-      def PgSqlString : String="date";
-      def MySqlString : String="Date"; 
-      def Value:String ;
-      def Constrants :  Constraints.FiledConstraints;        
+    {
+        @injection def data:Data;	
+        this.MySqlString : String="Date";
+        this.PgSqlString : String="date";
+        this.MySqlString : String="Date"; 
+        this.IsStringValue=1;
     }
 }
 module Constraints
@@ -321,7 +359,10 @@ module Table
         def NotExistFlag : bool=0;
         def Name : String="";
         def Data : Array[ptr[DataType.Data]];
-
+        def ColsName : Array[String];
+        def ColsString : String="";
+        def TConst : Constraints.TableConstraints;
+        def TConstString : String ="";
 
         handler this.setTableName(Name : String){
             this.Name=Name;
@@ -332,6 +373,103 @@ module Table
             this.NotExistFlag=1;
   
         }
+        handler this.setDataType(Data : Array[ptr[DataType.Data]])
+        {
+            this.Data=Data;
+  
+        }
+        handler this.getColsString() : String
+        {
+            return this.ColsString;
+  
+        }
+        handler this.setColsName(ColsName : Array[String])
+        {
+            this.ColsName=ColsName;
+  
+        }
+        handler this.getColsName() : Array[String]
+        {
+            return this.ColsName;
+  
+        }
+        handler this.setColsString() 
+        {
+            this.ColsString="";
+            def i : int =0;
+            def size : int =0;
+            if (this.Data.getLength()<this.ColsName.getLength())
+                size=this.Data.getLength();
+            else
+                size=this.ColsName.getLength();
+            for i=0 ; i<size-1 ; i=i+1
+            {
+                ColsString=ColsString+this.ColsName(i) + " ";
+                ColsString=ColsString+this.Data(i)~cnt.getDataString()+ " ";
+                ColsString=ColsString+this.Data(i)~cnt.getConstrants().getFieldConsString();
+                ColsString=ColsString+"\n";
 
+            }
+            if (size>0)
+            {
+                ColsString=ColsString+this.ColsName(size-1) + " ";
+                ColsString=ColsString+this.Data(size-1)~cnt.getDataString()+ " ";
+                ColsString=ColsString+this.Data(size-1)~cnt.getConstrants().getFieldConsString();
+
+            }
+  
+        }
+        handler this.getColsString() : String 
+        {
+            return this.ColsString;
+
+  
+        }
+        handler this.setTConst(TConst : Constraints.TableConstraints)  
+        {
+            this.TConst=TConst;
+
+  
+        }
+        handler this.setTConstString() 
+        {
+            def PKey:String;
+            def FKey :Array[String];
+            PKey=this.TConst.getPrimaryKeyConsString();
+            FKey=this.TConst.getForgenKeyConsString();
+            this.TConstString="";
+            this.TConstString=this.TConstString + PKey;
+            def i : int =0;
+            if FKey.getLength()>0
+                this.TConstString=this.TConstString + "\n";
+            for i=0 ;i<FKey.getLength()-1;i=i+1
+            {
+                this.TConstString=this.TConstString + FKey(i);
+                this.TConstString=this.TConstString + "\n";
+            }
+            if FKey.getLength()>0
+                this.TConstString=this.TConstString + FKey(i);
+        }
+        handler this.getTConstString() : String 
+        {
+            return this.TConstString;
+        }
+        handler this.getExecString() : String 
+        {
+            return this.ExecString;
+        }
+        handler this.setExecString() 
+        {
+            this.ExecString="CREATE TABLE ";
+            if (this.NotExistFlag)
+                this.ExecString=this.ExecString + "IF NOT EXISTS " +this.Name + "(\n";
+            else
+                this.ExecString=this.ExecString  +this.Name + "(\n";
+            this.ExecString=this.ExecString + this.getColsString() ;
+            if (this.getTConstString()!="")
+                this.ExecString="\n"+this.ExecString + this.getTConstString() + ")";
+            else
+                this.ExecString=this.ExecString  +")";            
+        }
 
 }
