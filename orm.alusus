@@ -4,12 +4,13 @@ import "Srl/Map";
 import "Srl/String";
 import "mysql";
 import "pgsql";
+use Srl;
 module DataType
 {
     class Data
     {
 
-        def Constrants :  Constraints.FiledConstraints;
+        def FConstrants :  Constraints.FiledConstraints;
         def MySqlString : String;
         def SqliteString : String;
         def PgSqlString : String ;
@@ -22,20 +23,22 @@ module DataType
         def StringValue:String;
         def IsStringValue:bool=0;
         def DataBaseType:int=0;  //0 for mysql 1 for sqlite and 2 for pgsql
-        handler this.getDataString() String
+        handler this.getDataString() :String
         {
             if this.DataBaseType==0
-                return this.MySqlString;
+                {return this.MySqlString;}
             else if this.DataBaseType==1
-                return this.SqliteString;
+                {return this.SqliteString;}
             else if this.DataBaseType==2
-                return this.PgSqlString;
+                {return this.PgSqlString;}
+            else
+                {return this.PgSqlString;}
         }
-        handler this.getConstrants() Constraints.FiledConstraints
+        handler this.getFConstrants() :Constraints.FiledConstraints
         {
-            return this.Constrants;
+            return this.FConstrants;
         }
-        handler this.getIntValue() int
+        handler this.getIntValue() :int
         {
             return this.IntValue;
 
@@ -44,7 +47,7 @@ module DataType
         {
             this.IntValue=IntValue;
         }
-        handler this.getCharValue() char
+        handler this.getCharValue() :char
         {
             return this.CharValue;
 
@@ -53,7 +56,7 @@ module DataType
         {
             this.CharValue=CharValue;
         }
-        handler this.getStringValue() String
+        handler this.getStringValue() :String
         {
             return this.StringValue;
 
@@ -62,7 +65,7 @@ module DataType
         {
             this.StringValue=StringValue;
         }
-        handler this.getFloatValue() float
+        handler this.getFloatValue() :float
         {
             return this.StringValue;
 
@@ -71,18 +74,13 @@ module DataType
         {
             this.FloatValue=FloatValue;
         }
-
-
-        
-        
-
     }
     class Integer
     {
         @injection def data:Data;	
-        this.MySqlString : String="INT";
-        this.SqliteString : String ="INTEGER";
-        this.PgSqlString : String ="integer";
+        this.MySqlString ="INT";
+        this.SqliteString  ="INTEGER";
+        this.PgSqlString  ="integer";
         this.IsIntValue=1;
     }
     class BigInteger
@@ -101,14 +99,6 @@ module DataType
         this.SqliteString : String ="INTEGER";
         this.IsIntValue=1;
 
-        handler this.getValue () int
-        {
-            return this.IntValue;
-        }
-        handler this.setValue (IntValue : int) 
-        {
-            this.IntValue=IntValue;
-        }
 
     }
     class TinyInteger
@@ -118,17 +108,6 @@ module DataType
         this.PgSqlString : String ="smallint";
         this.SqliteString : String ="INTEGER";
         this.IsIntValue=1;
-        handler this.getValue () int
-        {
-            return this.IntValue;
-        }
-        handler this.setValue (IntValue : int) 
-        {
-            this.IntValue=IntValue;
-        }
- 
-         
-
     }
     class Real
     {
@@ -137,15 +116,6 @@ module DataType
         this.PgSqlString : String ="real";
         this.SqliteString : String ="REAL";
         this.IsFloatValue=1;
-        handler this.getValue () float
-        {
-            return this.FloatValue;
-        }
-        handler this.setValue (FloatValue : float) 
-        {
-            this.FloatValue=FloatValue;
-        }
-
     }
     class Float
     {
@@ -154,15 +124,6 @@ module DataType
         this.PgSqlString : String ="double precision";
         this.SqliteString : String ="REAL";
         this.IsFloatValue=1;
-         handler this.getValue () float
-        {
-            return this.FloatValue;
-        }
-        handler this.setValue (FloatValue : float) 
-        {
-            this.FloatValue=FloatValue;
-        }         
-
     }
     class Decimal
     {
@@ -176,17 +137,17 @@ module DataType
     {
         @injection def data:Data;	
         this.MySqlString : String="XML";
-        this.PgSqlString : String ="\0";         
-        this.SqliteString : String ="\0";
+        this.PgSqlString : String ="";         
+        this.SqliteString : String ="";
         this.IsStringValue=1;  
     }
-    class VarChar
+  class VarChar
     {
         @injection def data:Data;
         def length : int=50;	
-        this.MySqlString : String="VARCHAR";
-        this.PgSqlString : String="varchar";
-        this.SqliteString : String ="VARCHAR";
+        this.MySqlString ="VARCHAR";
+        this.PgSqlString ="varchar";
+        this.SqliteString  ="VARCHAR";
         this.IsStringValue=1;
         handler this~init(length: int) 
         {
@@ -202,6 +163,7 @@ module DataType
             this.PgSqlString=this.PgSqlString + "(" + this.length + ")";
             this.SqliteString=this.SqliteString + "(" + this.length + ")";
         }
+    }
     class Char
     {
         @injection def data:Data;
@@ -257,7 +219,7 @@ module DataType
         this.PgSqlString : String="date";
         this.MySqlString : String="Date"; 
         this.IsStringValue=1;
-    }
+    }  
 }
 module Constraints
 {
@@ -267,14 +229,27 @@ module Constraints
         def Unique : int=-1;
         def Default : int=-1;
         def Check : int=-1;
-        def StringRep: Array[String]{("NOT NULL" , "UNIQUE" , "DEFAULT" , "CHECK " )};
+        def StringRep: Array[String];
         def FieldConsString : String="";
+        handler this~init() 
+        {
+            def v:String;
+            v="NOT NULL";
+            this.StringRep.add(v);
+            v="UNIQUE";
+            this.StringRep.add(v);
+            v="DEFAULT";
+            this.StringRep.add(v);
+            v="CHECK";
+            this.StringRep.add(v);
 
+        }
         handler this.setNotNullConstraint(){
             if (this.NotNull ==-1)
             {
                 this.NotNull=0;
-                this.addConstraint(this.NotNull,"");
+                def par : String="";
+                this.addConstraint(this.NotNull,par);
             }
     
             }
@@ -283,7 +258,8 @@ module Constraints
             if (this.Unique==-1)
             {
                 this.Unique=1;
-                this.addConstraint(this.Unique,"");
+                def par : String="";
+                this.addConstraint(this.Unique,par);
             }
   
         }
@@ -316,31 +292,32 @@ module Constraints
             {
                 this.FieldConsString=this.FieldConsString + " " + this.StringRep(constNumber);
 
-            }
+            }}
         handler this.getFieldConsString() : String{
             return this.FieldConsString;
             }   
     }
     class TableConstraints
     {	
-        def PrimaryKeyConsString : String="";
+        def PrimaryKeyConsString : String;
         def ForgenKeyConsString : Array[String];
 
         handler this.setPrimaryKeyConstraint(Columns : Array[String]){
-            PrimaryKeyConsString="PRIMARY KEY ( " + Fildes(0);
+            this.PrimaryKeyConsString="PRIMARY KEY ( " ;
+            this.PrimaryKeyConsString=this.PrimaryKeyConsString+ Columns(0);
             def i:int;
-            for i=1 ,i<Fildes.getLength() ,i=i+1
+            for i=1 ,i<Columns.getLength() ,i=i+1
             {
-                PrimaryKeyConsString = PrimaryKeyConsString + ", " + Fildes(i);
+                this.PrimaryKeyConsString = this.PrimaryKeyConsString + ", " + Columns(i);
             }
-            PrimaryKeyConsString=PrimaryKeyConsString+ " )"
+            this.PrimaryKeyConsString=this.PrimaryKeyConsString+ " )"
     
             }
         handler this.addForgenKey(Col : String , RefTable : String , RefCol : String)
         {
             def ForKey : String = "FOREIGN KEY ( ";
             ForKey = ForKey + Col + ") " + "REFERENCES " + RefTable + " (" + RefCol + ")";
-            ForgenKeyConsString.add(ForKey);
+            this.ForgenKeyConsString.add(ForKey);
   
         }
         handler this.getPrimaryKeyConsString() : String{
@@ -361,7 +338,7 @@ module Table
         def Data : Array[ptr[DataType.Data]];
         def ColsName : Array[String];
         def ColsString : String="";
-        def TConst : Constraints.TableConstraints;
+        def TConst : ptr[Constraints.TableConstraints];
         def TConstString : String ="";
 
         handler this.setTableName(Name : String){
@@ -399,22 +376,22 @@ module Table
             def i : int =0;
             def size : int =0;
             if (this.Data.getLength()<this.ColsName.getLength())
-                size=this.Data.getLength();
-            else
-                size=this.ColsName.getLength();
-            for i=0 ; i<size-1 ; i=i+1
+                {size=this.Data.getLength();}
+            else{
+                size=this.ColsName.getLength();}
+            for i=0 , i<size-1 , i=i+1
             {
-                ColsString=ColsString+this.ColsName(i) + " ";
-                ColsString=ColsString+this.Data(i)~cnt.getDataString()+ " ";
-                ColsString=ColsString+this.Data(i)~cnt.getConstrants().getFieldConsString();
-                ColsString=ColsString+"\n";
+                this.ColsString=this.ColsString+this.ColsName(i) + " ";
+                this.ColsString=this.ColsString+this.Data(i)~cnt.getDataString()+ " ";
+                this.ColsString=this.ColsString+this.Data(i)~cnt.FConstrants.getFieldConsString();
+                this.ColsString=this.ColsString+"\n";
 
             }
             if (size>0)
             {
-                ColsString=ColsString+this.ColsName(size-1) + " ";
-                ColsString=ColsString+this.Data(size-1)~cnt.getDataString()+ " ";
-                ColsString=ColsString+this.Data(size-1)~cnt.getConstrants().getFieldConsString();
+                this.ColsString=this.ColsString+this.ColsName(size-1) + " ";
+                this.ColsString=this.ColsString+this.Data(size-1)~cnt.getDataString()+ " ";
+                this.ColsString=this.ColsString+this.Data(size-1)~cnt.FConstrants.getFieldConsString();
 
             }
   
@@ -425,7 +402,7 @@ module Table
 
   
         }
-        handler this.setTConst(TConst : Constraints.TableConstraints)  
+        handler this.setTConst(TConst : ptr[Constraints.TableConstraints])  
         {
             this.TConst=TConst;
 
@@ -435,14 +412,14 @@ module Table
         {
             def PKey:String;
             def FKey :Array[String];
-            PKey=this.TConst.getPrimaryKeyConsString();
-            FKey=this.TConst.getForgenKeyConsString();
+            PKey=this.TConst~cnt.getPrimaryKeyConsString();
+            FKey=this.TConst~cnt.getForgenKeyConsString();
             this.TConstString="";
             this.TConstString=this.TConstString + PKey;
             def i : int =0;
             if FKey.getLength()>0
                 this.TConstString=this.TConstString + "\n";
-            for i=0 ;i<FKey.getLength()-1;i=i+1
+            for i=0 ,i<FKey.getLength()-1,i=i+1
             {
                 this.TConstString=this.TConstString + FKey(i);
                 this.TConstString=this.TConstString + "\n";
@@ -462,14 +439,16 @@ module Table
         {
             this.ExecString="CREATE TABLE ";
             if (this.NotExistFlag)
-                this.ExecString=this.ExecString + "IF NOT EXISTS " +this.Name + "(\n";
+                {this.ExecString=this.ExecString + "IF NOT EXISTS " +this.Name + "(\n";}
             else
-                this.ExecString=this.ExecString  +this.Name + "(\n";
-            this.ExecString=this.ExecString + this.getColsString() ;
-            if (this.getTConstString()!="")
-                this.ExecString="\n"+this.ExecString + this.getTConstString() + ")";
+                {this.ExecString=this.ExecString  +this.Name + "(\n";}
+            this.ExecString=this.ExecString + this.ColsString ;
+            if (this.TConstString!="")
+               {
+                   this.ExecString=this.ExecString + "\n";
+                   this.ExecString=this.ExecString + this.TConstString + ")";}
             else
-                this.ExecString=this.ExecString  +")";            
+               { this.ExecString=this.ExecString  +")";}            
         }
-
+}
 }
