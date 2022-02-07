@@ -4,6 +4,8 @@ import "Srl/Map";
 import "Srl/String";
 import "mysql";
 import "pgsql";
+import "Core/Data";
+import "Spp";
 use Srl;
 module DataType
 {
@@ -14,6 +16,7 @@ module DataType
         def MySqlString : String;
         def SqliteString : String;
         def PgSqlString : String ;
+        def Type : String ;
         def IntValue:int;
         def IsIntValue:bool=0;
         def FloatValue:float;
@@ -33,6 +36,14 @@ module DataType
                 {return this.PgSqlString;}
             else
                 {return this.PgSqlString;}
+        }
+        handler this.setCostType(Type : String) 
+        {
+           this.Type=Type;
+        }
+        handler this.getCostType() :String
+        {
+            return this.Type;
         }
         handler this.getFConstrants() :Constraints.FiledConstraints
         {
@@ -131,7 +142,7 @@ module DataType
         this.MySqlString : String="DECIMAL";         
         this.PgSqlString : String ="integer";
         this.SqliteString : String="DECIMAL";
-        this.IsIntValue=1;
+        this.IsFloatValue=1;
     }
     class Xml
     {
@@ -450,5 +461,178 @@ module Table
             else
                { this.ExecString=this.ExecString  +")";}            
         }
-}
+    }
+    class Reseve
+    {
+        use DataType;
+        def ConString : String;
+        def ExecString : String;
+        def CString : String;
+        def DataFiledString : String;
+        def TableName : String;
+        def OrderByString : String;
+        def HavingString : String;
+        def Data : Array[Array[ptr[Data]]];
+        def DataClass : Array[ptr[Data]];
+        def DataBaseType : int;
+        def PgSqlObj : PostgresSql.Db;
+        def MySqlObj : MySql.Db;
+        def SqliteObj : SqLite.Db;
+        handler this.setCString(Cond : String)  
+        {
+            this.CString="";
+            if(Cond!="")
+            {
+                this.CString="WHERE ";
+                this.CString=this.CString + Cond;
+            }  
+        }
+        handler this.getCString() : String 
+        {
+            return this.CString; 
+        }
+
+        handler this.setDataFiledString(DataFiled : Array[String])  
+        {
+            this.DataFiledString="*";
+            if(DataFiled.getLength()!=0)
+            {
+                def i : int;
+                this.DataFiledString="( ";
+                for i=0 , i<DataFiled.getLength() , i=i+1
+                    this.DataFiledString=this.DataFiledString +" , "+DataFiled(i) ;
+            }  
+        }
+        handler this.getDataFiledString() : String 
+        {
+            return this.DataFiledString; 
+        }
+
+        handler this.setTableName(TableNames : Array[String])  
+        {
+            this.TableName="";
+            def i : int;
+            if (TableNames.getLength()==1)
+            {
+                this.TableName=TableNames(0) ;
+            }
+            else if (TableNames.getLength()==0)
+            {
+                this.TableName="";
+            }
+            else 
+            {
+                this.TableName="(";
+                this.TableName=this.TableName + TableNames(0);
+                for i=1 , i<TableNames.getLength() , i=i+1
+                    this.TableName=this.TableName+" , " +TableNames(i) ;
+                this.TableName=this.TableName + ")";
+            }            
+        }
+        handler this.getTableName() : String 
+        {
+            return this.TableName; 
+        }
+
+        handler this.setOrderByString(TableNames : Array[String])  
+        {
+            this.OrderByString="";
+            def i : int;
+            if (TableNames.getLength()==1)
+            {
+                this.OrderByString=TableNames(0) ;
+            }
+            else if (TableNames.getLength()==0)
+            {
+                this.OrderByString="";
+            }
+            else 
+            {
+                this.OrderByString="(";
+                this.OrderByString=this.OrderByString + TableNames(0);
+                for i=1 , i<OrderByString.getLength() , i=i+1
+                    this.OrderByString=this.OrderByString+" , " +TableNames(i) ;
+                this.OrderByString(this.OrderByString=this.OrderByString+")";
+            }            
+        }
+        handler this.getOrderByString() : String 
+        {
+            return this.OrderByString; 
+        }
+
+        handler this.setHavingString(cond : String)  
+        {
+            this.HavingString="";
+            if (cond.getLength()!=0)
+            {
+                this.HavingString="HAVING ( " ;
+                this.HavingString=this.HavingString + cond + " )" ;
+            }
+        }
+        handler this.getHavingString() : String 
+        {
+            return this.HavingString; 
+        }
+
+        handler this.setDataClass(DataClass : Array[ptr[Data]])  
+        {
+            this.DataClass=DataClass;
+        }
+        handler this.getDataClass() : Array[ptr[Data]] 
+        {
+            return this.DataClass; 
+        }
+
+        handler this.setExecString()  
+        {
+            this.ExecString="SELECT ";
+            this.ExecString=this.ExecString + this.DataFiledString + "\n";
+            this.ExecString=this.ExecString + " FROM " + this.TableName + "\n";
+            this.ExecString=this.ExecString +  this.CString + "\n";
+            this.ExecString=this.ExecString +  this.OrderByString + "\n";
+            this.ExecString=this.ExecString +  this.HavingString + "\n";
+        }
+        handler this.getExecString() : String 
+        {
+            return this.ExecString; 
+        }
+
+        handler this.setConString(ConString : String)  
+        {
+            this.ConString=ConString; 
+        }
+        handler this.getConString() : String 
+        {
+            return this.ConString; 
+        }
+
+        handler this.setDataBaseType(DataBaseType : int)  
+        {
+            this.DataBaseType=DataBaseType; 
+        }
+        handler this.getDataBaseType() : int 
+        {
+            return this.DataBaseType; 
+        }
+        handler this.setData()  
+        {
+            if (this.DataBaseType==0)//sql
+            {
+                if(this.MySqlObj.conn==null)
+                {
+                    Console.print("connection error %s \n",this.MySqlObj.errorMessage() );
+                }
+                else
+                {
+                    this.MySqlObj.exec(this.ExecString);
+	            if (this.MySqlObj.result_state != 0)
+		        Console.print("%s \n",mysql.errorMessage() );
+	            this.MySqlObj.storeRes();
+	            if (this.MySqlObj.res==null)
+		        Console.print(" %s \n",mysql.errorMessage() );
+                }
+            }
+        }
+
+    }
 }
