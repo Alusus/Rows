@@ -478,6 +478,8 @@ module Table
         def PgSqlObj : PostgresSql.Db;
         def MySqlObj : MySql.Db;
         def SqliteObj : SqLite.Db;
+        def ColsName : Array[String];
+        def RowString : Array[String];
         handler this.setCString(Cond : String)  
         {
             this.CString="";
@@ -616,6 +618,7 @@ module Table
         }
         handler this.setData()  
         {
+            this.Data.clear();
             if (this.DataBaseType==0)//sql
             {
                 if(this.MySqlObj.conn==null)
@@ -626,13 +629,139 @@ module Table
                 {
                     this.MySqlObj.exec(this.ExecString);
 	            if (this.MySqlObj.result_state != 0)
-		        Console.print("%s \n",mysql.errorMessage() );
-	            this.MySqlObj.storeRes();
-	            if (this.MySqlObj.res==null)
-		        Console.print(" %s \n",mysql.errorMessage() );
+		        Console.print("%s \n",this.MySqlObj.errorMessage() );
+                    else
+                    {
+                        this.MySqlObj.storeRes();
+                        if (this.MySqlObj.res==null)
+                            Console.print(" %s \n",mysql.errorMessage() );
+                    }
+	            def numFields:int;
+	            numFields=this.MySqlObj.getFiledsNumber();
+                    this.MySqlObj.getRow();
+                    this.MySqlObj.getCol();
+                    def i:int;
+                    def RowData : ptr[Array[ptr[Data]]];
+                    while(this.MySqlObj.row!=null)
+                    {
+                        for i = 0, i < numFields, i = i+1
+                        {
+                            if (i==0)
+                            {
+                                while(this.MySqlObj.field!=null)
+                                {
+                                    this.ColsName.add(this.MySqlObj.field~cnt.name)
+                                    this.MySqlObj.getCol();
+                                }
+                            }
+                            this.RowString.add(this.MySqlObj.row~cnt(i));
+                        }
+                        RowData=this.convertData();
+                        this.Data.add(RowData~cnt);
+                        this.RowString.clear();
+                        this.MySqlObj.getRow();
+                    }
+                    this.MySqlObj.clearResult();
+	            this.MySqlObj.endConnection();
+                   
                 }
             }
+
+            else if (this.DataBaseType==1)//sqlite
+            {
+                if(this.SqliteObj.conn==null)
+                {
+                    Console.print("connection error %s \n",this.SqliteObj.errorMessage() );
+                }
+                else
+                {
+                    this.SqliteObj.exec(this.ExecString);
+	            if (this.SqliteObj.result_state != 0)
+		        Console.print("%s \n",SqliteObj.errorMessage() );
+                    else
+                    {
+                        this.SqliteObj.storeRes();
+                        if (this.SqliteObj.res==null)
+                            Console.print(" %s \n",SqliteObj.errorMessage() );
+                    }
+	            def numFields:int;
+	            numFields=this.SqliteObj.getFiledsNumber();
+                    this.SqliteObj.getRow();
+                    this.SqliteObj.getCol();
+                    def i:int;
+                    def RowData : ptr[Array[ptr[Data]]];
+                    while(this.SqliteObj.row!=null)
+                    {
+                        for i = 0, i < numFields, i = i+1
+                        {
+                            if (i==0)
+                            {
+                                while(SqliteObj.field!=null)
+                                {
+                                    this.ColsName.add(this.SqliteObj.field~cnt.name)
+                                    this.SqliteObj.getCol();
+                                }
+                            }
+                            this.RowString.add(this.SqliteObj.row~cnt(i));
+                        }
+                        RowData=this.convertData();
+                        this.Data.add(RowData~cnt);
+                        this.RowString.clear();
+                        this.SqliteObj.getRow();
+                    }
+                    this.SqliteObj.clearResult();
+	            this.SqliteObj.endConnection();
+                }                    
         }
 
+            else if (this.DataBaseType==2)//pgsql
+            {
+                if(this.PgSqlObj.connStatus==PostgresSql.Connection.BAD)
+                {
+                    Console.print("connection error %s \n",this.PgSqlObj.errorMessage() );
+                }
+                else
+                {
+                    this.PgSqlObj.exec(this.ExecString);
+	            if (this.PgSqlObj.resStatus != this.PostgresSql.Result.TUPLES_OK)
+		        Console.print("%s \n",this.PgSqlObj.errorMessage() );
+                    else
+                    {
+                        this.PgSqlObj.storeRes();
+                        if (this.PgSqlObj.res==null)
+                            Console.print(" %s \n",this.PgSqlObj.errorMessage() );
+                    }
+	            def numFields:int;
+	            numFields=this.PgSqlObj.getFiledsNumber();
+                    this.PgSqlObj.getRow();
+                    this.PgSqlObj.getCol();
+                    def i:int;
+                    def RowData : ptr[Array[ptr[Data]]];
+                    while(this.PgSqlObj.row!=null)
+                    {
+                        for i = 0, i < numFields, i = i+1
+                        {
+                            if (i==0)
+                            {
+                                while(PgSqlObj.field!=null)
+                                {
+                                    this.ColsName.add(this.PgSqlObj.field~cnt.name)
+                                    this.PgSqlObj.getCol();
+                                }
+                            }
+                            this.RowString.add(this.PgSqlObj.row~cnt(i));
+                        }
+                        RowData=this.convertData();
+                        this.Data.add(RowData~cnt);
+                        this.RowString.clear();
+                        this.PgSqlObj.getRow();
+                    }
+                }                    
+        }       
+
+
+
+
     }
+}
 }
