@@ -480,6 +480,17 @@ module Table
         def SqliteObj : SqLite.Db;
         def ColsName : Array[String];
         def RowString : Array[String];
+        def DbCon : DbConBuilder;
+        handler this.setDbCon(DbCon : DbConBuilder)  
+        {
+            this.DbCon=DbCon;
+
+        }
+        handler this.getDbCon() : DbConBuilder 
+        {
+            return this.DbCon; 
+        }
+
         handler this.setCString(Cond : String)  
         {
             this.CString="";
@@ -620,7 +631,10 @@ module Table
         {
             this.Data.clear();
             if (this.DataBaseType==0)//sql
-            {
+            { 
+                def MySqlObjPtr : ptr[MySql.Db];
+                MySqlObjPtr=this.DbCon.mySqlConBuilder();
+                this.MySqlObj=MySqlObjPtr~cnt;
                 if(this.MySqlObj.conn==null)
                 {
                     Console.print("connection error %s \n",this.MySqlObj.errorMessage() );
@@ -669,6 +683,9 @@ module Table
 
             else if (this.DataBaseType==1)//sqlite
             {
+                def SqliteObjPtr : ptr[Sqlite.Db];
+                SqliteObjPtr=this.DbCon.sqLiteConBuilder();
+                this.SqliteObj=SqliteObjPtr~cnt;
                 if(this.SqliteObj.conn==null)
                 {
                     Console.print("connection error %s \n",this.SqliteObj.errorMessage() );
@@ -685,6 +702,8 @@ module Table
                             Console.print(" %s \n",SqliteObj.errorMessage() );
                     }
 	            def numFields:int;
+                    this.RowString.clear();
+                    this.ColsName.clear();
 	            numFields=this.SqliteObj.getFiledsNumber();
                     this.SqliteObj.getRow();
                     this.SqliteObj.getCol();
@@ -712,56 +731,152 @@ module Table
                     this.SqliteObj.clearResult();
 	            this.SqliteObj.endConnection();
                 }                    
-        }
+            }
 
             else if (this.DataBaseType==2)//pgsql
             {
-                if(this.PgSqlObj.connStatus==PostgresSql.Connection.BAD)
+                def PgSqlObjPtr : ptr[PostgresSql.Db];
+                SqliteObjPtr=this.DbCon.pgSqlConBuilder();
+                this.PgSqlObj=PgSqlObjPtr~cnt;
+                if(this.PgSqlObj.connStatus()==PostgresSql.Connection.BAD)
                 {
                     Console.print("connection error %s \n",this.PgSqlObj.errorMessage() );
                 }
                 else
                 {
                     this.PgSqlObj.exec(this.ExecString);
-	            if (this.PgSqlObj.resStatus != this.PostgresSql.Result.TUPLES_OK)
-		        Console.print("%s \n",this.PgSqlObj.errorMessage() );
+	            if (this.PgSqlObj.resStatus() != this.PostgresSql.Result.TUPLES_OK ||this.PgSqlObj.resStatus() != this.PostgresSql.Result.COMMAND_OK  )
+		    {   
+                        Console.print("%s \n",this.PgSqlObj.errorMessage() );
+                        this.PgSqlObj.endConnection();
+                    }
                     else
                     {
-                        this.PgSqlObj.storeRes();
-                        if (this.PgSqlObj.res==null)
-                            Console.print(" %s \n",this.PgSqlObj.errorMessage() );
-                    }
-	            def numFields:int;
-	            numFields=this.PgSqlObj.getFiledsNumber();
-                    this.PgSqlObj.getRow();
-                    this.PgSqlObj.getCol();
-                    def i:int;
-                    def RowData : ptr[Array[ptr[Data]]];
-                    while(this.PgSqlObj.row!=null)
-                    {
+                        this.ColsName.clear();
+                        def numFields:int;
+	                numFields=this.PgSqlObj.getCols();
+	                numRows=this.PgSqlObj.getRows();
+                        def i:int;
+                        def j :int;
+                        def RowData : ptr[Array[ptr[Data]]];
                         for i = 0, i < numFields, i = i+1
                         {
-                            if (i==0)
-                            {
-                                while(PgSqlObj.field!=null)
-                                {
-                                    this.ColsName.add(this.PgSqlObj.field~cnt.name)
-                                    this.PgSqlObj.getCol();
-                                }
-                            }
-                            this.RowString.add(this.PgSqlObj.row~cnt(i));
+                            this.ColsName.add(this.PgSqlObj.getColsName(i));
                         }
-                        RowData=this.convertData();
-                        this.Data.add(RowData~cnt);
-                        this.RowString.clear();
-                        this.PgSqlObj.getRow();
+                        for i = 0, i < numRows, i = i+1
+                        {
+                            for j = 0, j < numFields, j = j+1
+                                this.RowString.add(this.PgSqlObj.getValue(i,j));
+                            RowData=this.convertData();
+                            this.Data.add(RowData~cnt);
+                            this.RowString.clear();
+                        }
+                        this.PgSqlObj.clearResult();
+                        this.PgSqlObj.endConnection();
                     }
                 }                    
-        }       
+            }       
+        }
+    }
+    class DbConBuilder
+    {
+        def DbName : String="";
+        def UserName : String="";
+        def Password : String="";
+        def Server : String="";
+        def Port : int=0;
+        def UnixSocket : String=null;
+        def ClientFlag : int=0;
+        handler this.setDBName(DbName : String)  
+        {
+            this.DbName=DBName; 
+        }
+        handler this.getDbName() : String 
+        {
+            return this.DbName; 
+        }
 
+        handler this.setUserName(UserName : String)  
+        {
+            this.UserName=UserName; 
+        }
+        handler this.getUserName() : String 
+        {
+            return this.UserName; 
+        }
 
+        handler this.setPassword(Password : String)  
+        {
+            this.Password=Password; 
+        }
+        handler this.getPassword() : String 
+        {
+            return this.Password; 
+        }
+
+        handler this.setServer(Server : String)  
+        {
+            this.Server=Server; 
+        }
+        handler this.getServer() : String 
+        {
+            return this.Server; 
+        }
+
+        handler this.setPort(Port : int)  
+        {
+            this.Port=Port; 
+        }
+        handler this.getPort() : int 
+        {
+            return this.Port; 
+        }
+
+        handler this.setUnixSocket(UnixSocket : String)  
+        {
+            this.UnixSocket=UnixSocket; 
+        }
+        handler this.getUnixSocket() : String 
+        {
+            return this.UnixSocket; 
+        }
+
+        handler this.setClientFlag(ClientFlag : int)  
+        {
+            this.ClientFlag=ClientFlag; 
+        }
+        handler this.getClientFlag() : int 
+        {
+            return this.ClientFlag; 
+        }
+
+        handler this.pgSqlConStringBuilder() : String
+        {
+            def PgSqlString : String ="";
+            PgSqlString= this.UserName + " " + this.Password+" "+this.DbName;
+        }
+        handler this.pgSqlConBuilder() : ptr[PostgresSql.Db]
+        {
+            def PgSqlString : String ;
+            PgSqlString=this.pgSqlConStringBuilder();
+            def PgSql : PostgresSql.Db(PgSqlString.buf);
+            return PgSql~ptr;
+        }
+
+        handler this.mySqlConBuilder() : ptr[ MySql.Db]
+        {
+
+            def MySql : MySql.Db(this.Server.buf,this.UserName.buf,this.Password.buf,this.DbName.buf,this.Port,this.UnixSocket.buf,this.ClientFlag);
+            return MySql~ptr;
+        }
+
+        handler this.sqLiteConBuilder() : ptr[  Sqlite.Db]
+        {
+
+            def sqlite: Sqlite.Db = this.DbName;
+            return sqlite~ptr;
+        }
 
 
     }
-}
 }
