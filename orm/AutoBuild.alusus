@@ -1,0 +1,107 @@
+import "Data";
+import "Srl/refs";
+module AutoBuild
+{    
+function generateAddingElementNames (varName: String, elements: Array[ref[Core.Basic.TiObject]]) {
+    def i: Int;
+    for i = 0, i < elements.getLength(), ++i {
+
+
+        def node: ref[Core.Data.Node](castRef[elements(i), Core.Data.Node]);
+        def d: ref[Core.Data.Ast.Definition](castRef[node.owner, Core.Data.Ast.Definition]);
+
+        def binding: ref[Core.Basic.Binding](Core.Basic.getInterface[d, Core.Basic.Binding]);
+        dumpModifiers(binding);
+        Spp.astMgr.insertAst(
+            ast { names.add(Srl.String("{{name}}")) },
+            Srl.Map[Srl.String, ref[Core.Basic.TiObject]]()
+                .set(Srl.String("names"), Core.Data.Ast.Identifier(varName))
+                .set(Srl.String("name"), binding.getMember("name"))
+
+        );
+
+    }
+}
+
+function generateAddingElementTypes (varName: String, elements: Array[ref[Core.Basic.TiObject]]) {
+    def i: Int;
+    for i = 0, i < elements.getLength(), ++i {
+        def node: ref[Core.Data.Node](castRef[elements(i), Core.Data.Node]);
+        def d: ref[Core.Data.Ast.Definition](castRef[node.owner, Core.Data.Ast.Definition]);
+        def containing: ref[Core.Basic.MapContaining](Core.Basic.getInterface[d, Core.Basic.MapContaining]);
+        Spp.astMgr.insertAst(
+            ast { names.add(Srl.String("{{name}}")) },
+            Srl.Map[Srl.String, ref[Core.Basic.TiObject]]()
+                .set(Srl.String("names"), Core.Data.Ast.Identifier(varName))
+                .set(Srl.String("name"), castRef[containing.getElement("target"), Core.Data.Ast.Identifier])
+
+        );
+
+    }
+}
+
+macro implementGetElementNames [condition, parent] {
+    def names: Array[String];
+    preprocess {
+        def elements: Array[ref[Core.Basic.TiObject]];
+        elements = Spp.astMgr.findElements(
+            ast { condition },
+            parent,
+            Spp.SeekerFlags.SKIP_OWNERS | Spp.SeekerFlags.SKIP_USES | Spp.SeekerFlags.SKIP_CHILDREN
+        );
+        generateAddingElementNames(String("names"), elements);
+    }
+    return names;
+}
+
+macro implementGetElementTypes [condition, parent] {
+    
+    preprocess {
+        def elements: Array[ref[Core.Basic.TiObject]];
+        elements = Spp.astMgr.findElements(
+            ast { condition },
+            parent,
+            Spp.SeekerFlags.SKIP_OWNERS | Spp.SeekerFlags.SKIP_USES | Spp.SeekerFlags.SKIP_CHILDREN
+        );
+        generateAddingElementTypes(String("types"), elements);
+    }
+    return types;
+}
+
+function dumpModifiers (element: ref[Core.Basic.TiObject]) {
+    def modifiers: ref[Core.Basic.Containing](Spp.astMgr.getModifiers(element));
+    def i: Int;
+    for i = 0, i < modifiers.getElementCount()~cast[Int], ++i {
+        Console.print(Spp.astMgr.getModifierKeyword(modifiers.getElement(i)));
+        Console.print("\n");
+    }
+}
+
+function dumpModifierParams(modifier: ref[Core.Basic.TiObject]) {
+    def params: Srl.Array[Srl.String];
+    Spp.astMgr.getModifierStringParams(modifier, params);
+    def i: Int;
+    for i = 0, i < params.getLength(), ++i {
+        Console.print("%s\n", params(i).buf);
+    }
+}
+
+function dumpElementModifierParams(element: ref[Core.Basic.TiObject], modName: ptr[array[Char]]) {
+    def modifiers: ref[Core.Basic.Containing](Spp.astMgr.getModifiers(element));
+    def modifier: ref[Core.Basic.TiObject](Spp.astMgr.findModifier(modifiers, modName));
+    dumpModifierParams(modifier);
+}
+
+function dumpElementModifierParams2(element: ref[Core.Basic.TiObject], modName: ptr[array[Char]]) {
+    def modifier: ref[Core.Basic.TiObject](Spp.astMgr.findModifierForElement(element, modName));
+    dumpModifierParams(modifier);
+}
+func getVarNames (Table :SrdRef[Table]):Array[String] {
+        implementGetElementNames[elementType == "var", Table~ast];
+}
+func getVarNames (Table :SrdRef[Table]):Array[String] {
+        implementGetElementTypes[elementType == "type", Table~ast];
+}
+func getVarNames (Table :SrdRef[Table]):Array[String] {
+        implementGetElementNames[elementType == "var", Table~ast];
+}

@@ -1,0 +1,102 @@
+import "Data";
+module Insert
+{    
+    class InsertString
+    {	
+        def ExecString : String="INSERT INTO ";
+        def Name : String="";
+        def Data : Array[ptr[Data.Data]];
+        def ColsName : Array[String];
+        def ColsString : String="";
+        def ValString : String="";
+        handler this.setTableName(Name : String){
+            this.Name=Name;
+    
+            }
+        handler this.setData(Data : Array[ptr[DataType.Data]])
+        {
+            this.Data=Data;
+  
+        }
+        handler this.getColsString() : String
+        {
+            return this.ColsString;
+  
+        }
+        handler this.setColsName(ColsName : Array[String])
+        {
+            this.ColsName=ColsName;
+  
+        }
+        handler this.getColsName() : Array[String]
+        {
+            return this.ColsName;
+  
+        }
+        handler this.setColsString() 
+        {
+            this.ColsString="( ";
+            def i : int =0;
+            def size : int =0;
+            if (this.Data.getLength()<this.ColsName.getLength())
+                {size=this.Data.getLength();}
+            else{
+                size=this.ColsName.getLength();}
+            for i=0 , i<size-1 , i=i+1
+            {
+                this.ColsString=this.ColsString+this.ColsName(i) + " ";
+
+            }
+            if (size>0)
+            {
+                this.ColsString=this.ColsString+this.ColsName(size-1) + " ";
+
+            }
+             this.ColsString=this.ColsString + ")";
+  
+        }
+        handler this.setValString() 
+        {
+            this.ValString="( ";
+            def i : int =0;
+            def size : int =0;
+            if (this.Data.getLength()<this.ColsName.getLength())
+                {size=this.Data.getLength();}
+            else{
+                size=this.ColsName.getLength();}
+            for i=0 , i<size , i=i+1
+            {
+                if (this.Data(i)~cnt.IsIntValue)
+                    this.ValString=this.ValString+this.Data(i)~cnt.getIntValue() + " ";
+                else if (this.Data(i)~cnt.IsFloatValue)
+                    this.ValString=this.ValString+this.Data(i)~cnt.getFloatValue() + " ";
+                else if (this.Data(i)~cnt.IsCharValue)
+                    this.ValString=this.ValString+this.Data(i)~cnt.getCharValue() + " ";
+                else if (this.Data(i)~cnt.IsStringValue)
+                    this.ValString=this.ValString+this.Data(i)~cnt.getStringValue() + " ";
+
+            }
+             this.ValString=this.ValString + ")";
+  
+        }
+        handler this.getColsString() : String 
+        {
+            return this.ColsString;
+
+  
+        }
+        handler this.getExecString() : String 
+        {
+            return this.ExecString;
+        }
+        handler this.setExecString() 
+        {
+            this.ExecString="INSERT INTO";
+
+            this.ExecString=this.ExecString  +this.Name + "\n";
+            this.ExecString=this.ExecString + this.ColsString + "\n" ;
+            this.ExecString=this.ExecString + "VALUES " ;
+            this.ExecString=this.ExecString + this.ValString + "\n" ;           
+        }
+    }
+}

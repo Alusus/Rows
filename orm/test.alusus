@@ -1,0 +1,33 @@
+import "Srl/Console";
+import "Srl/Array";
+import "Srl/refs";
+use Srl;
+class A {
+    def j:int=10;
+    def d:int=50;
+    handler this~init() {}
+    handler this~init(val: ref[this_type]) {
+        this = val;
+    }
+    handler this=ref[this_type] {
+        this.j = val.j;
+        this.d = val.d;
+    }
+}
+class B {
+    @injection def a: A;
+    def k: Int = 13;
+    handler this~init() {}
+    handler this~init(val: ref[this_type]) {
+        this = val;
+    }
+    handler this = ref[this_type] {
+        this.a = val.a;
+        this.k = val.k;
+    }
+}
+def aa: Array[SrdRef[A]];
+aa.add(SrdRef[A].construct());
+aa.add(castSrdRef[SrdRef[B].construct(), A]);
+Console.print("%d, %d\n", aa(0).j, aa(0).d);
+Console.print("%d, %d, %d\n", aa(1).j, aa(1).d, castSrdRef[aa(1), B].k);
