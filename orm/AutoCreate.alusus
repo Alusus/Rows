@@ -9,5 +9,6 @@ class Cars
 def Id :Integer;
 @defult("'sleman'")
 def Name :VarChar;
+//def Name:VarChar(50); this will return an errors
 }
 AutoBuild.autoDet[Cars~ast];
