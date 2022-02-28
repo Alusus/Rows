@@ -1,0 +1,13 @@
+import "Data";
+import "AutoBuild";
+use DataType;
+class Cars
+{
+@defult["10"]
+ @notnull
+@pk
+def Id :Integer;
+@defult("'sleman'")
+def Name :VarChar;
+}
+AutoBuild.autoDet[Cars~ast];

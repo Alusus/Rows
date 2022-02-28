@@ -1,17 +1,27 @@
 import "Data";
 import "Srl/refs";
 module AutoBuild
-{    
+{
 function generateAddingElementNames (varName: String, elements: Array[ref[Core.Basic.TiObject]]) {
     def i: Int;
+    def colsMod : Array[Array[String]];
+    def strArray : Array[String];
+    def paramsArray:Array[String]
     for i = 0, i < elements.getLength(), ++i {
+        strArray=AutoBuild.dumpModifiers(elements(i));
+        def j : int;
+        for j=0 , j<strArray.getLength() , ++j
+        {
+            paramsArray=AutoBuild.dumpElementModifierParams(elements(i),strArray(j).buf);
+        }
 
+        colsMod.add(strArray);
 
         def node: ref[Core.Data.Node](castRef[elements(i), Core.Data.Node]);
         def d: ref[Core.Data.Ast.Definition](castRef[node.owner, Core.Data.Ast.Definition]);
 
         def binding: ref[Core.Basic.Binding](Core.Basic.getInterface[d, Core.Basic.Binding]);
-        dumpModifiers(binding);
+
         Spp.astMgr.insertAst(
             ast { names.add(Srl.String("{{name}}")) },
             Srl.Map[Srl.String, ref[Core.Basic.TiObject]]()
@@ -21,6 +31,17 @@ function generateAddingElementNames (varName: String, elements: Array[ref[Core.B
         );
 
     }
+}
+
+function generateAddingElementMods (elements: Array[ref[Core.Basic.TiObject]]) : Array[Array[String]] {
+    def i: Int;
+    def colsMod : Array[Array[String]];
+    def strArray : Array[String];
+    for i = 0, i < elements.getLength(), ++i {
+        strArray=AutoBuild.dumpModifiers(elements(i));
+        colsMod.add(strArray);
+    }
+    return colsMod;
 }
 
 function generateAddingElementTypes (varName: String, elements: Array[ref[Core.Basic.TiObject]]) {
@@ -40,22 +61,36 @@ function generateAddingElementTypes (varName: String, elements: Array[ref[Core.B
     }
 }
 
-macro implementGetElementNames [condition, parent] {
-    def names: Array[String];
-    preprocess {
-        def elements: Array[ref[Core.Basic.TiObject]];
-        elements = Spp.astMgr.findElements(
-            ast { condition },
-            parent,
-            Spp.SeekerFlags.SKIP_OWNERS | Spp.SeekerFlags.SKIP_USES | Spp.SeekerFlags.SKIP_CHILDREN
-        );
-        generateAddingElementNames(String("names"), elements);
-    }
-    return names;
-}
+macro implementGetElementNames [condition, parent  ] {
 
+        Array[String]().{
+        preprocess {
+            def elements: Array[ref[Core.Basic.TiObject]];
+            elements = Spp.astMgr.findElements(
+                ast { condition },
+                parent,
+                Spp.SeekerFlags.SKIP_OWNERS | Spp.SeekerFlags.SKIP_USES | Spp.SeekerFlags.SKIP_CHILDREN
+            );
+            AutoBuild.generateAddingElementNames(String("this"), elements);
+        }}
+
+}
+macro implementGetElementMods [condition, parent  ] {
+
+
+        preprocess {
+            def elements: Array[ref[Core.Basic.TiObject]];
+            elements = Spp.astMgr.findElements(
+                ast { condition },
+                parent,
+                Spp.SeekerFlags.SKIP_OWNERS | Spp.SeekerFlags.SKIP_USES | Spp.SeekerFlags.SKIP_CHILDREN
+            );
+            colsMod=AutoBuild.generateAddingElementMods( elements);
+        }
+
+}
 macro implementGetElementTypes [condition, parent] {
-    
+    Array[String]().{
     preprocess {
         def elements: Array[ref[Core.Basic.TiObject]];
         elements = Spp.astMgr.findElements(
@@ -63,45 +98,62 @@ macro implementGetElementTypes [condition, parent] {
             parent,
             Spp.SeekerFlags.SKIP_OWNERS | Spp.SeekerFlags.SKIP_USES | Spp.SeekerFlags.SKIP_CHILDREN
         );
-        generateAddingElementTypes(String("types"), elements);
+        AutoBuild.generateAddingElementTypes(String("this"), elements);
     }
-    return types;
+   }
 }
 
-function dumpModifiers (element: ref[Core.Basic.TiObject]) {
+function dumpModifiers (element: ref[Core.Basic.TiObject]) : Array[String] {
     def modifiers: ref[Core.Basic.Containing](Spp.astMgr.getModifiers(element));
     def i: Int;
+    def strArray : Array[String] ;
     for i = 0, i < modifiers.getElementCount()~cast[Int], ++i {
-        Console.print(Spp.astMgr.getModifierKeyword(modifiers.getElement(i)));
-        Console.print("\n");
+        strArray.add(Spp.astMgr.getModifierKeyword(modifiers.getElement(i)));
+
     }
+    return strArray;
 }
 
-function dumpModifierParams(modifier: ref[Core.Basic.TiObject]) {
+function dumpModifierParams(modifier: ref[Core.Basic.TiObject]) : Array[String] {
     def params: Srl.Array[Srl.String];
+
     Spp.astMgr.getModifierStringParams(modifier, params);
-    def i: Int;
-    for i = 0, i < params.getLength(), ++i {
-        Console.print("%s\n", params(i).buf);
-    }
+    return params;
 }
 
-function dumpElementModifierParams(element: ref[Core.Basic.TiObject], modName: ptr[array[Char]]) {
+function dumpElementModifierParams(element: ref[Core.Basic.TiObject], modName: ptr[array[Char]]) : Array[String] {
     def modifiers: ref[Core.Basic.Containing](Spp.astMgr.getModifiers(element));
     def modifier: ref[Core.Basic.TiObject](Spp.astMgr.findModifier(modifiers, modName));
-    dumpModifierParams(modifier);
+    def params : Array[String];
+
+    params=dumpModifierParams(modifier);
+    return params;
+
 }
 
 function dumpElementModifierParams2(element: ref[Core.Basic.TiObject], modName: ptr[array[Char]]) {
     def modifier: ref[Core.Basic.TiObject](Spp.astMgr.findModifierForElement(element, modName));
     dumpModifierParams(modifier);
 }
-func getVarNames (Table :SrdRef[Table]):Array[String] {
-        implementGetElementNames[elementType == "var", Table~ast];
+
+macro autoDet [parent]
+{
+    def var : Array[String];
+    def colsMod : Array[Array[String]];
+    var=AutoBuild.implementGetElementNames[elementType == "var", parent];
+    def types : Array[String];
+    types=AutoBuild.implementGetElementTypes[elementType == "var", parent];
+    def i : int;
+    def j : int;
+    AutoBuild.implementGetElementMods[elementType == "var", parent];
+    for i=0 , i< var.getLength() , i+=1
+       {
+        Console.print("var %s ",var(i).buf);
+        Console.print("type %s ",types(i).buf);
+        for j=0 , j< colsMod(i).getLength() , j+=1
+        Console.print(colsMod(i)(j));
+        Console.print("\n");
+       }
+
 }
-func getVarNames (Table :SrdRef[Table]):Array[String] {
-        implementGetElementTypes[elementType == "type", Table~ast];
-}
-func getVarNames (Table :SrdRef[Table]):Array[String] {
-        implementGetElementNames[elementType == "var", Table~ast];
 }
