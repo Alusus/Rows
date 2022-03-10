@@ -3,14 +3,15 @@ import "Srl/refs";
 module AutoBuild
 {
 use DataType;
+Console.print("var Var \n");
 def DataTypeArray:Array[String];
-def DataTypeString : Srring;
-def DataTypePtrArray : Array[ptr[Data]];
-
+def DataTypeString : String;
+def DataTypePtr : ptr[Data];
+def js2q : DataType.Integer;
 def paramsModsArray : Array[String];
 def val : String;
-def integerDataType : Integer;
-def bigIntegerDataType : BigInteger;
+def integerDataType : DataType.Integer;
+def bigIntegerDataType : DataType.BigInteger;
 def smallIntegerDataType : SmallInteger;
 def tinyIntegerDataType : TinyInteger;
 def realDataType : Real;
@@ -22,7 +23,7 @@ def varCharDataType : VarChar;
 def charTypeDataType : CharType;
 def textDataType : Text;
 def datesDataType : Dates;
-
+Console.print("var Var \n");
 function generateArrays()
 {
    DataTypeString="Integer";
@@ -66,20 +67,10 @@ function generateArrays()
     val="fk";
     paramsModsArray.add(val);
 }
+Console.print("var Var \n");
 function generateAddingElementNames (varName: String, elements: Array[ref[Core.Basic.TiObject]]) {
     def i: Int;
-    def colsMod : Array[Array[String]];
-    def strArray : Array[String];
-    def paramsArray:Array[String]
     for i = 0, i < elements.getLength(), ++i {
-        strArray=AutoBuild.dumpModifiers(elements(i));
-        def j : int;
-        for j=0 , j<strArray.getLength() , ++j
-        {
-            paramsArray=AutoBuild.dumpElementModifierParams(elements(i),strArray(j).buf);
-        }
-
-        colsMod.add(strArray);
 
         def node: ref[Core.Data.Node](castRef[elements(i), Core.Data.Node]);
         def d: ref[Core.Data.Ast.Definition](castRef[node.owner, Core.Data.Ast.Definition]);
@@ -96,11 +87,13 @@ function generateAddingElementNames (varName: String, elements: Array[ref[Core.B
 
     }
 }
+Console.print("var Var \n");
 
 function generateAddingElementMods (elements: Array[ref[Core.Basic.TiObject]]) : Array[Array[String]] {
     def i: Int;
     def colsMod : Array[Array[String]];
     def strArray : Array[String];
+     Console.print("var Var inside fun mod befor for \n");
     for i = 0, i < elements.getLength(), ++i {
         strArray=AutoBuild.dumpModifiers(elements(i));
         colsMod.add(strArray);
@@ -108,7 +101,7 @@ function generateAddingElementMods (elements: Array[ref[Core.Basic.TiObject]]) :
     return colsMod;
 }
 
-
+Console.print("var Var \n");
 function generateAddingElementTypes (varName: String, elements: Array[ref[Core.Basic.TiObject]]) {
     def i: Int;
     for i = 0, i < elements.getLength(), ++i {
@@ -125,7 +118,7 @@ function generateAddingElementTypes (varName: String, elements: Array[ref[Core.B
 
     }
 }
-
+Console.print("var Var \n");
 macro implementGetElementNames [condition, parent  ] {
 
         Array[String]().{
@@ -140,6 +133,7 @@ macro implementGetElementNames [condition, parent  ] {
         }}
 
 }
+
 macro implementGetElementMods [condition, parent  ] {
 
 
@@ -150,7 +144,9 @@ macro implementGetElementMods [condition, parent  ] {
                 parent,
                 Spp.SeekerFlags.SKIP_OWNERS | Spp.SeekerFlags.SKIP_USES | Spp.SeekerFlags.SKIP_CHILDREN
             );
+            Console.print("var Var inside imp \n");
             colsMod=AutoBuild.generateAddingElementMods( elements);
+             Console.print("var Var inside imp2 \n");
             def params : Array[String];
             for i=0 , i<colsMod.getLength() , ++i
             {
@@ -211,10 +207,12 @@ function numOfParams (Mod : String) : int {
 
 
 function dumpModifiers (element: ref[Core.Basic.TiObject]) : Array[String] {
+ Console.print("var Var inside inside dumpnod \n");
     def modifiers: ref[Core.Basic.Containing](Spp.astMgr.getModifiers(element));
     def i: Int;
     def strArray : Array[String] ;
     for i = 0, i < modifiers.getElementCount()~cast[Int], ++i {
+     Console.print(Spp.astMgr.getModifierKeyword(modifiers.getElement(i)));
         strArray.add(Spp.astMgr.getModifierKeyword(modifiers.getElement(i)));
 
     }
@@ -246,24 +244,43 @@ function dumpElementModifierParams2(element: ref[Core.Basic.TiObject], modName: 
 function isDataType(varType : String) : int
 {
 
-   def i : int ;
-   for i=0 , i< DataTypeArray.getLength() , ++i
+   def si : int ;
+   Console.print("inside is data type");
+   for si=0 , si< DataTypeArray.getLength() , ++si
    {
-       if (DataTypeArray(i) == varType)
-       {
-           return i;
-       }
+
+           Console.print(DataTypeArray(si));
+           Console.print("\n");
+
+
    }
    return -1;
 
 
 }
-
+Console.print("var Var \n");
 macro autoDet [parent]
 {
+use DataType;
+Console.print("var Var ");
+def DataTypePtr : ptr[Data];
+def integerDataType : DataType.Integer;
+def bigIntegerDataType : DataType.BigInteger;
+def smallIntegerDataType : SmallInteger;
+def tinyIntegerDataType : TinyInteger;
+def realDataType : Real;
+def floatDataType : DataType.Float;
+
+def decimalDataType : Decimal;
+def xmlDataType : Xml;
+def varCharDataType : VarChar;
+def charTypeDataType : CharType;
+def textDataType : Text;
+def datesDataType : Dates;
     def var : Array[String];
     def colsMod : Array[Array[String]];
     def modsParams : Array[Array[String]];
+    Console.print("var Var ");
     var=AutoBuild.implementGetElementNames[elementType == "var", parent];
     def types : Array[String];
     types=AutoBuild.implementGetElementTypes[elementType == "var", parent];
@@ -272,64 +289,70 @@ macro autoDet [parent]
     def k : int;
     def c : int;
     def index: int;
+    DataTypeArray(0);
     c=-1;
     AutoBuild.implementGetElementMods[elementType == "var", parent];
+     Console.print("var Var ");
+     def hssw:String="533sd";
 
     for i=0 , i< var.getLength() , i+=1
        {
         Console.print("var %s ",var(i).buf);
         Console.print("type %s ",types(i).buf);
-        index=isDataType(types(i));
+        index=isDataType(hssw);
+        index=3;
+
 
         if(index>-1)
         {
             if (index==0)
             {
-                DataTypePtrArray.add(integerDataType~ptr);
+
+                DataTypePtr = integerDataType~ptr;
             }
             else if (index==1)
             {
-                DataTypePtrArray.add(bigIntegerDataType~ptr);
+                DataTypePtr = bigIntegerDataType~ptr;
             }
             else if (index==2)
             {
-                DataTypePtrArray.add(smallIntegerDataType~ptr);
+                DataTypePtr = smallIntegerDataType~ptr;
             }
             else if (index==3)
             {
-                DataTypePtrArray.add(tinyIntegerDataType~ptr);
+                DataTypePtr = tinyIntegerDataType~ptr;
             }
             else if (index==4)
             {
-                DataTypePtrArray.add(realDataType~ptr);
+                DataTypePtr = realDataType~ptr;
             }
             else if (index==5)
             {
-                DataTypePtrArray.add(floatDataType~ptr);
+                DataTypePtr = floatDataType~ptr;
             }
             else if (index==6)
             {
-                DataTypePtrArray.add(decimalDataType~ptr);
+                DataTypePtr = decimalDataType~ptr;
             }
             else if (index==7)
             {
-                DataTypePtrArray.add(xmlDataType~ptr);
+                DataTypePtr = xmlDataType~ptr;
             }
             else if (index==8)
             {
-                DataTypePtrArray.add(varCharDataType~ptr);
+                DataTypePtr = varCharDataType~ptr;
             }
             else if (index==9)
             {
-                DataTypePtrArray.add(charTypeDataType~ptr);
+                DataTypePtr = charTypeDataType~ptr;
             }
             else if (index==10)
             {
-                DataTypePtrArray.add(textDataType~ptr);
+                DataTypePtr = textDataType~ptr;
             }
             else if (index==11)
             {
-                DataTypePtrArray.add(datesDataType~ptr);
+                DataTypePtr = datesDataType~ptr;
             }
         }
 
@@ -348,7 +371,8 @@ macro autoDet [parent]
         Console.print("\n");}
        }
 
-c=0;
+
+
 }
 
 }

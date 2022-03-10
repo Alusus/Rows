@@ -14,8 +14,10 @@ module Create
         def ExecString : String="CREATE TABLE";
         def NotExistFlag : bool=0;
         def Name : String="";
-        def Data : Array[ptr[DataType.Data]];
-        def ColsName : Array[String];
+        def Data :ptr[DataType.Data];
+        def IntData : DataType.Integer;
+
+        def ColsName : String;
         def ColsString : String="";
         def TConst : ptr[Constraints.TableConstraints];
         def TConstString : String ="";
@@ -29,7 +31,7 @@ module Create
             this.NotExistFlag=1;
 
         }
-        handler this.setDataType(Data : Array[ptr[DataType.Data]])
+        handler this.setDataType(Data : ptr[DataType.Data])
         {
             this.Data=Data;
 
@@ -49,31 +51,14 @@ module Create
             return this.ColsName;
 
         }
-        handler this.setColsString()
+        handler this.addToColsString()
         {
-            this.ColsString="";
-            def i : int =0;
-            def size : int =0;
-            if (this.Data.getLength()<this.ColsName.getLength())
-                {size=this.Data.getLength();}
-            else{
-                size=this.ColsName.getLength();}
-            for i=0 , i<size-1 , i=i+1
-            {
-                this.ColsString=this.ColsString+this.ColsName(i) + " ";
-                this.ColsString=this.ColsString+this.Data(i)~cnt.getDataString()+ " ";
-                this.ColsString=this.ColsString+this.Data(i)~cnt.FConstrants.getFieldConsString();
-                this.ColsString=this.ColsString+",\n";
 
-            }
-            if (size>0)
-            {
-                this.ColsString=this.ColsString+this.ColsName(size-1) + " ";
-                this.ColsString=this.ColsString+this.Data(size-1)~cnt.getDataString()+ " ";
-                this.ColsString=this.ColsString+this.Data(size-1)~cnt.FConstrants.getFieldConsString();
-                this.ColsString=this.ColsString+",\n";
 
-            }
+                this.ColsString=this.ColsString+this.ColsName + " ";
+                this.ColsString=this.ColsString+this.Data~cnt.getDataString()+ " ";
+                this.ColsString=this.ColsString+this.Data~cnt.FConstrants.getFieldConsString();
+                this.ColsString=this.ColsString+",\n";
 
         }
         handler this.getColsString() : String
@@ -142,7 +127,7 @@ module Create
         }
         handler this.setPgObj(PgObj :Db)
         {
-            Console.print("haha\n");
+
             this.PgObj=PgObj;
             Console.print("Conn %d \n",this.PgObj.connStatus());
 
