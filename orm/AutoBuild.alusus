@@ -1,13 +1,13 @@
 import "Data";
 import "Srl/refs";
+import "Create";
 module AutoBuild
 {
 use DataType;
-Console.print("var Var \n");
 def DataTypeArray:Array[String];
 def DataTypeString : String;
 def DataTypePtr : ptr[Data];
-def js2q : DataType.Integer;
+def
 def paramsModsArray : Array[String];
 def val : String;
 def integerDataType : DataType.Integer;
@@ -23,7 +23,6 @@ def varCharDataType : VarChar;
 def charTypeDataType : CharType;
 def textDataType : Text;
 def datesDataType : Dates;
-Console.print("var Var \n");
 function generateArrays()
 {
    DataTypeString="Integer";
@@ -67,7 +66,6 @@ function generateArrays()
     val="fk";
     paramsModsArray.add(val);
 }
-Console.print("var Var \n");
 function generateAddingElementNames (varName: String, elements: Array[ref[Core.Basic.TiObject]]) {
     def i: Int;
     for i = 0, i < elements.getLength(), ++i {
@@ -87,13 +85,13 @@ function generateAddingElementNames (varName: String, elements: Array[ref[Core.B
 
     }
 }
-Console.print("var Var \n");
+
 
 function generateAddingElementMods (elements: Array[ref[Core.Basic.TiObject]]) : Array[Array[String]] {
     def i: Int;
     def colsMod : Array[Array[String]];
     def strArray : Array[String];
-     Console.print("var Var inside fun mod befor for \n");
+
     for i = 0, i < elements.getLength(), ++i {
         strArray=AutoBuild.dumpModifiers(elements(i));
         colsMod.add(strArray);
@@ -101,7 +99,6 @@ function generateAddingElementMods (elements: Array[ref[Core.Basic.TiObject]]) :
     return colsMod;
 }
 
-Console.print("var Var \n");
 function generateAddingElementTypes (varName: String, elements: Array[ref[Core.Basic.TiObject]]) {
     def i: Int;
     for i = 0, i < elements.getLength(), ++i {
@@ -118,7 +115,6 @@ function generateAddingElementTypes (varName: String, elements: Array[ref[Core.B
 
     }
 }
-Console.print("var Var \n");
 macro implementGetElementNames [condition, parent  ] {
 
         Array[String]().{
@@ -144,23 +140,18 @@ macro implementGetElementMods [condition, parent  ] {
                 parent,
                 Spp.SeekerFlags.SKIP_OWNERS | Spp.SeekerFlags.SKIP_USES | Spp.SeekerFlags.SKIP_CHILDREN
             );
-            Console.print("var Var inside imp \n");
             colsMod=AutoBuild.generateAddingElementMods( elements);
-             Console.print("var Var inside imp2 \n");
             def params : Array[String];
             for i=0 , i<colsMod.getLength() , ++i
             {
                 for j=0 , j<colsMod(i).getLength() , ++j
                 {
-                    Console.print("inside micro ");
-                    Console.print(colsMod(i)(j));
-                    Console.print(" ");
 
                     params=AutoBuild.dumpElementModifierParams(elements(i),colsMod(i)(j).buf);
                     modsParams.add(params);
 
                 }
-                Console.print(" \n");
+
             }
         }
 
@@ -182,11 +173,26 @@ macro implementGetElementTypes [condition, parent] {
 function numOfParams (Mod : String) : int {
 
     def i: Int;
+    def paramsModsArray : Array[String];
+    def val : String;
+    val="notnull";
+    paramsModsArray.add(val);
+    val="unique";
+    paramsModsArray.add(val);
+    val="pk";
+    paramsModsArray.add(val);
+    val="defult";
+    paramsModsArray.add(val);
+    val="check";
+    paramsModsArray.add(val);
+
+    val="fk";
+    paramsModsArray.add(val);
     for i = 0, i < paramsModsArray.getLength()-1, ++i
      {
         if (Mod== paramsModsArray(i))
         {
-            if (i<2)
+            if (i<3)
             {
                 return 0;
             }
@@ -207,12 +213,10 @@ function numOfParams (Mod : String) : int {
 
 
 function dumpModifiers (element: ref[Core.Basic.TiObject]) : Array[String] {
- Console.print("var Var inside inside dumpnod \n");
     def modifiers: ref[Core.Basic.Containing](Spp.astMgr.getModifiers(element));
     def i: Int;
     def strArray : Array[String] ;
     for i = 0, i < modifiers.getElementCount()~cast[Int], ++i {
-     Console.print(Spp.astMgr.getModifierKeyword(modifiers.getElement(i)));
         strArray.add(Spp.astMgr.getModifierKeyword(modifiers.getElement(i)));
 
     }
@@ -243,14 +247,43 @@ function dumpElementModifierParams2(element: ref[Core.Basic.TiObject], modName: 
 
 function isDataType(varType : String) : int
 {
-
    def si : int ;
-   Console.print("inside is data type");
+   def DataTypeArray:Array[String];
+   def DataTypeString : String;
+   DataTypeString="Integer";
+   DataTypeArray.add(DataTypeString);
+   DataTypeString="BigInteger";
+   DataTypeArray.add(DataTypeString);
+   DataTypeString="SmallInteger";
+   DataTypeArray.add(DataTypeString);
+
+   DataTypeString="TinyInteger";
+   DataTypeArray.add(DataTypeString);
+   DataTypeString="Real";
+   DataTypeArray.add(DataTypeString);
+   DataTypeString="Float";
+   DataTypeArray.add(DataTypeString);
+
+   DataTypeString="Decimal";
+   DataTypeArray.add(DataTypeString);
+   DataTypeString="Xml";
+   DataTypeArray.add(DataTypeString);
+   DataTypeString="VarChar";
+   DataTypeArray.add(DataTypeString);
+
+   DataTypeString="CharType";
+   DataTypeArray.add(DataTypeString);
+   DataTypeString="Text";
+   DataTypeArray.add(DataTypeString);
+   DataTypeString="Dates";
+   DataTypeArray.add(DataTypeString);
    for si=0 , si< DataTypeArray.getLength() , ++si
    {
 
-           Console.print(DataTypeArray(si));
-           Console.print("\n");
+          if(DataTypeArray(si)==varType)
+          {
+              return si;
+          }
 
 
    }
@@ -258,29 +291,34 @@ function isDataType(varType : String) : int
 
 
 }
-Console.print("var Var \n");
-macro autoDet [parent]
-{
-use DataType;
-Console.print("var Var ");
-def DataTypePtr : ptr[Data];
-def integerDataType : DataType.Integer;
-def bigIntegerDataType : DataType.BigInteger;
-def smallIntegerDataType : SmallInteger;
-def tinyIntegerDataType : TinyInteger;
-def realDataType : Real;
-def floatDataType : DataType.Float;
 
-def decimalDataType : Decimal;
-def xmlDataType : Xml;
-def varCharDataType : VarChar;
-def charTypeDataType : CharType;
-def textDataType : Text;
-def datesDataType : Dates;
+macro autoDet [parent , tableName, dbCon ]
+{
+    use DataType;
+
+    def DataTypePtr : ptr[Data];
+    def paramsModsArray : Array[String];
+    def val : String;
+    def integerDataType : DataType.Integer;
+    def bigIntegerDataType : DataType.BigInteger;
+    def smallIntegerDataType : SmallInteger;
+    def tinyIntegerDataType : TinyInteger;
+    def realDataType : Real;
+    def floatDataType : DataType.Float;
+    def decimalDataType : Decimal;
+    def xmlDataType : Xml;
+    def varCharDataType : VarChar;
+    def charTypeDataType : CharType;
+    def textDataType : Text;
+    def datesDataType : Dates;
     def var : Array[String];
     def colsMod : Array[Array[String]];
     def modsParams : Array[Array[String]];
-    Console.print("var Var ");
+    def pkArray : Array[String];
+    def tableConst :Constraints.TableConstraints;
+    def table : Create.Create;
+    def colsName : Array[String];
+
     var=AutoBuild.implementGetElementNames[elementType == "var", parent];
     def types : Array[String];
     types=AutoBuild.implementGetElementTypes[elementType == "var", parent];
@@ -289,24 +327,23 @@ def datesDataType : Dates;
     def k : int;
     def c : int;
     def index: int;
-    DataTypeArray(0);
+
     c=-1;
     AutoBuild.implementGetElementMods[elementType == "var", parent];
-     Console.print("var Var ");
-     def hssw:String="533sd";
 
     for i=0 , i< var.getLength() , i+=1
        {
-        Console.print("var %s ",var(i).buf);
-        Console.print("type %s ",types(i).buf);
-        index=isDataType(hssw);
-        index=3;
+
+        index=AutoBuild.isDataType(types(i));
+
 
 
         if(index>-1)
         {
+            table.setColsName(var(i));
             if (index==0)
             {
+                integerDataType
 
                 DataTypePtr = integerDataType~ptr;
             }
@@ -354,25 +391,80 @@ def datesDataType : Dates;
             {
                 DataTypePtr = datesDataType~ptr;
             }
-        }
+        Console.print("var %s ",var(i).buf);
+        Console.print("type %s ",types(i).buf);
 
-        Console.print(modsParams.getLength());
-        Console.print(" hehe ");
-        Console.print(modsParams(3)(1));
+
         Console.print("\n");
         for j=0 , j< colsMod(i).getLength() , j+=1
-       { Console.print(" ");
-        Console.print(colsMod(i)(j));
-        Console.print("\n params for this mod : \n");
-        ++c;
-        for k=0 , k<modsParams(c).getLength() , ++k
-        {Console.print(modsParams(c)(k));
-        Console.print(" ");}
-        Console.print("\n");}
+       {
+           ++c;
+
+
+           Console.print(" ");
+           if(AutoBuild.numOfParams(colsMod(i)(j))!=-1)
+           {
+                Console.print(colsMod(i)(j));
+                if(colsMod(i)(j)=="notnull")
+                {
+                    DataTypePtr~cnt.FConstrants.setNotNullConstraint();
+                }
+                else if(colsMod(i)(j)=="unique")
+                {
+                    DataTypePtr~cnt.FConstrants.setUniqueConstraint();
+                }
+                else if(colsMod(i)(j)=="pk")
+                {
+                    pkArray.add(var(i));
+                }
+
+                if(AutoBuild.numOfParams(colsMod(i)(j))>0)
+                {
+                    Console.print("\n params for this mod : \n");
+                    if(colsMod(i)(j)=="defult")
+                    {
+                        DataTypePtr~cnt.FConstrants.setDefaultConstraint(modsParams(c)(0));
+                    }
+                    else if(colsMod(i)(j)=="check")
+                    {
+                        DataTypePtr~cnt.FConstrants.setCheckConstraint(modsParams(c)(0));
+                    }
+                    else if(colsMod(i)(j)=="fk")
+                    {
+                        tableConst.addForgenKey(modsParams(c)(0),modsParams(c)(1),modsParams(c)(2))
+                    }
+
+
+                    for k=0 , k<modsParams(c).getLength() , ++k
+                    {
+                        Console.print(modsParams(c)(k));
+                        Console.print(" ");
+                    }
+                }
+
+        Console.print("\n");
+        }
+
+
+        }
+        table.setDataType(DataTypePtr);
+        table.addToColsString();
+
        }
+    }
 
-
+    tableConst.setPrimaryKeyConstraint(pkArray);
+    table.setTConst(tableConst~ptr);
+    table.setTConstString();
+    table.setExecString();
+    table.setTableName(tableName);
+    def ex:String;
+    table.setExecString();
+    ex=table.getExecString();
+    Console.print(ex);
+    Console.print("\n");
 
 }
+
 
 }
