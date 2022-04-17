@@ -7,9 +7,11 @@ module Create
 {
     class Create
     {
+        def Mysql : bool=false;
         def MySqlObj : MySql.Db;
         def Pg : bool=false;
-        def PgObj : Db;
+        def PgObj : PostgresSql.Db;
+        def SqLite : bool=false;
         def SqLiteObj : Sqlite.Db;
         def ExecString : String="CREATE TABLE";
         def NotExistFlag : bool=0;
@@ -41,7 +43,7 @@ module Create
             return this.ColsString;
 
         }
-        handler this.setColsName(ColsName : Array[String])
+        handler this.setColsName(ColsName : String)
         {
             this.ColsName=ColsName;
 
@@ -80,10 +82,10 @@ module Create
             PKey=this.TConst~cnt.getPrimaryKeyConsString();
             FKey=this.TConst~cnt.getForgenKeyConsString();
             this.TConstString="";
-            this.TConstString=this.TConstString + PKey + ",";
+            this.TConstString=this.TConstString + PKey ;
             def i : int =0;
             if FKey.getLength()>0
-                this.TConstString=this.TConstString + "\n";
+                this.TConstString=this.TConstString+ "," + "\n";
             for i=0 ,i<FKey.getLength()-1,i=i+1
             {
                 this.TConstString=this.TConstString + FKey(i);
@@ -111,13 +113,14 @@ module Create
             if (this.TConstString!="")
                {
                    this.ExecString=this.ExecString + "\n";
-                   this.ExecString=this.ExecString + this.TConstString + ")";}
+                   this.ExecString=this.ExecString + this.TConstString +");";}
             else
-               { this.ExecString=this.ExecString  +")";}
+               { this.ExecString=this.ExecString  +");";}
         }
         handler this.setMysqlObj(MySqlObj : MySql.Db)
         {
             this.MySqlObj=MySqlObj;
+            this.Mysql=true;
 
         }
         handler this.getMysqlObj() : MySql.Db
@@ -129,7 +132,8 @@ module Create
         {
 
             this.PgObj=PgObj;
-            Console.print("Conn %d \n",this.PgObj.connStatus());
+            this.Pg=true;
+
 
         }
         handler this.getPgObj() : PostgresSql.Db
@@ -150,23 +154,37 @@ module Create
         }
         handler this.exec()
         {
-
-
+            if(this.Pg==true)
+            {
+                Console.print("inside exec : ");
                 Console.print(this.PgObj.Connstring);
+                Console.print("\n");
                 this.PgObj.connectDb();
                 this.PgObj.exec(this.ExecString.buf);
+                Console.print(this.PgObj.errorMessage());
 
+            }
+            else if(this.Mysql==true)
+            {
+                Console.print("inside exec mysql: ");
 
+                Console.print("\n");
 
+                Console.print(this.ExecString.buf );
+                Console.print("\n");
+                if (mysql.Conn==null)
+                {
+                    Console.print("after conn %s \n",this.MySqlObj.errorMessage() );
+                }
+                 else
+                {
+                    this.MySqlObj.exec(this.ExecString.buf);
+                }
+                Console.print(" mysql: after exec\n");
+                Console.print(this.MySqlObj.errorMessage());
+                Console.print("\n");
 
-                    Console.print("%s\n" ,this.PgObj.errorMessage());
-
-
-                    Console.print("%s\n" ,this.PgObj.errorMessage());
-
-
-
-
+            }
 
         }
     }
