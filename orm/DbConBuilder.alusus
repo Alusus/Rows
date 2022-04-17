@@ -10,6 +10,13 @@ module DbConBuilder
         def Port : int=0;
         def UnixSocket : String=null;
         def ClientFlag : int=0;
+        def DbConType : int
+        def Db:{
+		def MYSQL: 0;
+		def SQLITE: 1;
+		def PGSQL: 2;
+			}
+
         handler this~init() {}
 
         handler this.setDBName(DbName : String)
@@ -19,6 +26,15 @@ module DbConBuilder
         handler this.getDbName() : String
         {
             return this.DbName;
+        }
+
+        handler this.setDbConType(DbConType : int)
+        {
+            this.DbConType=DbConType;
+        }
+        handler this.getDbConType() : int
+        {
+            return this.DbConType;
         }
 
         handler this.setUserName(UserName : String)
@@ -42,6 +58,7 @@ module DbConBuilder
         handler this.setServer(Server : String)
         {
             this.Server=Server;
+
         }
         handler this.getServer() : String
         {
@@ -86,15 +103,14 @@ module DbConBuilder
             def PgSqlString : String ;
             PgSqlString=this.pgSqlConStringBuilder();
             def PgSql : PostgresSql.Db(PgSqlString);
-            Console.print(PgSql.Connstring);
-            Console.print(" \ninside Dbcon \n");
             return PgSql;
         }
 
         handler this.mySqlConBuilder() : MySql.Db
         {
 
-            def MySql : MySql.Db(this.Server.buf,this.UserName.buf,this.Password.buf,this.DbName.buf,this.Port,this.UnixSocket.buf,this.ClientFlag);
+            def MySql : MySql.Db(this.Server,this.UserName,this.Password,this.DbName,this.Port,this.UnixSocket,this.ClientFlag);
+
             return MySql;
         }
 
