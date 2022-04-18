@@ -216,11 +216,119 @@ module TablePicker
            Fs.write(body,char~size,body.getLength(),fp);
            Fs.closeFile(fp);
            return true;
-
-
-
        }
+       macro implementGetElementNames [condition, parent  ] {
+
+        Array[String]().{
+        preprocess {
+            def elements: Array[ref[Core.Basic.TiObject]];
+            elements = Spp.astMgr.findElements(
+                ast { condition },
+                parent,
+                Spp.SeekerFlags.SKIP_OWNERS | Spp.SeekerFlags.SKIP_USES | Spp.SeekerFlags.SKIP_CHILDREN
+            );
+            this.generateAddingElementNames(String("this"), elements);
+        }}
+
+}
+function generateAddingElementNames (varName: String, elements: Array[ref[Core.Basic.TiObject]]) {
+    def i: Int;
+    for i = 0, i < elements.getLength(), ++i {
+
+        def node: ref[Core.Data.Node](castRef[elements(i), Core.Data.Node]);
+        def d: ref[Core.Data.Ast.Definition](castRef[node.owner, Core.Data.Ast.Definition]);
+
+        def binding: ref[Core.Basic.Binding](Core.Basic.getInterface[d, Core.Basic.Binding]);
+
+        Spp.astMgr.insertAst(
+            ast { names.add(Srl.String("{{name}}")) },
+            Srl.Map[Srl.String, ref[Core.Basic.TiObject]]()
+                .set(Srl.String("names"), Core.Data.Ast.Identifier(varName))
+                .set(Srl.String("name"), binding.getMember("name"))
+
+        );
+
+    }
+}
+function generateAddingElementTypes (varName: String, elements: Array[ref[Core.Basic.TiObject]]) {
+    def i: Int;
+    for i = 0, i < elements.getLength(), ++i {
+        def node: ref[Core.Data.Node](castRef[elements(i), Core.Data.Node]);
+        def d: ref[Core.Data.Ast.Definition](castRef[node.owner, Core.Data.Ast.Definition]);
+        def containing: ref[Core.Basic.MapContaining](Core.Basic.getInterface[d, Core.Basic.MapContaining]);
+        Spp.astMgr.insertAst(
+            ast { names.add(Srl.String("{{name}}")) },
+            Srl.Map[Srl.String, ref[Core.Basic.TiObject]]()
+                .set(Srl.String("names"), Core.Data.Ast.Identifier(varName))
+                .set(Srl.String("name"), castRef[containing.getElement("target"), Core.Data.Ast.Identifier])
+
+        );
+
+    }
+}
+macro implementGetElementTypes [condition, parent] {
+    Array[String]().{
+    preprocess {
+        def elements: Array[ref[Core.Basic.TiObject]];
+        elements = Spp.astMgr.findElements(
+            ast { condition },
+            parent,
+            Spp.SeekerFlags.SKIP_OWNERS | Spp.SeekerFlags.SKIP_USES | Spp.SeekerFlags.SKIP_CHILDREN
+        );
+        this.generateAddingElementTypes(String("this"), elements);
+    }
    }
+}
+function generateCode (varName: String, elements: Array[ref[Core.Basic.TiObject]]) {
+    def i: Int;
+    for i = 0, i < elements.getLength(), ++i {
+        def node: ref[Core.Data.Node](castRef[elements(i), Core.Data.Node]);
+        def d: ref[Core.Data.Ast.Definition](castRef[node.owner, Core.Data.Ast.Definition]);
+        def containing: ref[Core.Basic.MapContaining](Core.Basic.getInterface[d, Core.Basic.MapContaining]);
+        Spp.astMgr.insertAst(
+            ast {     Console.print("From AST CODE");
+    Console.print("\n");},
+            Srl.Map[Srl.String, ref[Core.Basic.TiObject]]()
+                .set(Srl.String("names"), Core.Data.Ast.Identifier(varName))
+                .set(Srl.String("name"), castRef[containing.getElement("target"), Core.Data.Ast.Identifier])
+
+        );
+
+    }
+}
+
+       macro autoBinde [parent  ]
+       {
+    def val : String;
+    def types : Array[String];
+    types=this.implementGetElementTypes[elementType == "var", parent];
+    var=this.implementGetElementNames[elementType == "var", parent];
+    def i : int;
+    def j : int;
+    def k : int;
+    def c : int;
+    def index: int;
+
+    c=-1;
+
+    for i=0 , i< var.getLength() , i+=1
+       {
+
+    }
+
+    tableConst.setPrimaryKeyConstraint(pkArray);
+    table.setTConst(tableConst~ptr);
+    table.setTConstString();
+    table.setExecString();
+    table.setTableName(tableName);
+    def ex:String;
+    table.setExecString();
+    ex=table.getExecString();
+    Console.print(ex);
+    Console.print("\n");
+
+}
+
 }
 
 def DbCon :  DbConBuilder.DbConBuilder;
@@ -241,6 +349,4 @@ tablebuild.setMySqlObj(mysql);
 tablebuild.genrateExecString();
 tablebuild.genrateColsData();
 tablebuild.genrateTableClass();
-
-
 
