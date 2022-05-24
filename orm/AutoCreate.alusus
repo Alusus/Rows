@@ -1,14 +1,63 @@
 import "Data";
 import "AutoBuild";
 use DataType;
+@tableName["MyTable"]
 class Cars
 {
 @defult["10"]
  @notnull
 @pk
 def Id :Integer;
-@defult("'sleman'")
+@s
+@defult["30"]
+def i:String;
+
+
+def n:String;
+
+@defult["'sleman'" ]
 def Name :VarChar;
-//def Name:VarChar(50); this will return an errors
+
 }
-AutoBuild.autoDet[Cars~ast];
+
+class varType
+{
+@defult["10"]
+ @notnull
+@pk
+def Id :Integer;
+@s
+@defult["30"]
+def iq:String;
+
+
+def n:String;
+
+@defult["'sleman'" ]
+def Name :VarChar;
+
+}
+def Tname : String;
+Tname="Cars";
+def DbName : String="testdb";
+
+def UserName : String="user12";
+
+def Password : String="Qwerty231@#!";
+
+def server : String="localhost";
+
+def DbsCon :  DbConBuilder.DbConBuilder;
+
+DbsCon.setDBName(DbName);
+
+DbsCon.setUserName(UserName);
+
+DbsCon.setPassword(Password);
+
+DbsCon.setServer(server);
+DbsCon.setDbConType(0);
+def a : String;
+a=String("Cars");
+AutoBuild.test(String("Student") ,DbsCon , Cars~ast ,a );
+

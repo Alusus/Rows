@@ -1,9 +1,22 @@
 import "Data";
 import "Srl/refs";
 import "Create";
+import "Srl/Console";
+import "Srl/refs";
+import "Srl/System";
+import "Core/Data";
+import "Spp";
+import "Receive";
+import "DbConBuilder";
+use Srl;
+use Core.Basic;
+use Core.Data;
+use Core.Data.Ast;
+
 module AutoBuild
 {
 use DataType;
+def TioSrdRef: alias SrdRef[Core.Basic.TiObject];
 def DataTypeArray:Array[String];
 def DataTypeString : String;
 def DataTypePtr : ptr[Data];
@@ -122,7 +135,7 @@ macro implementGetElementNames [condition, parent  ] {
             elements = Spp.astMgr.findElements(
                 ast { condition },
                 parent,
-                Spp.SeekerFlags.SKIP_OWNERS | Spp.SeekerFlags.SKIP_USES | Spp.SeekerFlags.SKIP_CHILDREN
+               Spp.SeekerFlags.SKIP_OWNERS | Spp.SeekerFlags.SKIP_USES | Spp.SeekerFlags.SKIP_CHILDREN
             );
             AutoBuild.generateAddingElementNames(String("this"), elements);
         }}
@@ -466,6 +479,334 @@ macro autoDet [parent , tableName ]
     ex=table.getExecString();
     Console.print(ex);
     Console.print("\n");
+
+}
+
+def TioSrdRef: alias SrdRef[Core.Basic.TiObject];
+
+func generateDataType (  ): TioSrdRef {
+    def result: TioSrdRef;
+
+     def list: SrdRef[Core.Data.Ast.Scope] = newSrdObj[Core.Data.Ast.Scope];
+
+def listContainer: DynContainerOf[list.obj];
+
+
+                if !Spp.astMgr.buildAst(
+           ast {myType= String("Cars")  },
+            Map[String, ref[TiObject]]()
+                .set(String("myType"), Core.Data.Ast.Identifier(String("myType")))
+                .set(String("varType"), Core.Data.Ast.Identifier(String("varType"))),
+
+            result
+        ) {
+            System.fail(1, "generateDataType/build Data Type var : error\n");
+        }
+       listContainer.addElement(result.obj);
+
+    return castSrdRef[list, TiObject];
+}
+
+macro genareteDataType [dataType] {
+
+    preprocess {
+        if !Spp.astMgr.insertAst(
+            AutoBuild.generateDataType( ).obj
+        ) {
+            System.fail(1, "Failed to genrate data type.\n");
+        }
+    }
+}
+
+//func generateDataTable (obj: ref[TiObject] , className: String , conn : DbConBuilder.DbConBuilder , tableNames : Array[String]  , var : Array[String] , types : Array[String]): TioSrdRef {
+func generateDataTable ( ): TioSrdRef {
+    def result: TioSrdRef;
+
+     def list: SrdRef[Core.Data.Ast.Scope] = newSrdObj[Core.Data.Ast.Scope];
+
+def listContainer: DynContainerOf[list.obj];
+
+def myType : String;
+AutoBuild.genareteDataType["s"];
+                if !Spp.astMgr.buildAst(
+           ( ast def table : Receive.Receive  ),
+            Map[String, ref[TiObject]]()
+                .set(String("table"), Core.Data.Ast.Identifier(String("table")))
+                .set(String("tableNames"), Core.Data.Ast.Identifier(String("tableNames"))),
+
+            result
+        ) {
+            System.fail(1, "generateDataTable/build table var : error\n");
+        }
+       listContainer.addElement(result.obj);
+
+
+
+                if !Spp.astMgr.buildAst(
+           ( ast def myNumber : int ),
+            Map[String, ref[TiObject]](),
+
+            result
+        ) {
+            System.fail(1, "generateDataTable/build table var : error\n");
+        }
+       listContainer.addElement(result.obj);
+
+                       if !Spp.astMgr.buildAst(
+            ast {myNumber  = num},
+            Map[String, ref[TiObject]]()
+            .set(String("num"), Core.Data.Ast.IntegerLiteral(String("17"))),
+
+            result
+        ) {
+            System.fail(1, "generateDataTable/build table var : error\n");
+        }
+       listContainer.addElement(result.obj);
+
+
+
+
+
+
+
+
+
+                              if !Spp.astMgr.buildAst(
+           ( ast def  mySqlObj : MySql.Db  ),
+            Map[String, ref[TiObject]]()
+                .set(String("mySqlObj"), Core.Data.Ast.Identifier(String("mySqlObj"))),
+
+            result
+        ) {
+            System.fail(1, "generateDataTable/build table var : error\n");
+        }
+       listContainer.addElement(result.obj);
+
+                                     if !Spp.astMgr.buildAst(
+           ( ast def  c : Myclass  ),
+            Map[String, ref[TiObject]]()
+                .set(String("Myclass"), Core.Data.Ast.Identifier(myType)),
+
+            result
+        ) {
+            System.fail(1, "generateDataTable/build table var : error\n");
+        }
+       listContainer.addElement(result.obj);
+
+                                            if !Spp.astMgr.buildAst(
+           ( ast   c.i = String("Sleman D alrstum")  ),
+            Map[String, ref[TiObject]]()
+                .set(String("mySqlObj"), Core.Data.Ast.Identifier(String("mySqlObj"))),
+
+            result
+        ) {
+            System.fail(1, "generateDataTable/build table var : error\n");
+        }
+       listContainer.addElement(result.obj);
+
+                                     if !Spp.astMgr.buildAst(
+           ( ast def  dataArray : Array[Array[String]] ),
+            Map[String, ref[TiObject]]()
+                .set(String("dataArray"), Core.Data.Ast.Identifier(String("dataArray"))),
+
+            result
+        ) {
+            System.fail(1, "generateDataTable/build table var : error\n");
+        }
+       listContainer.addElement(result.obj);
+
+                              if !Spp.astMgr.buildAst(
+            ast{      if DbCon.getDbConType()==0 {    mySqlObj=DbCon.mySqlConBuilder();  table.setMySqlObj(mySqlObj);}  table.setData(); },
+            Map[String, ref[TiObject]]()
+                .set(String("table"), Core.Data.Ast.Identifier(String("table")))
+                .set(String("DbCon"), Core.Data.Ast.Identifier(String("DbCon")))
+                .set(String("mySqlObj"), Core.Data.Ast.Identifier(String("mySqlObj"))),
+
+            result
+        ) {
+            System.fail(1, "generateDataTable/build table var : error\n");
+        }
+       listContainer.addElement(result.obj)
+
+
+
+
+
+                       if !Spp.astMgr.buildAst(
+            ast{ table.setTableName(tableNames);
+             table.setExecString();
+             dataArray= table.getData();
+             if (5 < 7) Console.print("haha \n");  },
+            Map[String, ref[TiObject]]()
+                .set(String("table"), Core.Data.Ast.Identifier(String("table")))
+                .set(String("dataArray"), Core.Data.Ast.Identifier(String("dataArray")))
+                .set(String("tableNames"), Core.Data.Ast.Identifier(String("tableNames"))),
+
+            result
+        ) {
+            System.fail(1, "generateDataTable/build table var : error\n");
+        }
+       listContainer.addElement(result.obj);
+
+
+
+    return castSrdRef[list, TiObject];
+}
+
+macro genareteDataAsString [c] {
+
+    preprocess {
+        if !Spp.astMgr.insertAst(
+            AutoBuild.generateDataTable( ).obj
+        ) {
+            System.fail(1, "Failed to genrate data.\n");
+        }
+    }
+}
+
+func test (name : String , DbsCon: DbConBuilder.DbConBuilder , myClass : ref[TiObject] , className : String ) {
+    def par : String;
+    def var : Array[String];
+    def types : Array[String];
+    var=AutoBuild.implementGetElementNames[elementType == "var",Cars~ast];
+    types=AutoBuild.implementGetElementTypes[elementType == "var", Cars~ast];
+    def i : int;
+    for i=0, i< var.getLength() , i=i + 1
+         Console.print(var(i)+"\n");
+
+
+
+    par=name;
+    def tableNames : Array[String];
+    def varType : String;
+    varType = className;
+    def DbCon : DbConBuilder.DbConBuilder;
+    DbCon=DbsCon;
+    tableNames.add(par);
+
+
+    def firstName: String("Mohammed");
+    def position: String("Engineer");
+    def sw: String="dfg";
+
+    def query: String="ww";
+     AutoBuild.genareteDataAsString[varType];
+
+     dataArray.add(tableNames);
+     //myNumber=7;
+
+    Console.print(table.getExecString()+"\n");
+    Console.print(mySqlObj.getDbName()+"\n");
+    Console.print(dataArray(0)(0)+"  from array \n");
+    Console.print(myNumber);
+    Console.print("  \n");
+        Console.print(c.i);
+    Console.print("  \n");
+
+
+}
+macro getData[parent,dbcon,tableName]
+{
+    def result: SrdRef[Core.Basic.TiObject];
+
+    def types : Array[String];
+    types=AutoBuild.implementGetElementTypes[elementType == "var", parent~ast];
+
+        def var : Array[String];
+    var=AutoBuild.implementGetElementNames[elementType == "var", parent~ast];
+    i =0;
+    def Dataw : Array[Array[String]];
+    def table : Receive.Receive;
+    def resultArray : Array[SrdRef[Core.Basic.TiObject]];
+    def t : Array[String];
+    t.add(tableName);
+    table.setTableName(t);
+    table.setExecString();
+    Console.print(table.getExecString()+"\n");
+    if (dbcon.DbConType==0)
+    {
+         def  MySqlObj : MySql.Db;
+         MySqlObj=dbcon.mySqlConBuilder();
+         table.setMySqlObj(MySqlObj);
+         table.setData();
+         Dataw=table.getData();
+
+    }
+    def i : int=0;
+    def j : int=0;
+    for i=0 ,i< Dataw.getLength(), i = i+ 1
+    {
+           for j=0 ,j< Dataw(i).getLength(), j = j+ 1
+           {
+               if types(j)=="string"
+               {
+                    def val : String;
+                    def myVar : String;
+                    myVar=var(j);
+                    val=Dataw(i)(j);
+                    //def binding: ref[Binding](getInterface[parent~ast, Binding]);
+                    //def mapContaining: ref[MapContaining](getInterface[parent~ast, MapContaining]);
+                    if !Spp.astMgr.buildAst(
+                              ast { def t : mytable  },
+                              Map[String, ref[TiObject]]()
+                                  .set(Srl.String("mytable"), Core.Data.Ast.Identifier(tableName.buf))
+                                  .set(Srl.String("myvar"), Core.Data.Ast.Identifier(myVar))
+                                  .set(String("val"), val),
+                                  result
+                                                                 ) {
+                                                      System.fail(1, "getData Erorr/stringType\n");
+                                                                   }
+
+
+               }
+
+               if types(j)=="int"
+               {
+                    def val : String;
+                    def myVar : String
+                    def intVal : int;
+                    val=Dataw(i)(j);
+                    intVal=Receive.getInt(val.buf);
+                    myVar=var(j);
+                    //def binding: ref[Binding](getInterface[parent~ast, Binding]);
+                    //def mapContaining: ref[MapContaining](getInterface[parent~ast, MapContaining]);
+
+
+
+               }
+
+               if types(j)=="float"
+               {
+                    def val : String;
+                    def myVar : String
+                    def floatVal : float;
+                    val=Dataw(i)(j);
+                    floatVal=Receive.getFloat(val.buf);
+                    myVar=var(j);
+                    //def binding: ref[Binding](getInterface[parent~ast, Binding]);
+                    //def mapContaining: ref[MapContaining](getInterface[parent~ast, MapContaining]);
+                    if !Spp.astMgr.buildAst(
+                              ast { mytable.myvar=val  },
+                              Map[String, ref[TiObject]]()
+                                  .set(Srl.String("mytable"), Core.Data.Ast.Identifier(tableName.buf))
+                                  .set(Srl.String("myvar"), Core.Data.Ast.Identifier(myVar))
+                                  .set(String("val"), floatVal),
+                                  result
+                                                                 ) {
+                                                      System.fail(1, "getData Erorr/intType\n");
+                                                                   }
+
+
+               }
+
+           }
+           resultArray.add(result);
+
+
+    }
+
+
+
 
 }
 
