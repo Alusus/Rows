@@ -1,0 +1,467 @@
+
+import "Data";
+import "Srl/refs";
+import "Create";
+import "Srl/Console";
+import "Srl/refs";
+import "Srl/System";
+import "Core/Data";
+import "Spp";
+import "DbConBuilder";
+
+module TableBuilder
+{
+    use DataType;
+    def TioSrdRef: alias SrdRef[Core.Basic.TiObject];
+    def DataTypeArray:Array[String];
+    def DataTypeString : String;
+    def DataTypePtr : ptr[Data];
+    def paramsModsArray : Array[String];
+    def val : String;
+    def integerDataType : DataType.Integer;
+    def bigIntegerDataType : DataType.BigInteger;
+    def smallIntegerDataType : SmallInteger;
+    def tinyIntegerDataType : TinyInteger;
+    def realDataType : Real;
+    def floatDataType : Float;
+
+    def decimalDataType : Decimal;
+    def xmlDataType : Xml;
+    def varCharDataType : VarChar;
+    def charTypeDataType : CharType;
+    def textDataType : Text;
+    def datesDataType : Dates;
+
+
+    function generateAddingElementNames (varName: String, elements: Array[ref[Core.Basic.TiObject]])
+    {
+        def i: Int;
+        for i = 0, i < elements.getLength(), ++i
+        {
+
+            def node: ref[Core.Data.Node](castRef[elements(i), Core.Data.Node]);
+            def d: ref[Core.Data.Ast.Definition](castRef[node.owner, Core.Data.Ast.Definition]);
+
+            def binding: ref[Core.Basic.Binding](Core.Basic.getInterface[d, Core.Basic.Binding]);
+
+            Spp.astMgr.insertAst(
+                                        ast { names.add(Srl.String("{{name}}")) },
+                                        Srl.Map[Srl.String, ref[Core.Basic.TiObject]]()
+                                            .set(Srl.String("names"), Core.Data.Ast.Identifier(varName))
+                                            .set(Srl.String("name"), binding.getMember("name"))
+
+                                        );
+
+            }
+    }
+
+
+    function generateAddingElementMods (elements: Array[ref[Core.Basic.TiObject]] , var : Array[String]) : Array[Array[String]]
+     {
+        def i: Int;
+        def colsMod : Array[Array[String]];
+        def strArray : Array[String];
+        def modArray : Array[String];
+
+        for i = 0, i < elements.getLength(), ++i
+        {
+
+            strArray=TableBuilder.dumpModifiers(elements(i));
+
+            modArray.add(var(i))
+
+
+            colsMod.add(strArray);
+        }
+
+        return colsMod;
+    }
+
+    function generateAddingElementTypes (varName: String, elements: Array[ref[Core.Basic.TiObject]])
+    {
+        def i: Int;
+        for i = 0, i < elements.getLength(), ++i
+        {
+            def node: ref[Core.Data.Node](castRef[elements(i), Core.Data.Node]);
+            def d: ref[Core.Data.Ast.Definition](castRef[node.owner, Core.Data.Ast.Definition]);
+            def containing: ref[Core.Basic.MapContaining](Core.Basic.getInterface[d, Core.Basic.MapContaining]);
+            Spp.astMgr.insertAst(
+                              ast { names.add(Srl.String("{{name}}")) },
+                              Srl.Map[Srl.String, ref[Core.Basic.TiObject]]()
+                                  .set(Srl.String("names"), Core.Data.Ast.Identifier(varName))
+                                  .set(Srl.String("name"), castRef[containing.getElement("target"), Core.Data.Ast.Identifier])
+
+                                 );
+
+        }
+    }
+    macro implementGetElementNames [condition, parent  ]
+    {
+        Array[String]().
+        {
+            preprocess
+            {
+                def elements: Array[ref[Core.Basic.TiObject]];
+                elements = Spp.astMgr.findElements(
+                                        ast { condition },
+                                        parent,
+                                        Spp.SeekerFlags.SKIP_OWNERS | Spp.SeekerFlags.SKIP_USES | Spp.SeekerFlags.SKIP_CHILDREN
+                                                              );
+                TableBuilder.generateAddingElementNames(String("this"), elements);
+            }
+        }
+    }
+
+    macro implementGetElementMods [condition, parent  ]
+    {
+        preprocess
+        {
+            def var : Array[String];
+            var=TableBuilder.implementGetElementNames[elementType == "var", parent];
+            def elements: Array[ref[Core.Basic.TiObject]];
+            elements = Spp.astMgr.findElements(
+                ast { condition },
+                parent,
+                Spp.SeekerFlags.SKIP_OWNERS | Spp.SeekerFlags.SKIP_USES | Spp.SeekerFlags.SKIP_CHILDREN
+            );
+            colsMod=TableBuilder.generateAddingElementMods( elements ,var );
+            def params : Array[String];
+            def cmpar:Array[Array[String]]
+            for i=0 , i<colsMod.getLength() , ++i
+            {
+                cmpar.clear();
+                if(colsMod(i).getLength() >0)
+                {
+                    for j=0 , j<colsMod(i).getLength() , ++j
+                    {
+
+                        params=TableBuilder.dumpElementModifierParams(elements(i),colsMod(i)(j).buf);
+                        cmpar.add(params);
+                    }
+                }
+                else
+                {
+                    def noParams : Array[String];
+                    cmpar.add(noParams);
+                }
+                modsParams.add(cmpar);
+            }
+        }
+    }
+    macro implementGetElementTypes [condition, parent]
+    {
+        Array[String]().
+        {
+            preprocess
+            {
+                def elements: Array[ref[Core.Basic.TiObject]];
+                elements = Spp.astMgr.findElements(
+                    ast { condition },
+                    parent,
+                    Spp.SeekerFlags.SKIP_OWNERS | Spp.SeekerFlags.SKIP_USES | Spp.SeekerFlags.SKIP_CHILDREN
+                );
+                TableBuilder.generateAddingElementTypes(String("this"), elements);
+            }
+       }
+    }
+
+    function numOfParams (Mod : String) : int
+    {
+        def i: Int;
+        def paramsModsArray : Array[String];
+        def val : String;
+        val="notnull";
+        paramsModsArray.add(val);
+        val="unique";
+        paramsModsArray.add(val);
+        val="pk";
+        paramsModsArray.add(val);
+        val="defult";
+        paramsModsArray.add(val);
+        val="check";
+        paramsModsArray.add(val);
+
+        val="fk";
+        paramsModsArray.add(val);
+        for i = 0, i < paramsModsArray.getLength()-1, ++i
+         {
+            if (Mod== paramsModsArray(i))
+            {
+                if (i<3)
+                {
+                    return 0;
+                }
+                else if(i<5)
+                {
+                    return 1;
+                }
+                else if(i==5)
+                {
+                    return 2;
+                }
+
+            }
+
+        }
+        return -1;
+    }
+
+
+    function dumpModifiers (element: ref[Core.Basic.TiObject]) : Array[String]
+     {
+        def modifiers: ref[Core.Basic.Containing](Spp.astMgr.getModifiers(element));
+        def i: Int;
+        def strArray : Array[String] ;
+        if(modifiers~ptr!=0)
+        {
+            for i = 0, i < modifiers.getElementCount()~cast[Int], ++i
+             {
+                strArray.add(Spp.astMgr.getModifierKeyword(modifiers.getElement(i)));
+
+            }
+        }
+        return strArray;
+    }
+
+    function dumpModifierParams(modifier: ref[Core.Basic.TiObject]) : Array[String]
+    {
+        def params: Srl.Array[Srl.String];
+        Spp.astMgr.getModifierStringParams(modifier, params);
+        return params;
+    }
+
+    function dumpElementModifierParams(element: ref[Core.Basic.TiObject], modName: ptr[array[Char]]) : Array[String]
+     {
+        def modifiers: ref[Core.Basic.Containing](Spp.astMgr.getModifiers(element));
+        def modifier: ref[Core.Basic.TiObject](Spp.astMgr.findModifier(modifiers, modName));
+        def params : Array[String];
+
+        params=dumpModifierParams(modifier);
+        return params;
+
+    }
+
+    function dumpElementModifierParams2(element: ref[Core.Basic.TiObject], modName: ptr[array[Char]])
+     {
+        def modifier: ref[Core.Basic.TiObject](Spp.astMgr.findModifierForElement(element, modName));
+        dumpModifierParams(modifier);
+    }
+
+    function isDataType(varType : String) : int
+    {
+       def si : int ;
+       def DataTypeArray:Array[String];
+       def DataTypeString : String;
+       DataTypeString="Integer";
+       DataTypeArray.add(DataTypeString);
+       DataTypeString="BigInteger";
+       DataTypeArray.add(DataTypeString);
+       DataTypeString="SmallInteger";
+       DataTypeArray.add(DataTypeString);
+       DataTypeString="TinyInteger";
+       DataTypeArray.add(DataTypeString);
+       DataTypeString="Real";
+       DataTypeArray.add(DataTypeString);
+       DataTypeString="Float";
+       DataTypeArray.add(DataTypeString);
+       DataTypeString="Decimal";
+       DataTypeArray.add(DataTypeString);
+       DataTypeString="Xml";
+       DataTypeArray.add(DataTypeString);
+       DataTypeString="VarChar";
+       DataTypeArray.add(DataTypeString);
+       DataTypeString="CharType";
+       DataTypeArray.add(DataTypeString);
+       DataTypeString="Text";
+       DataTypeArray.add(DataTypeString);
+       DataTypeString="Dates";
+       DataTypeArray.add(DataTypeString);
+       for si=0 , si< DataTypeArray.getLength() , ++si
+       {
+
+              if(DataTypeArray(si)==varType)
+              {
+                  return si;
+              }
+
+
+       }
+       return -1;
+    }
+
+    macro autoCreate [parent , tableName , dbCon ]
+    {
+        use DataType;
+
+        def DataTypePtr : ptr[Data];
+        def paramsModsArray : Array[String];
+        def val : String;
+        def  mySqlObj : MySql.Db ;
+        def var : Array[String];
+        def colsMod : Array[Array[String]];
+        def modsParams :Array[ Array[Array[String]]];
+        def pkArray : Array[String];
+        def tableConst :Constraints.TableConstraints;
+        def table : Create.Create;
+        def colsName : Array[String];
+        def tableNameMod : String;
+         if dbCon.getDbConType()==0
+         {
+             mySqlObj=dbCon.mySqlConBuilder();  table.setMysqlObj(mySqlObj);
+        }
+        var=TableBuilder.implementGetElementNames[elementType == "var", parent];
+        def types : Array[String];
+        types=TableBuilder.implementGetElementTypes[elementType == "var", parent];
+        def i : int;
+        def j : int;
+        def k : int;
+        def c : int;
+        def index: int;
+        TableBuilder.implementGetElementMods[elementType == "var", parent ];
+
+    for i=0 , i< var.getLength() , i+=1
+       {
+
+       def integerDataType : DataType.Integer;
+    def bigIntegerDataType : DataType.BigInteger;
+    def smallIntegerDataType : SmallInteger;
+    def tinyIntegerDataType : TinyInteger;
+    def realDataType : Real;
+    def floatDataType : DataType.Float;
+    def decimalDataType : Decimal;
+    def xmlDataType : Xml;
+    def varCharDataType : VarChar;
+    def charTypeDataType : CharType;
+    def textDataType : Text;
+    def datesDataType : Dates;
+
+        index=TableBuilder.isDataType(types(i));
+
+
+
+
+
+        if(index>-1)
+        {
+            table.setColsName(var(i));
+            if (index==0)
+            {
+
+
+                DataTypePtr = integerDataType~ptr;
+            }
+            else if (index==1)
+            {
+                DataTypePtr = bigIntegerDataType~ptr;
+            }
+            else if (index==2)
+            {
+                DataTypePtr = smallIntegerDataType~ptr;
+            }
+            else if (index==3)
+            {
+                DataTypePtr = tinyIntegerDataType~ptr;
+            }
+            else if (index==4)
+            {
+                DataTypePtr = realDataType~ptr;
+            }
+            else if (index==5)
+            {
+                DataTypePtr = floatDataType~ptr;
+            }
+            else if (index==6)
+            {
+                DataTypePtr = decimalDataType~ptr;
+            }
+            else if (index==7)
+            {
+                DataTypePtr = xmlDataType~ptr;
+            }
+            else if (index==8)
+            {
+                DataTypePtr = varCharDataType~ptr;
+            }
+            else if (index==9)
+            {
+                DataTypePtr = charTypeDataType~ptr;
+            }
+            else if (index==10)
+            {
+                DataTypePtr = textDataType~ptr;
+            }
+            else if (index==11)
+            {
+                DataTypePtr = datesDataType~ptr;
+            }
+
+
+
+
+
+        for j=0 , j< colsMod(i).getLength() , j+=1
+       {
+
+
+
+           Console.print(" ");
+           if(TableBuilder.numOfParams(colsMod(i)(j))!=-1)
+           {
+
+                if(colsMod(i)(j)=="notnull")
+                {
+                    DataTypePtr~cnt.FConstrants.setNotNullConstraint();
+                }
+                else if(colsMod(i)(j)=="unique")
+                {
+                    DataTypePtr~cnt.FConstrants.setUniqueConstraint();
+                }
+                else if(colsMod(i)(j)=="pk")
+                {
+                    pkArray.add(var(i));
+                }
+
+                if(TableBuilder.numOfParams(colsMod(i)(j))>0)
+                {
+
+                    if(colsMod(i)(j)=="defult")
+                    {
+                        DataTypePtr~cnt.FConstrants.setDefaultConstraint(modsParams(i)(j)(0));
+                    }
+                    else if(colsMod(i)(j)=="check")
+                    {
+                        DataTypePtr~cnt.FConstrants.setCheckConstraint(modsParams(i )(j)(0));
+                    }
+                    else if(colsMod(i)(j)=="fk")
+                    {
+                        tableConst.addForgenKey(modsParams(i )(j)(0),modsParams(i)(j)(1),modsParams(i)(j)(2))
+                    }
+
+
+                }
+
+
+        }
+
+
+        }
+        table.setDataType(DataTypePtr);
+
+        table.addToColsString();
+
+       }
+    }
+
+    tableConst.setPrimaryKeyConstraint(pkArray);
+    table.setTConst(tableConst~ptr);
+    table.setTConstString();
+    table.setExecString();
+    table.setTableName(tableName);
+    def ex:String;
+    table.setExecString();
+    ex=table.getExecString();
+    table.exec();
+
+}
+}
+

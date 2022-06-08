@@ -1,0 +1,41 @@
+import "TableBuilder"
+use DataType;
+class Cars
+{
+
+@defult["10"]
+ @notnull
+@pk
+def Id :Integer;
+@ssw
+def i:String;
+def ssd:Integer;
+def ss:Integer;
+
+@defult["'sleman'" ]
+def Name :VarChar;
+
+}
+
+def Tname : String;
+Tname="Cars";
+def DbName : String="testdb";
+
+def UserName : String="user12";
+
+def Password : String="Qwerty231@#!";
+
+def server : String="localhost";
+
+def DbCon :  DbConBuilder.DbConBuilder;
+
+DbCon.setDBName(DbName);
+
+DbCon.setUserName(UserName);
+
+DbCon.setPassword(Password);
+
+DbCon.setServer(server);
+DbCon.setDbConType(0);
+
+TableBuilder.autoCreate[Cars~ast , String("Cars") , DbCon]

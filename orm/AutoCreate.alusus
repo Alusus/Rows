@@ -19,22 +19,71 @@ def n:String;
 def Name :VarChar;
 
 }
+class cars
+{
+    def id : int;
+    def name : String;
+    def price : float;
+    handler this~init(ref[cars])
+        {
+
+            this.id=value.id;
+
+            this.name=value.name;
+            this.price=value.price;
+
+
+        }
+            handler this~init()
+        {
+
+
+        }
+        handler this = ref[Db]
+        {
+
+            this.id=value.id;
+
+            this.name=value.name;
+            this.price=value.price;
+        }
+        AutoBuild.getDataType[String("cars") , cars~ast ]
+
+}
 
 class varType
 {
-@defult["10"]
- @notnull
-@pk
-def Id :Integer;
-@s
-@defult["30"]
-def iq:String;
+
+    def id : int;
+    def name : String;
+    def price : float;
+    handler this~init(ref[varType])
+        {
+
+            this.id=value.id;
+
+            this.name=value.name;
+            this.price=value.price;
 
 
-def n:String;
+        }
+            handler this~init()
+        {
 
-@defult["'sleman'" ]
-def Name :VarChar;
+
+        }
+        handler this = ref[varType]
+        {
+
+            this.id=value.id;
+
+            this.name=value.name;
+            this.price=value.price;
+        }
+
+
+AutoBuild.getDataType[String("varType") , varType~ast ]
+
 
 }
 def Tname : String;
@@ -59,5 +108,28 @@ DbsCon.setServer(server);
 DbsCon.setDbConType(0);
 def a : String;
 a=String("Cars");
-AutoBuild.test(String("Student") ,DbsCon , Cars~ast ,a );
 
+def c : cars;
+def d: Array[cars]
+
+d=c.getData(DbsCon);
+def k: int=0;
+def s: String="";
+Console.print("\n");
+Console.print("\n");
+Console.print("\n");
+for k=0 , k<d.getLength() , k=k+1
+{
+Console.print(d(k).id);
+Console.print("  ");
+Console.print(d(k).name);
+Console.print("  ");
+Console.print(d(k).price);
+Console.print("\n");
+}
+c.id=900;
+c.name=String("'SlemanCar'");
+c.price=2500000.50;
+c.saveData(DbsCon);
+def where : String="id=3030";
+c.deleteRowData(DbsCon ,where  );
