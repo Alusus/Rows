@@ -24,29 +24,8 @@ class cars
     def id : int;
     def name : String;
     def price : float;
-    handler this~init(ref[cars])
-        {
-
-            this.id=value.id;
-
-            this.name=value.name;
-            this.price=value.price;
 
 
-        }
-            handler this~init()
-        {
-
-
-        }
-        handler this = ref[Db]
-        {
-
-            this.id=value.id;
-
-            this.name=value.name;
-            this.price=value.price;
-        }
         AutoBuild.getDataType[String("cars") , cars~ast ]
 
 }
@@ -111,8 +90,8 @@ a=String("Cars");
 
 def c : cars;
 def d: Array[cars]
-
-d=c.getData(DbsCon);
+c.setDbCon(DbsCon);
+d=c.getData();
 def k: int=0;
 def s: String="";
 Console.print("\n");
@@ -130,6 +109,11 @@ Console.print("\n");
 c.id=900;
 c.name=String("'SlemanCar'");
 c.price=2500000.50;
-c.saveData(DbsCon);
+c.saveData();
 def where : String="id=3030";
-c.deleteRowData(DbsCon ,where  );
+c.deleteRowData(,where  );
+c.id=900;
+c.name=String("'Sleman ford Car'");
+c.price=2500000.50;
+where = String("id=900");
+c.updateData(where);

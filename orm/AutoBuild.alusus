@@ -8,6 +8,7 @@ import "Core/Data";
 import "Spp";
 import "Receive";
 import "Insert";
+import "Update";
 import "DbConBuilder";
 import "Delete.alusus"
 use Srl;
@@ -17,381 +18,498 @@ use Core.Data.Ast;
 
 module AutoBuild
 {
-use DataType;
-def TioSrdRef: alias SrdRef[Core.Basic.TiObject];
-def DataTypeArray:Array[String];
-def DataTypeString : String;
-def DataTypePtr : ptr[Data];
-def paramsModsArray : Array[String];
-def val : String;
-def integerDataType : DataType.Integer;
-def bigIntegerDataType : DataType.BigInteger;
-def smallIntegerDataType : SmallInteger;
-def tinyIntegerDataType : TinyInteger;
-def realDataType : Real;
-def floatDataType : Float;
+    use DataType;
+    def TioSrdRef: alias SrdRef[Core.Basic.TiObject];
+    function generateAddingElementNames (varName: String, elements: Array[ref[Core.Basic.TiObject]])
+    {
+        def i: Int;
+        for i = 0, i < elements.getLength(), ++i
+        {
+            def node: ref[Core.Data.Node](castRef[elements(i), Core.Data.Node]);
+            def d: ref[Core.Data.Ast.Definition](castRef[node.owner, Core.Data.Ast.Definition]);
+            def binding: ref[Core.Basic.Binding](Core.Basic.getInterface[d, Core.Basic.Binding]);
+            Spp.astMgr.insertAst(
+                ast { names.add(Srl.String("{{name}}")) },
+                Srl.Map[Srl.String, ref[Core.Basic.TiObject]]()
+                    .set(Srl.String("names"), Core.Data.Ast.Identifier(varName))
+                    .set(Srl.String("name"), binding.getMember("name"))
 
-def decimalDataType : Decimal;
-def xmlDataType : Xml;
-def varCharDataType : VarChar;
-def charTypeDataType : CharType;
-def textDataType : Text;
-def datesDataType : Dates;
-
-
-function generateAddingElementNames (varName: String, elements: Array[ref[Core.Basic.TiObject]]) {
-    def i: Int;
-    for i = 0, i < elements.getLength(), ++i {
-
-        def node: ref[Core.Data.Node](castRef[elements(i), Core.Data.Node]);
-        def d: ref[Core.Data.Ast.Definition](castRef[node.owner, Core.Data.Ast.Definition]);
-
-        def binding: ref[Core.Basic.Binding](Core.Basic.getInterface[d, Core.Basic.Binding]);
-
-        Spp.astMgr.insertAst(
-            ast { names.add(Srl.String("{{name}}")) },
-            Srl.Map[Srl.String, ref[Core.Basic.TiObject]]()
-                .set(Srl.String("names"), Core.Data.Ast.Identifier(varName))
-                .set(Srl.String("name"), binding.getMember("name"))
-
-        );
-
-    }
-}
-
-
-
-
-function generateAddingElementTypes (varName: String, elements: Array[ref[Core.Basic.TiObject]]) {
-    def i: Int;
-    for i = 0, i < elements.getLength(), ++i {
-        def node: ref[Core.Data.Node](castRef[elements(i), Core.Data.Node]);
-        def d: ref[Core.Data.Ast.Definition](castRef[node.owner, Core.Data.Ast.Definition]);
-        def containing: ref[Core.Basic.MapContaining](Core.Basic.getInterface[d, Core.Basic.MapContaining]);
-        Spp.astMgr.insertAst(
-            ast { names.add(Srl.String("{{name}}")) },
-            Srl.Map[Srl.String, ref[Core.Basic.TiObject]]()
-                .set(Srl.String("names"), Core.Data.Ast.Identifier(varName))
-                .set(Srl.String("name"), castRef[containing.getElement("target"), Core.Data.Ast.Identifier])
-
-        );
-
-    }
-}
-macro implementGetElementNames [condition, parent  ] {
-        Array[String]().{
-        preprocess {
-            def elements: Array[ref[Core.Basic.TiObject]];
-            elements = Spp.astMgr.findElements(
-                ast { condition },
-                parent,
-               Spp.SeekerFlags.SKIP_OWNERS | Spp.SeekerFlags.SKIP_USES | Spp.SeekerFlags.SKIP_CHILDREN
             );
-            AutoBuild.generateAddingElementNames(String("this"), elements);
-        }}
-
-}
-
-
-macro implementGetElementTypes [condition, parent] {
-    Array[String]().{
-    preprocess {
-        def elements: Array[ref[Core.Basic.TiObject]];
-        elements = Spp.astMgr.findElements(
-            ast { condition },
-            parent,
-            Spp.SeekerFlags.SKIP_OWNERS | Spp.SeekerFlags.SKIP_USES | Spp.SeekerFlags.SKIP_CHILDREN
-        );
-        AutoBuild.generateAddingElementTypes(String("this"), elements);
+        }
     }
-   }
-}
+
+    function generateAddingElementTypes (varName: String, elements: Array[ref[Core.Basic.TiObject]])
+    {
+        def i: Int;
+        for i = 0, i < elements.getLength(), ++i
+        {
+            def node: ref[Core.Data.Node](castRef[elements(i), Core.Data.Node]);
+            def d: ref[Core.Data.Ast.Definition](castRef[node.owner, Core.Data.Ast.Definition]);
+            def containing: ref[Core.Basic.MapContaining](Core.Basic.getInterface[d, Core.Basic.MapContaining]);
+            Spp.astMgr.insertAst(
+                ast { names.add(Srl.String("{{name}}")) },
+                Srl.Map[Srl.String, ref[Core.Basic.TiObject]]()
+                    .set(Srl.String("names"), Core.Data.Ast.Identifier(varName))
+                    .set(Srl.String("name"), castRef[containing.getElement("target"), Core.Data.Ast.Identifier])
+            );
+        }
+    }
+
+    macro implementGetElementNames [condition, parent  ]
+    {
+          Array[String]().
+          {
+              preprocess
+             {
+                    def elements: Array[ref[Core.Basic.TiObject]];
+                     elements = Spp.astMgr.findElements(
+                            ast { condition },
+                             parent,
+                            Spp.SeekerFlags.SKIP_OWNERS | Spp.SeekerFlags.SKIP_USES | Spp.SeekerFlags.SKIP_CHILDREN
+                         );
+                    AutoBuild.generateAddingElementNames(String("this"), elements);
+             }
+          }
+    }
+
+    macro implementGetElementTypes [condition, parent]
+    {
+        Array[String]().
+        {
+            preprocess
+            {
+                def elements: Array[ref[Core.Basic.TiObject]];
+                elements = Spp.astMgr.findElements(
+                    ast { condition },
+                    parent,
+                    Spp.SeekerFlags.SKIP_OWNERS | Spp.SeekerFlags.SKIP_USES | Spp.SeekerFlags.SKIP_CHILDREN
+                );
+                AutoBuild.generateAddingElementTypes(String("this"), elements);
+            }
+        }
+    }
 
 
 
-
-def TioSrdRef: alias SrdRef[Core.Basic.TiObject];
-
-func generateDataType (className : String  , parent : ref[TiObject] , varArray:Array[String] , typeArray : Array[String] ): TioSrdRef {
-    def result: TioSrdRef;
-     def list: SrdRef[Core.Data.Ast.Scope] = newSrdObj[Core.Data.Ast.Scope];
-
-def listContainer: DynContainerOf[list.obj];
-def resArray : Array[TioSrdRef];
-def resArray2 : Array[TioSrdRef];
-    def result2: TioSrdRef;
-    def result3: TioSrdRef;
-    //def varArray:Array[String] ;
-
-    def i : int=0;
-    def iString:String;
-    iString="" + i;
-     if !Spp.astMgr.buildAst(
-           (ast def classData : className ),
+    func generateDataType (className : String  , parent : ref[TiObject] , varArray:Array[String] , typeArray : Array[String] ): TioSrdRef
+    {
+        def result: TioSrdRef;
+        def list: SrdRef[Core.Data.Ast.Scope] = newSrdObj[Core.Data.Ast.Scope];
+        def listContainer: DynContainerOf[list.obj];
+        def resArray : Array[TioSrdRef];
+        def resArray2 : Array[TioSrdRef];
+        def resArray3 :Array[TioSrdRef];
+        def result2: TioSrdRef;
+        def result3: TioSrdRef;
+        def i : int=0;
+        def iString:String;
+        iString="" + i;
+        if !Spp.astMgr.buildAst
+            (
+              (ast use DbConBuilder ),
+             Map[String, ref[TiObject]]()
+                 .set(String("DbCon"), Core.Data.Ast.Identifier(String("DbCon"))),
+             result
+            )
+        {
+            System.fail(1, "generateDataType/build Data Type var : error\n");
+        }
+        listContainer.addElement(result.obj);
+        if !Spp.astMgr.buildAst
+            (
+             (ast def DbCon :DbConBuilder ),
+             Map[String, ref[TiObject]]()
+                 .set(String("DbCon"), Core.Data.Ast.Identifier(String("DbCon"))),
+             result
+            )
+        {
+            System.fail(1, "generateDataType/build Data Type var : error\n");
+        }
+        listContainer.addElement(result.obj);
+        if !Spp.astMgr.buildAst
+            (
+            (ast def classData : className ),
             Map[String, ref[TiObject]]()
-            .set(String("classData"), Core.Data.Ast.Identifier("classData"))
+                .set(String("classData"), Core.Data.Ast.Identifier("classData"))
                 .set(String("className"), Core.Data.Ast.Identifier(className)),
             result2
-        ) {
+            )
+        {
             System.fail(1, "generateDataType/build Data Type var : error\n");
         }
         resArray.add(result2);
 
-    for i=0 , i< typeArray.getLength() , i=i+1
-    {
-    iString=String("") + i;
-
-    if (i==0)
-       {
-        if(typeArray(i)=="String")
+        for i=0 , i< typeArray.getLength() , i=i+1
         {
-         if !Spp.astMgr.buildAst(
-           (ast  classData.strVal=dataArray(i)(j) ),
-            Map[String, ref[TiObject]]()
-            .set(String("classData"), Core.Data.Ast.Identifier("classData"))
-            .set(String("dataArray"), Core.Data.Ast.Identifier("dataArray"))
-            .set(String("i"), Core.Data.Ast.Identifier("i"))
-            .set(String("j"), Core.Data.Ast.IntegerLiteral(iString))
-            .set(String("strVal"), Core.Data.Ast.Identifier(varArray(i))),
-            result3
-        ) {
-            System.fail(1, "generateDataType/build Data Type var : error\n");
+            iString=String("") + i;
+            if (i==0)
+            {
+                if(typeArray(i)=="String")
+                {
+                    if !Spp.astMgr.buildAst
+                        (
+                        (ast  classData.strVal=dataArray(i)(j) ),
+                        Map[String, ref[TiObject]]()
+                            .set(String("classData"), Core.Data.Ast.Identifier("classData"))
+                            .set(String("dataArray"), Core.Data.Ast.Identifier("dataArray"))
+                            .set(String("i"), Core.Data.Ast.Identifier("i"))
+                            .set(String("j"), Core.Data.Ast.IntegerLiteral(iString))
+                            .set(String("strVal"), Core.Data.Ast.Identifier(varArray(i))),
+                        result3
+                        )
+                    {
+                        System.fail(1, "generateDataType/build Data Type var : error\n");
+                    }
+                }
+                if(typeArray(i)=="int")
+                {
+                    if !Spp.astMgr.buildAst
+                        (
+                        (ast  classData.intVal=Receive.getInt(dataArray(i)(j).buf )),
+                        Map[String, ref[TiObject]]()
+                            .set(String("classData"), Core.Data.Ast.Identifier("classData"))
+                            .set(String("dataArray"), Core.Data.Ast.Identifier("dataArray"))
+                            .set(String("i"), Core.Data.Ast.Identifier("i"))
+                            .set(String("j"), Core.Data.Ast.IntegerLiteral(iString))
+                            .set(String("intVal"), Core.Data.Ast.Identifier(varArray(i))),
+                        result3
+                        )
+                    {
+                        System.fail(1, "generateDataType/build Data Type var : error\n");
+                    }
+                }
+                if(typeArray(i)=="float")
+                {
+                    if !Spp.astMgr.buildAst
+                        (
+                        (ast  classData.floatVal=Receive.getFloat(dataArray(i)(j).buf )),
+                        Map[String, ref[TiObject]]()
+                            .set(String("classData"), Core.Data.Ast.Identifier("classData"))
+                            .set(String("dataArray"), Core.Data.Ast.Identifier("dataArray"))
+                            .set(String("i"), Core.Data.Ast.Identifier("i"))
+                            .set(String("j"), Core.Data.Ast.IntegerLiteral(iString))
+                            .set(String("floatVal"), Core.Data.Ast.Identifier(varArray(i))),
+                        result3
+                        )
+                    {
+                        System.fail(1, "generateDataType/build Data Type var : error\n");
+                    }
+                }
+
+                resArray.add(result3);
+
+            }
+            else
+            {
+                if(typeArray(i)=="String")
+                {
+                    if !Spp.astMgr.buildAst
+                        (
+                        (ast{ beforData classData.strVal=dataArray(i)(j)} ),
+                        Map[String, ref[TiObject]]()
+                            .set(String("classData"), Core.Data.Ast.Identifier("classData"))
+                            .set(String("dataArray"), Core.Data.Ast.Identifier("dataArray"))
+                            .set(String("i"), Core.Data.Ast.Identifier("i"))
+                            .set(String("j"), Core.Data.Ast.IntegerLiteral(iString))
+                            .set(String("beforData"), resArray(i))
+                            .set(String("strVal"), Core.Data.Ast.Identifier(varArray(i))),
+                        result3
+                        )
+                    {
+                        System.fail(1, "generateDataType/build Data Type var : error\n");
+                    }
+                }
+                if(typeArray(i)=="int")
+                {
+                    if !Spp.astMgr.buildAst
+                        (
+                        (ast  {beforData classData.intVal=Receive.getInt(dataArray(i)(j).buf )}),
+                        Map[String, ref[TiObject]]()
+                            .set(String("classData"), Core.Data.Ast.Identifier("classData"))
+                            .set(String("dataArray"), Core.Data.Ast.Identifier("dataArray"))
+                            .set(String("i"), Core.Data.Ast.Identifier("i"))
+                            .set(String("j"), Core.Data.Ast.IntegerLiteral(iString))
+                            .set(String("beforData"), resArray(i))
+                            .set(String("intVal"), Core.Data.Ast.Identifier(varArray(i))),
+                        result3
+                        )
+                    {
+                        System.fail(1, "generateDataType/build Data Type var : error\n");
+                    }
+                }
+                if(typeArray(i)=="float")
+                {
+                    if !Spp.astMgr.buildAst
+                        (
+                        (ast {beforData  classData.floatVal=Receive.getFloat(dataArray(i)(j).buf )}),
+                        Map[String, ref[TiObject]]()
+                            .set(String("classData"), Core.Data.Ast.Identifier("classData"))
+                            .set(String("dataArray"), Core.Data.Ast.Identifier("dataArray"))
+                            .set(String("i"), Core.Data.Ast.Identifier("i"))
+                            .set(String("j"), Core.Data.Ast.IntegerLiteral(iString))
+                            .set(String("beforData"), resArray(i))
+                            .set(String("floatVal"), Core.Data.Ast.Identifier(varArray(i))),
+                        result3
+                        )
+                    {
+                        System.fail(1, "generateDataType/build Data Type var : error\n");
+                    }
+                }
+
+                resArray.add(result3);
+            }
         }
 
-        }
-        if(typeArray(i)=="int")
-        {
-         if !Spp.astMgr.buildAst(
-           (ast  classData.intVal=Receive.getInt(dataArray(i)(j).buf )),
-            Map[String, ref[TiObject]]()
-            .set(String("classData"), Core.Data.Ast.Identifier("classData"))
-            .set(String("dataArray"), Core.Data.Ast.Identifier("dataArray"))
-            .set(String("i"), Core.Data.Ast.Identifier("i"))
-            .set(String("j"), Core.Data.Ast.IntegerLiteral(iString))
-            .set(String("intVal"), Core.Data.Ast.Identifier(varArray(i))),
-            result3
-        ) {
-            System.fail(1, "generateDataType/build Data Type var : error\n");
-        }
+        // trans data to string to add it to the database
 
-
-        }
-        if(typeArray(i)=="float")
-        {
-         if !Spp.astMgr.buildAst(
-           (ast  classData.floatVal=Receive.getFloat(dataArray(i)(j).buf )),
-            Map[String, ref[TiObject]]()
-            .set(String("classData"), Core.Data.Ast.Identifier("classData"))
-            .set(String("dataArray"), Core.Data.Ast.Identifier("dataArray"))
-            .set(String("i"), Core.Data.Ast.Identifier("i"))
-            .set(String("j"), Core.Data.Ast.IntegerLiteral(iString))
-            .set(String("floatVal"), Core.Data.Ast.Identifier(varArray(i))),
-            result3
-        ) {
-            System.fail(1, "generateDataType/build Data Type var : error\n");
-        }
-
-
-        }
-
- resArray.add(result3);
-
-    }
-    else
-    {
-         if(typeArray(i)=="String")
-        {
-         if !Spp.astMgr.buildAst(
-           (ast{ beforData classData.strVal=dataArray(i)(j)} ),
-            Map[String, ref[TiObject]]()
-            .set(String("classData"), Core.Data.Ast.Identifier("classData"))
-            .set(String("dataArray"), Core.Data.Ast.Identifier("dataArray"))
-            .set(String("i"), Core.Data.Ast.Identifier("i"))
-            .set(String("j"), Core.Data.Ast.IntegerLiteral(iString))
-            .set(String("beforData"), resArray(i))
-            .set(String("strVal"), Core.Data.Ast.Identifier(varArray(i))),
-            result3
-        ) {
-            System.fail(1, "generateDataType/build Data Type var : error\n");
-        }
-
-        }
-        if(typeArray(i)=="int")
-        {
-         if !Spp.astMgr.buildAst(
-           (ast  {beforData classData.intVal=Receive.getInt(dataArray(i)(j).buf )}),
-            Map[String, ref[TiObject]]()
-            .set(String("classData"), Core.Data.Ast.Identifier("classData"))
-            .set(String("beforData"), resArray(i))
-            .set(String("dataArray"), Core.Data.Ast.Identifier("dataArray"))
-            .set(String("i"), Core.Data.Ast.Identifier("i"))
-            .set(String("j"), Core.Data.Ast.IntegerLiteral(iString))
-            .set(String("intVal"), Core.Data.Ast.Identifier(varArray(i))),
-            result3
-        ) {
-            System.fail(1, "generateDataType/build Data Type var : error\n");
-        }
-
-
-        }
-        if(typeArray(i)=="float")
-        {
-         if !Spp.astMgr.buildAst(
-           (ast {beforData classData.floatVal=Receive.getFloat(dataArray(i)(j).buf )}),
-            Map[String, ref[TiObject]]()
-            .set(String("classData"), Core.Data.Ast.Identifier("classData"))
-            .set(String("dataArray"), Core.Data.Ast.Identifier("dataArray"))
-            .set(String("beforData"),resArray(i))
-            .set(String("i"), Core.Data.Ast.Identifier("i"))
-            .set(String("j"), Core.Data.Ast.IntegerLiteral(iString))
-            .set(String("floatVal"), Core.Data.Ast.Identifier(varArray(i))),
-            result3
-        ) {
-            System.fail(1, "generateDataType/build Data Type var : error\n");
-        }
-
-
-        }
-resArray.add(result3);
-    }
-    }
-
-Console.print( className + " \n");
-
-// trans data to string to add it to the database
         resArray2.add(result2);
-    for i=0 , i< typeArray.getLength() , i=i+1
-    {
-
-
-    if (i==0)
-       {
-        if(typeArray(i)=="String")
+        for i=0 , i< typeArray.getLength() , i=i+1
         {
-         if !Spp.astMgr.buildAst(
-           ast  {data.add(this.strVal) colname.add(String("{{strVal}}")) Console.print( colname(0) + " \n"); },
+            if (i==0)
+            {
+                if(typeArray(i)=="String")
+                {
+                    if !Spp.astMgr.buildAst
+                        (
+                        ast  {data.add(this.strVal) colname.add(String("{{strVal}}")) Console.print( colname(0) + " \n"); },
+                        Map[String, ref[TiObject]]()
+                            .set(String("classData"), Core.Data.Ast.Identifier("classData"))
+                            .set(String("data"), Core.Data.Ast.Identifier("data"))
+                            .set(String("colname"), Core.Data.Ast.Identifier("colname"))
+                            .set(String("strVal"), Core.Data.Ast.Identifier(varArray(i))),
+                        result3
+                        )
+                    {
+                    System.fail(1, "generateDataType/build Data Type var : error\n");
+                    }
+                }
+                if(typeArray(i)=="int")
+                {
+                    if !Spp.astMgr.buildAst
+                        (
+                        ast { data.add(String( String("") + this.intVal)) colname.add(String("{{intVal}}")) },
+                        Map[String, ref[TiObject]]()
+                            .set(String("classData"), Core.Data.Ast.Identifier("classData"))
+                            .set(String("data"), Core.Data.Ast.Identifier("data"))
+                            .set(String("colname"), Core.Data.Ast.Identifier("colname"))
+                            .set(String("intVal"), Core.Data.Ast.Identifier(varArray(i))),
+                        result3
+                        )
+                    {
+                        System.fail(1, "generateDataType/build Data Type var : error\n");
+                    }
+                }
+                if(typeArray(i)=="float")
+                {
+                    if !Spp.astMgr.buildAst
+                        (
+                        ast  {data.add(String( String("") + this.floatVal)) colname.add(String("{{floatVal}}")) },
+                        Map[String, ref[TiObject]]()
+                            .set(String("classData"), Core.Data.Ast.Identifier("classData"))
+                            .set(String("colname"), Core.Data.Ast.Identifier("colname"))
+                            .set(String("data"), Core.Data.Ast.Identifier("data"))
+                            .set(String("floatVal"), Core.Data.Ast.Identifier(varArray(i))),
+                        result3
+                        )
+                    {
+                        System.fail(1, "generateDataType/build Data Type var : error\n");
+                    }
+                }
+                resArray2.add(result3);
+            }
+            else
+            {
+                if(typeArray(i)=="String")
+                {
+                    if !Spp.astMgr.buildAst
+                        (
+                        (ast{ beforData data.add(this.strVal) colname.add(String("{{strVal}}"))   } ),
+                        Map[String, ref[TiObject]]()
+                            .set(String("classData"), Core.Data.Ast.Identifier("classData"))
+                            .set(String("data"), Core.Data.Ast.Identifier("data"))
+                            .set(String("beforData"), resArray2(i))
+                            .set(String("colname"), Core.Data.Ast.Identifier("colname"))
+                            .set(String("strVal"), Core.Data.Ast.Identifier(varArray(i))),
+                        result3
+                        )
+                    {
+                    System.fail(1, "generateDataType/build Data Type var : error\n");
+                    }
+                }
+                if(typeArray(i)=="int")
+                {
+                    if !Spp.astMgr.buildAst
+                        (
+                        (ast  {beforData  data.add(String( String("") + this.intVal)) colname.add(String("{{intVal}}")) }),
+                        Map[String, ref[TiObject]]()
+                            .set(String("classData"), Core.Data.Ast.Identifier("classData"))
+                            .set(String("data"), Core.Data.Ast.Identifier("data"))
+                            .set(String("beforData"), resArray2(i))
+                            .set(String("colname"), Core.Data.Ast.Identifier("colname"))
+                            .set(String("intVal"), Core.Data.Ast.Identifier(varArray(i))),
+                        result3
+                        )
+                    {
+                    System.fail(1, "generateDataType/build Data Type var : error\n");
+                    }
+                }
+                if(typeArray(i)=="float")
+                {
+                    if !Spp.astMgr.buildAst
+                        (
+                        (ast {beforData data.add(String( String("") +this.floatVal))  colname.add(String("{{floatVal}}")) }),
+                        Map[String, ref[TiObject]]()
+                            .set(String("classData"), Core.Data.Ast.Identifier("classData"))
+                            .set(String("data"), Core.Data.Ast.Identifier("data"))
+                            .set(String("beforData"), resArray2(i))
+                            .set(String("colname"), Core.Data.Ast.Identifier("colname"))
+                            .set(String("floatVal"), Core.Data.Ast.Identifier(varArray(i))),
+                        result3
+                        )
+                    {
+                    System.fail(1, "generateDataType/build Data Type var : error\n");
+                    }
+                }
+                resArray2.add(result3);
+            }
+        }
+
+        //init ref and = inint
+
+        resArray3.add(result2);
+        for i=0 , i< typeArray.getLength() , i=i+1
+        {
+            if (i==0)
+            {
+                if !Spp.astMgr.buildAst
+                    (
+                    (ast  this.varItem=value.varItem ) ,
+                    Map[String, ref[TiObject]]()
+                        .set(String("varItem"), Core.Data.Ast.Identifier(varArray(i))),
+                    result3
+                    )
+                {
+                    System.fail(1, "generateDataType/build Data Type var : error\n");
+                }
+                resArray3.add(result3);
+            }
+            else
+            {
+                if !Spp.astMgr.buildAst
+                    (
+                    (ast{ beforData this.varItem=value.varItem;  } ),
+                    Map[String, ref[TiObject]]()
+                        .set(String("classData"), Core.Data.Ast.Identifier("classData"))
+                        .set(String("data"), Core.Data.Ast.Identifier("data"))
+                        .set(String("colname"), Core.Data.Ast.Identifier("colname"))
+                        .set(String("beforData"), resArray3(i))
+                        .set(String("varItem"), Core.Data.Ast.Identifier(varArray(i))),
+                    result3
+                    )
+                {
+                    System.fail(1, "generateDataType/build Data Type var : error\n");
+                }
+                resArray3.add(result3);
+            }
+        }
+        if !Spp.astMgr.buildAst(
+            (ast handler this~init(){ }  ),
             Map[String, ref[TiObject]]()
-            .set(String("classData"), Core.Data.Ast.Identifier("classData"))
-            .set(String("data"), Core.Data.Ast.Identifier("data"))
-            .set(String("colname"), Core.Data.Ast.Identifier("colname"))
-            .set(String("strVal"), Core.Data.Ast.Identifier(varArray(i))),
-            result3
+                .set(String("DbCon"), Core.Data.Ast.Identifier(String("DbCon"))),
+
+
+            result
         ) {
             System.fail(1, "generateDataType/build Data Type var : error\n");
         }
+       listContainer.addElement(result.obj);
 
-        }
-        if(typeArray(i)=="int")
-        {
-         if !Spp.astMgr.buildAst(
-           ast { data.add(String( String("") + this.intVal)) colname.add(String("{{intVal}}")) },
+              if !Spp.astMgr.buildAst(
+           (ast handler this~init(ref[className])
+           {
+
+                initfunc
+
+            }  ),
             Map[String, ref[TiObject]]()
-            .set(String("classData"), Core.Data.Ast.Identifier("classData"))
-            .set(String("data"), Core.Data.Ast.Identifier("data"))
-            .set(String("colname"), Core.Data.Ast.Identifier("colname"))
-            .set(String("intVal"), Core.Data.Ast.Identifier(varArray(i))),
-            result3
+                .set(String("className"), Core.Data.Ast.Identifier(className))
+                .set(String("initfunc"), resArray3(resArray3.getLength()-1))
+                .set(String("DbCon"), Core.Data.Ast.Identifier(String("DbCon"))),
+
+
+            result
         ) {
             System.fail(1, "generateDataType/build Data Type var : error\n");
         }
+       listContainer.addElement(result.obj);
 
+                     if !Spp.astMgr.buildAst(
+           (ast handler this= ref[className]
+           {
 
-        }
-        if(typeArray(i)=="float")
-        {
-         if !Spp.astMgr.buildAst(
-           ast  {data.add(String( String("") + this.floatVal)) colname.add(String("{{floatVal}}")) },
+                initfunc
+
+            }  ),
             Map[String, ref[TiObject]]()
-            .set(String("classData"), Core.Data.Ast.Identifier("classData"))
-            .set(String("colname"), Core.Data.Ast.Identifier("colname"))
-            .set(String("data"), Core.Data.Ast.Identifier("data"))
-            .set(String("floatVal"), Core.Data.Ast.Identifier(varArray(i))),
-            result3
+                .set(String("className"), Core.Data.Ast.Identifier(className))
+                .set(String("initfunc"), resArray3(resArray3.getLength()-1))
+                .set(String("DbCon"), Core.Data.Ast.Identifier(String("DbCon"))),
+
+
+            result
         ) {
             System.fail(1, "generateDataType/build Data Type var : error\n");
         }
+       listContainer.addElement(result.obj);
 
 
-        }
+if !Spp.astMgr.buildAst(
+           (ast handler this.setDbCon(DbsCon :DbConBuilder )
+           {
+               this.DbCon =DbsCon;
 
- resArray2.add(result3);
-
-    }
-    else
-    {
-         if(typeArray(i)=="String")
-        {
-         if !Spp.astMgr.buildAst(
-           (ast{ beforData data.add(this.strVal) colname.add(String("{{strVal}}"))   } ),
+               }  ),
             Map[String, ref[TiObject]]()
-            .set(String("classData"), Core.Data.Ast.Identifier("classData"))
-            .set(String("data"), Core.Data.Ast.Identifier("data"))
-            .set(String("colname"), Core.Data.Ast.Identifier("colname"))
-            .set(String("beforData"), resArray2(i))
-            .set(String("strVal"), Core.Data.Ast.Identifier(varArray(i))),
-            result3
+                .set(String("DbCon"), Core.Data.Ast.Identifier(String("DbCon"))),
+
+
+            result
         ) {
             System.fail(1, "generateDataType/build Data Type var : error\n");
         }
+       listContainer.addElement(result.obj);
 
-        }
-        if(typeArray(i)=="int")
-        {
-         if !Spp.astMgr.buildAst(
-           (ast  {beforData  data.add(String( String("") + this.intVal)) colname.add(String("{{intVal}}")) }),
+       if !Spp.astMgr.buildAst(
+           (ast handler this.getDbCon(  ):DbConBuilder.DbConBuilder
+           {
+               return this.DbCon;
+
+               }  ),
             Map[String, ref[TiObject]]()
-            .set(String("classData"), Core.Data.Ast.Identifier("classData"))
-            .set(String("colname"), Core.Data.Ast.Identifier("colname"))
-            .set(String("beforData"), resArray2(i))
-            .set(String("intVal"), Core.Data.Ast.Identifier(varArray(i))),
-            result3
+                .set(String("DbCon"), Core.Data.Ast.Identifier(String("DbCon"))),
+            result
         ) {
             System.fail(1, "generateDataType/build Data Type var : error\n");
         }
-
-
-        }
-        if(typeArray(i)=="float")
-        {
-         if !Spp.astMgr.buildAst(
-           (ast {beforData data.add(String( String("") +this.floatVal))  colname.add(String("{{floatVal}}")) }),
-            Map[String, ref[TiObject]]()
-            .set(String("classData"), Core.Data.Ast.Identifier("classData"))
-            .set(String("data"), Core.Data.Ast.Identifier("data"))
-            .set(String("colname"), Core.Data.Ast.Identifier("colname"))
-            .set(String("beforData"),resArray2(i))
-            .set(String("floatVal"), Core.Data.Ast.Identifier(varArray(i))),
-            result3
-        ) {
-            System.fail(1, "generateDataType/build Data Type var : error\n");
-        }
-
-
-        }
-resArray2.add(result3);
-    }
-    }
-
+       listContainer.addElement(result.obj);
 
                 if !Spp.astMgr.buildAst(
-           (ast handler this.getData(db :DbConBuilder.DbConBuilder) : Array[cn]
+           (ast handler this.getData() : Array[cn]
            {
                def table : Receive.Receive ;
-               Console.print("inside getData \n");
                def  mySqlObj : MySql.Db ;
                def  dataArray : Array[Array[String]];
                def data : Array[cn];
 
-              if db.getDbConType()==0
+              if this.DbCon.getDbConType()==0
                  {
-                      mySqlObj=db.mySqlConBuilder();  table.setMySqlObj(mySqlObj);
+                      mySqlObj=this.DbCon.mySqlConBuilder();  table.setMySqlObj(mySqlObj);
 
 
 
                  }
 
                                   def s : Array[String];
-                 Console.print( String("{{className}}") + " \n");
                  s.add(String("{{className}}") );
                  table.setTableName(s);
              table.setExecString();
@@ -429,18 +547,17 @@ resArray2.add(result3);
        listContainer.addElement(result.obj);
 
        if !Spp.astMgr.buildAst(
-           (ast handler this.saveData(db :DbConBuilder.DbConBuilder )
+           (ast handler this.saveData()
            {
                def table2 : Insert.Insert;
-
                def  mySqlObj : MySql.Db ;
                def  data : Array[String];
                def colname : Array[String];
                def state : int=0;
 
-              if db.getDbConType()==0
+              if this.DbCon.getDbConType()==0
                  {
-                      mySqlObj=db.mySqlConBuilder();  table2.setMySqlObj(mySqlObj);
+                      mySqlObj=this.DbCon.mySqlConBuilder();  table2.setMySqlObj(mySqlObj);
 
 
 
@@ -481,15 +598,15 @@ resArray2.add(result3);
         }
        listContainer.addElement(result.obj);
              if !Spp.astMgr.buildAst(
-           (ast handler this.deleteRowData(db :DbConBuilder.DbConBuilder ,  whereState : String )
+           (ast handler this.deleteRowData( whereState : String )
            {
 
                def  mySqlObj : MySql.Db ;
 
                def table : Delete.Delete;
-              if db.getDbConType()==0
+              if this.DbCon.getDbConType()==0
                  {
-                      mySqlObj=db.mySqlConBuilder();
+                      mySqlObj=this.DbCon.mySqlConBuilder();
                        table.setMySqlObj(mySqlObj);
                  }
                  table.setTableName(String("{{className}}" ));
@@ -509,25 +626,49 @@ resArray2.add(result3);
        listContainer.addElement(result.obj);
 
 
+        if !Spp.astMgr.buildAst(
+           (ast handler this.updateData(conString : String)
+           {
+               def table2 : Update.Update;
+               def  mySqlObj : MySql.Db ;
+               def  data : Array[String];
+               def colname : Array[String];
+               def state : int=0;
+
+              if this.DbCon.getDbConType()==0
+                 {
+                      mySqlObj=this.DbCon.mySqlConBuilder();  table2.setMySqlObj(mySqlObj);
 
 
-    return castSrdRef[list, TiObject];
-}
 
-func getClassData (className : String , parent : ref[TiObject]  ): TioSrdRef {
-    def result: TioSrdRef;
-    def varArray:Array[String] ;
-    def  typeArray : Array[String];
-    varArray=AutoBuild.implementGetElementNames[elementType == "var",Cars~ast];
-    typeArray=AutoBuild.implementGetElementTypes[elementType == "var", Cars~ast];
-     def list: SrdRef[Core.Data.Ast.Scope] = newSrdObj[Core.Data.Ast.Scope];
+                 }
 
-     def listContainer: DynContainerOf[list.obj];
-                if !Spp.astMgr.buildAst(
-           (ast def dataClass :  className  ),
+
+
+
+                 table2.setTableName(String("{{className}}" ));
+
+             getclassData
+
+
+             table2.setData(data);
+             table2.setColsName(colname);
+             table2.setConString(conString);
+             table2.setExecString();
+            table2.exec();
+             }  ),
             Map[String, ref[TiObject]]()
+                .set(String("cn"), Core.Data.Ast.Identifier(className))
                 .set(String("className"), Core.Data.Ast.Identifier(className))
-                .set(String("dataClass"), Core.Data.Ast.Identifier(String("dataClass"))),
+                .set(String("strVal"), Core.Data.Ast.Identifier(varArray(1)))
+                .set(String("getclassData"), resArray2(resArray2.getLength()-1))
+
+                .set(String("table2"), Core.Data.Ast.Identifier(String("table2")))
+                .set(String("mySqlObj"), Core.Data.Ast.Identifier(String("mySqlObj")))
+                .set(String("dataArray"), Core.Data.Ast.Identifier(String("dataArray")))
+                .set(String("data"), Core.Data.Ast.Identifier(String("data")))
+                .set(String("s"), Core.Data.Ast.Identifier(String("s")))
+                .set(String("varType"), Core.Data.Ast.Identifier(String("varType"))),
 
             result
         ) {
@@ -536,43 +677,9 @@ func getClassData (className : String , parent : ref[TiObject]  ): TioSrdRef {
        listContainer.addElement(result.obj);
 
 
-    def j : int=0;
-    for j=0 ,  j< typeArray.getLength() , j=j+1
-    {
-         if (typeArray(j)=="String")
-         {
-           if !Spp.astMgr.buildAst(
-           (ast  dataClass.var=data ),
-            Map[String, ref[TiObject]]()
-                .set(String("className"), Core.Data.Ast.Identifier(className))
-                .set(String("data"), Core.Data.Ast.Identifier("dataArray(i)(j)"))
-                .set(String("var"), Core.Data.Ast.Identifier(String(varArray(j)))),
-
-            result
-        ) {
-            System.fail(1, "generateDataType/build Data Type var : error\n");
-        }
-       listContainer.addElement(result.obj);
-
-         }
-
-    }
-
-
 
 
     return castSrdRef[list, TiObject];
-}
-
-macro genareteClassData[parent , dataClass ]
-{
-       preprocess {
-        if !Spp.astMgr.insertAst(
-            AutoBuild.getClassData(className , parent  ).obj
-        ) {
-            System.fail(1, "Failed to genrate data type.\n");
-        }
-    }
 }
 
 macro getDataType [className , parent] {
@@ -593,244 +700,7 @@ macro getDataType [className , parent] {
 }
 
 
-func generateDataTable (className :String ): TioSrdRef {
-    def result: TioSrdRef;
-    def dataType : String;
-    dataType="hi there";
 
-Console.print(className+" from ge \n");
-
-     def list: SrdRef[Core.Data.Ast.Scope] = newSrdObj[Core.Data.Ast.Scope];
-
-     def listContainer: DynContainerOf[list.obj];
-
-                if !Spp.astMgr.buildAst(
-           ( ast def table : Receive.Receive  ),
-            Map[String, ref[TiObject]]()
-                .set(String("table"), Core.Data.Ast.Identifier(String("table")))
-                .set(String("tableNames"), Core.Data.Ast.Identifier(String("tableNames"))),
-
-            result
-        ) {
-            System.fail(1, "generateDataTable/build table var : error\n");
-        }
-       listContainer.addElement(result.obj);
-
-
-
-
-
-
-
-                              if !Spp.astMgr.buildAst(
-           ( ast def  mySqlObj : MySql.Db  ),
-            Map[String, ref[TiObject]]()
-                .set(String("mySqlObj"), Core.Data.Ast.Identifier(String("mySqlObj"))),
-
-            result
-        ) {
-            System.fail(1, "generateDataTable/build table var : error\n");
-        }
-       listContainer.addElement(result.obj);
-
-
-
-
-                                     if !Spp.astMgr.buildAst(
-           ( ast def  dataArray : Array[Array[String]] ),
-            Map[String, ref[TiObject]]()
-                .set(String("dataArray"), Core.Data.Ast.Identifier(String("dataArray"))),
-
-            result
-        ) {
-            System.fail(1, "generateDataTable/build table var : error\n");
-        }
-       listContainer.addElement(result.obj);
-
-                              if !Spp.astMgr.buildAst(
-            ast{      if DbCon.getDbConType()==0 {    mySqlObj=DbCon.mySqlConBuilder();  table.setMySqlObj(mySqlObj);}  },
-            Map[String, ref[TiObject]]()
-                .set(String("table"), Core.Data.Ast.Identifier(String("table")))
-                .set(String("DbCon"), Core.Data.Ast.Identifier(String("DbCon")))
-                .set(String("mySqlObj"), Core.Data.Ast.Identifier(String("mySqlObj"))),
-
-            result
-        ) {
-            System.fail(1, "generateDataTable/build table var : error\n");
-        }
-       listContainer.addElement(result.obj)
-
-
-
-
-
-                       if !Spp.astMgr.buildAst(
-            ast{ table.setTableName(tableNames);
-             table.setExecString();
-              table.setData();
-             dataArray= table.getData();
-              },
-            Map[String, ref[TiObject]]()
-                .set(String("table"), Core.Data.Ast.Identifier(String("table")))
-                .set(String("dataArray"), Core.Data.Ast.Identifier(String("dataArray")))
-                .set(String("tableNames"), Core.Data.Ast.Identifier(String("tableNames"))),
-
-            result
-        ) {
-            System.fail(1, "generateDataTable/build table var : error\n");
-        }
-       listContainer.addElement(result.obj);
-
-
-
-    return castSrdRef[list, TiObject];
-}
-
-macro genareteDataAsString[className] {
-
-    preprocess {
-        if !Spp.astMgr.insertAst(
-            AutoBuild.generateDataTable( className).obj
-        ) {
-            System.fail(1, "Failed to genrate data.\n");
-        }
-    }
-}
-
-handler this.test (name : String , DbsCon: DbConBuilder.DbConBuilder , myClass : ref[TiObject] , className : String ) {
-    def par : String;
-    def var : Array[String];
-    def types : Array[String];
-    var=AutoBuild.implementGetElementNames[elementType == "var",Cars~ast];
-    types=AutoBuild.implementGetElementTypes[elementType == "var", Cars~ast];
-
-
-
-
-    par=name;
-    def tableNames : Array[String];
-
-    this.setClassDataType(className);
-
-
-    def DbCon : DbConBuilder.DbConBuilder;
-    DbCon=DbsCon;
-    tableNames.add(par);
-
-
-    def firstName: String("Mohammed");
-    def position: String("Engineer");
-    def sw: String="dfg";
-
-    def query: String="ww";
-     AutoBuild.genareteDataAsString[String("Cars")];
-    Console.print(table.getExecString()+"\n");
-
-}
-macro getData[parent,dbcon,tableName]
-{
-    def result: SrdRef[Core.Basic.TiObject];
-
-    def types : Array[String];
-    types=AutoBuild.implementGetElementTypes[elementType == "var", parent~ast];
-
-        def var : Array[String];
-    var=AutoBuild.implementGetElementNames[elementType == "var", parent~ast];
-    i =0;
-    def Dataw : Array[Array[String]];
-    def table : Receive.Receive;
-    def resultArray : Array[SrdRef[Core.Basic.TiObject]];
-    def t : Array[String];
-    t.add(tableName);
-    table.setTableName(t);
-    table.setExecString();
-    Console.print(table.getExecString()+"\n");
-    if (dbcon.DbConType==0)
-    {
-         def  MySqlObj : MySql.Db;
-         MySqlObj=dbcon.mySqlConBuilder();
-         table.setMySqlObj(MySqlObj);
-         table.setData();
-         Dataw=table.getData();
-
-    }
-    def i : int=0;
-    def j : int=0;
-    for i=0 ,i< Dataw.getLength(), i = i+ 1
-    {
-           for j=0 ,j< Dataw(i).getLength(), j = j+ 1
-           {
-               if types(j)=="string"
-               {
-                    def val : String;
-                    def myVar : String;
-                    myVar=var(j);
-                    val=Dataw(i)(j);
-                    //def binding: ref[Binding](getInterface[parent~ast, Binding]);
-                    //def mapContaining: ref[MapContaining](getInterface[parent~ast, MapContaining]);
-                    if !Spp.astMgr.buildAst(
-                              ast { def t : mytable  },
-                              Map[String, ref[TiObject]]()
-                                  .set(Srl.String("mytable"), Core.Data.Ast.Identifier(tableName.buf))
-                                  .set(Srl.String("myvar"), Core.Data.Ast.Identifier(myVar))
-                                  .set(String("val"), val),
-                                  result
-                                                                 ) {
-                                                      System.fail(1, "getData Erorr/stringType\n");
-                                                                   }
-
-
-               }
-
-               if types(j)=="int"
-               {
-                    def val : String;
-                    def myVar : String
-                    def intVal : int;
-                    val=Dataw(i)(j);
-                    intVal=Receive.getInt(val.buf);
-                    myVar=var(j);
-                    //def binding: ref[Binding](getInterface[parent~ast, Binding]);
-                    //def mapContaining: ref[MapContaining](getInterface[parent~ast, MapContaining]);
-
-
-
-               }
-
-               if types(j)=="float"
-               {
-                    def val : String;
-                    def myVar : String
-                    def floatVal : float;
-                    val=Dataw(i)(j);
-                    floatVal=Receive.getFloat(val.buf);
-                    myVar=var(j);
-                    //def binding: ref[Binding](getInterface[parent~ast, Binding]);
-                    //def mapContaining: ref[MapContaining](getInterface[parent~ast, MapContaining]);
-                    if !Spp.astMgr.buildAst(
-                              ast { mytable.myvar=val  },
-                              Map[String, ref[TiObject]]()
-                                  .set(Srl.String("mytable"), Core.Data.Ast.Identifier(tableName.buf))
-                                  .set(Srl.String("myvar"), Core.Data.Ast.Identifier(myVar))
-                                  .set(String("val"), floatVal),
-                                  result
-                                                                 ) {
-                                                      System.fail(1, "getData Erorr/intType\n");
-                                                                   }
-
-
-               }
-
-           }
-           resultArray.add(result);
-
-
-    }
-
-
-
-
-}
 
 
 }
