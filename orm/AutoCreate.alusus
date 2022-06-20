@@ -1,6 +1,12 @@
 import "Data";
 import "AutoBuild";
 use DataType;
+use Srl;
+use Core.Basic;
+use Core.Data;
+use Core.Data.Ast;
+use DbConBuilder;
+def TioSrdRef: alias SrdRef[Core.Basic.TiObject];
 @tableName["MyTable"]
 class Cars
 {
@@ -24,47 +30,20 @@ class cars
     def id : int;
     def name : String;
     def price : float;
+    def ss :DbConBuilder;
+
+
+
 
 
         AutoBuild.getDataType[String("cars") , cars~ast ]
 
-}
-
-class varType
-{
-
-    def id : int;
-    def name : String;
-    def price : float;
-    handler this~init(ref[varType])
-        {
-
-            this.id=value.id;
-
-            this.name=value.name;
-            this.price=value.price;
-
-
-        }
-            handler this~init()
-        {
-
-
-        }
-        handler this = ref[varType]
-        {
-
-            this.id=value.id;
-
-            this.name=value.name;
-            this.price=value.price;
-        }
-
-
-AutoBuild.getDataType[String("varType") , varType~ast ]
-
 
 }
+
+
+
+
 def Tname : String;
 Tname="Cars";
 def DbName : String="testdb";
@@ -91,7 +70,7 @@ a=String("Cars");
 def c : cars;
 def d: Array[cars]
 c.setDbCon(DbsCon);
-d=c.getData();
+d=cars.where[id > 5 ].getData();
 def k: int=0;
 def s: String="";
 Console.print("\n");
@@ -112,8 +91,23 @@ c.price=2500000.50;
 c.saveData();
 def where : String="id=3030";
 c.deleteRowData(,where  );
+//
 c.id=900;
 c.name=String("'Sleman ford Car'");
 c.price=2500000.50;
 where = String("id=900");
 c.updateData(where);
+
+
+
+    def firstName: String("Mohammed");
+    def position: String("Engineer");
+
+Console.print(cars._MyClass._Where);
+func test {
+    def firstName: String("Mohammed");
+    def position: String("Engineer");
+    //def query: String = where[name == firstName && (pos == position || pos == "Lawyer")];
+    //Console.print("%s\n", query.buf);
+}
+test();

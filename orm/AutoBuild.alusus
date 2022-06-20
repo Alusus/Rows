@@ -37,6 +37,75 @@ module AutoBuild
             );
         }
     }
+    func generateWhere (obj: ref[TiObject]): TioSrdRef {
+        def result: TioSrdRef;
+        if obj~ptr == 0 {
+            System.fail(1, "generateWhere: obj is null.\n");
+        }
+
+        if isDerivedFrom[obj, ComparisonOperator] {
+            def binding: ref[Binding](getInterface[obj, Binding]);
+            def mapContaining: ref[MapContaining](getInterface[obj, MapContaining]);
+            if !Spp.astMgr.buildAst(
+                ast { String("{{name}}") + String(" {{op}} '") + val  + String("'") },
+                Map[String, ref[TiObject]]()
+                    .set(String("name"), mapContaining.getElement("first"))
+                    .set(String("op"), binding.getMember("type"))
+                    .set(String("val"), mapContaining.getElement("second")),
+                result
+            ) {
+                System.fail(1, "generateWhere/ComparisonOperator: error\n");
+            }
+        }
+                else if isDerivedFrom[obj, AssignmentOperator] {
+            def binding: ref[Binding](getInterface[obj, Binding]);
+            def mapContaining: ref[MapContaining](getInterface[obj, MapContaining]);
+            def containing: ref[Containing](getInterface[mapContaining.getElement("second"), Containing]);
+            if !Spp.astMgr.buildAst(
+                ast { String("{{name}}") + String(" {{op}} '") + val  + String("'") },
+                Map[String, ref[TiObject]]()
+                    .set(String("name"), mapContaining.getElement("first"))
+                    .set(String("op"), binding.getMember("type"))
+                    .set(String("val"), mapContaining.getElement("second")),
+                result
+            ) {
+                System.fail(1, "generateWhere/ComparisonOperator: error\n");
+            }
+        }
+         else if isDerivedFrom[obj, LogOperator] {
+            def binding: ref[Binding](getInterface[obj, Binding]);
+            def mapContaining: ref[MapContaining](getInterface[obj, MapContaining]);
+            if !Spp.astMgr.buildAst(
+                ast { (cond1) + String(" {{op}} ") + (cond2) },
+                Map[String, ref[TiObject]]()
+                    .set(String("cond1"), generateWhere(mapContaining.getElement("first")).obj)
+                    .set(String("op"), binding.getMember("type"))
+                    .set(String("cond2"), generateWhere(mapContaining.getElement("second")).obj),
+                result
+            ) {
+                System.fail(1, "generateWhere/LogOperator: error\n");
+            }
+        } else if isDerivedFrom[obj, Bracket] {
+            def mapContaining: ref[MapContaining](getInterface[obj, MapContaining]);
+            if !Spp.astMgr.buildAst(
+                ast { String("(") + (cond) + String(")") },
+                Map[String, ref[TiObject]]()
+                   .set(String("cond"), generateWhere(mapContaining.getElement("operand")).obj),
+                result
+            ) {
+                System.fail(1, "generateWhere/Bracket: error\n");
+            }
+        } else {
+            if !Spp.astMgr.buildAst(
+                obj,
+                Map[String, ref[TiObject]](),
+                result
+            ) {
+                System.fail(1, "Failed to build condition.\n");
+            }
+        }
+        return result;
+    }
 
     function generateAddingElementTypes (varName: String, elements: Array[ref[Core.Basic.TiObject]])
     {
@@ -115,9 +184,10 @@ module AutoBuild
             System.fail(1, "generateDataType/build Data Type var : error\n");
         }
         listContainer.addElement(result.obj);
+
         if !Spp.astMgr.buildAst
             (
-             (ast def DbCon :DbConBuilder ),
+             (ast  def _Where :String="" ),
              Map[String, ref[TiObject]]()
                  .set(String("DbCon"), Core.Data.Ast.Identifier(String("DbCon"))),
              result
@@ -126,6 +196,19 @@ module AutoBuild
             System.fail(1, "generateDataType/build Data Type var : error\n");
         }
         listContainer.addElement(result.obj);
+
+        if !Spp.astMgr.buildAst
+            (
+             (ast @shared def DbCon :DbConBuilder ),
+             Map[String, ref[TiObject]]()
+                 .set(String("DbCon"), Core.Data.Ast.Identifier(String("DbCon"))),
+             result
+            )
+        {
+            System.fail(1, "generateDataType/build Data Type var : error\n");
+        }
+        listContainer.addElement(result.obj);
+
         if !Spp.astMgr.buildAst
             (
             (ast def classData : className ),
@@ -144,7 +227,7 @@ module AutoBuild
             iString=String("") + i;
             if (i==0)
             {
-                if(typeArray(i)=="String")
+                if(typeArray(i)=="String" && varArray(i) != "_Where" )
                 {
                     if !Spp.astMgr.buildAst
                         (
@@ -161,7 +244,7 @@ module AutoBuild
                         System.fail(1, "generateDataType/build Data Type var : error\n");
                     }
                 }
-                if(typeArray(i)=="int")
+                else if(typeArray(i)=="int" )
                 {
                     if !Spp.astMgr.buildAst
                         (
@@ -178,7 +261,7 @@ module AutoBuild
                         System.fail(1, "generateDataType/build Data Type var : error\n");
                     }
                 }
-                if(typeArray(i)=="float")
+                else if(typeArray(i)=="float")
                 {
                     if !Spp.astMgr.buildAst
                         (
@@ -201,7 +284,7 @@ module AutoBuild
             }
             else
             {
-                if(typeArray(i)=="String")
+                if(typeArray(i)=="String" && varArray(i) != "_Where" )
                 {
                     if !Spp.astMgr.buildAst
                         (
@@ -267,7 +350,7 @@ module AutoBuild
         {
             if (i==0)
             {
-                if(typeArray(i)=="String")
+                if(typeArray(i)=="String" && varArray(i) != "_Where" )
                 {
                     if !Spp.astMgr.buildAst
                         (
@@ -319,7 +402,7 @@ module AutoBuild
             }
             else
             {
-                if(typeArray(i)=="String")
+                if(typeArray(i)=="String" && varArray(i) != "_Where" )
                 {
                     if !Spp.astMgr.buildAst
                         (
@@ -379,7 +462,7 @@ module AutoBuild
         resArray3.add(result2);
         for i=0 , i< typeArray.getLength() , i=i+1
         {
-            if (i==0)
+            if (i==0 && (varArray(i)!="DbCon"&&varArray(i)!="_MyClass"))
             {
                 if !Spp.astMgr.buildAst
                     (
@@ -393,7 +476,7 @@ module AutoBuild
                 }
                 resArray3.add(result3);
             }
-            else
+            else if( (varArray(i)!="DbCon"&&varArray(i)!="_MyClass"))
             {
                 if !Spp.astMgr.buildAst
                     (
@@ -412,17 +495,17 @@ module AutoBuild
                 resArray3.add(result3);
             }
         }
-        if !Spp.astMgr.buildAst(
+        if !Spp.astMgr.buildAst
+            (
             (ast handler this~init(){ }  ),
             Map[String, ref[TiObject]]()
                 .set(String("DbCon"), Core.Data.Ast.Identifier(String("DbCon"))),
-
-
             result
-        ) {
+            )
+        {
             System.fail(1, "generateDataType/build Data Type var : error\n");
         }
-       listContainer.addElement(result.obj);
+        listContainer.addElement(result.obj);
 
               if !Spp.astMgr.buildAst(
            (ast handler this~init(ref[className])
@@ -466,7 +549,7 @@ module AutoBuild
 if !Spp.astMgr.buildAst(
            (ast handler this.setDbCon(DbsCon :DbConBuilder )
            {
-               this.DbCon =DbsCon;
+               DbCon =DbsCon;
 
                }  ),
             Map[String, ref[TiObject]]()
@@ -482,7 +565,7 @@ if !Spp.astMgr.buildAst(
        if !Spp.astMgr.buildAst(
            (ast handler this.getDbCon(  ):DbConBuilder.DbConBuilder
            {
-               return this.DbCon;
+               return DbCon;
 
                }  ),
             Map[String, ref[TiObject]]()
@@ -501,12 +584,16 @@ if !Spp.astMgr.buildAst(
                def  dataArray : Array[Array[String]];
                def data : Array[cn];
 
-              if this.DbCon.getDbConType()==0
+              if DbCon.getDbConType()==0
                  {
-                      mySqlObj=this.DbCon.mySqlConBuilder();  table.setMySqlObj(mySqlObj);
+                      mySqlObj=DbCon.mySqlConBuilder();  table.setMySqlObj(mySqlObj);
 
 
 
+                 }
+                 if this._Where!=""
+                 {
+                    table.setCString(this._Where);
                  }
 
                                   def s : Array[String];
@@ -515,12 +602,15 @@ if !Spp.astMgr.buildAst(
              table.setExecString();
               table.setData();
              dataArray= table.getData();
+             Console.print(table.getExecString());
              def i : int =0;
              for i=0 , i< dataArray.getLength() , i+=1
              {
              buildclassData
              getclassData
              data.add(classData);
+
+
 
              }
 
@@ -555,9 +645,9 @@ if !Spp.astMgr.buildAst(
                def colname : Array[String];
                def state : int=0;
 
-              if this.DbCon.getDbConType()==0
+              if DbCon.getDbConType()==0
                  {
-                      mySqlObj=this.DbCon.mySqlConBuilder();  table2.setMySqlObj(mySqlObj);
+                      mySqlObj=DbCon.mySqlConBuilder();  table2.setMySqlObj(mySqlObj);
 
 
 
@@ -604,9 +694,9 @@ if !Spp.astMgr.buildAst(
                def  mySqlObj : MySql.Db ;
 
                def table : Delete.Delete;
-              if this.DbCon.getDbConType()==0
+              if DbCon.getDbConType()==0
                  {
-                      mySqlObj=this.DbCon.mySqlConBuilder();
+                      mySqlObj=DbCon.mySqlConBuilder();
                        table.setMySqlObj(mySqlObj);
                  }
                  table.setTableName(String("{{className}}" ));
@@ -635,9 +725,9 @@ if !Spp.astMgr.buildAst(
                def colname : Array[String];
                def state : int=0;
 
-              if this.DbCon.getDbConType()==0
+              if DbCon.getDbConType()==0
                  {
-                      mySqlObj=this.DbCon.mySqlConBuilder();  table2.setMySqlObj(mySqlObj);
+                      mySqlObj=DbCon.mySqlConBuilder();  table2.setMySqlObj(mySqlObj);
 
 
 
@@ -655,6 +745,7 @@ if !Spp.astMgr.buildAst(
              table2.setColsName(colname);
              table2.setConString(conString);
              table2.setExecString();
+             Console.print(table2.getExecString());
             table2.exec();
              }  ),
             Map[String, ref[TiObject]]()
@@ -675,6 +766,42 @@ if !Spp.astMgr.buildAst(
             System.fail(1, "generateDataType/build Data Type var : error\n");
         }
        listContainer.addElement(result.obj);
+
+               if !Spp.astMgr.buildAst
+            (
+             (ast @shared def _MyClass : className ),
+             Map[String, ref[TiObject]]()
+                 .set(String("className"), Core.Data.Ast.Identifier(className))
+                 .set(String("DbCon"), Core.Data.Ast.Identifier(String("DbCon"))),
+             result
+            )
+        {
+            System.fail(1, "generateDataType/build Data Type var : error\n");
+        }
+        listContainer.addElement(result.obj);
+
+               if !Spp.astMgr.buildAst
+            (
+             (ast         macro where [condition] {
+                                        className._MyClass._Where= preprocess {
+                                                if !Spp.astMgr.insertAst(
+                                                        AutoBuild.generateWhere(ast condition).obj
+                                                             ) {
+                                                           System.fail(1, "Failed to insert condition.\n");
+                                                                 }
+                                                                 }
+                                                        className._MyClass
+                                                }
+                                                 ),
+             Map[String, ref[TiObject]]()
+                 .set(String("className"), Core.Data.Ast.Identifier(className))
+                 .set(String("DbCon"), Core.Data.Ast.Identifier(String("DbCon"))),
+             result
+            )
+        {
+            System.fail(1, "generateDataType/build Data Type var : error\n");
+        }
+        listContainer.addElement(result.obj);
 
 
 
