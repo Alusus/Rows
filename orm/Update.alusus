@@ -8,6 +8,7 @@ module Update
         def Data : Array[String];
         def ColsName : Array[String];
         def ConString : String="";
+        def UpdateString : String="";
         def DbType : int;
         def PgSqlObj : PostgresSql.Db;
         def MySqlObj : MySql.Db ;
@@ -28,6 +29,18 @@ module Update
         handler this.getData() : Array[String]
         {
             return this.Data;
+
+        }
+
+        handler this.setUpdateString(UpdateString : String)
+        {
+            this.UpdateString=UpdateString;
+
+        }
+
+        handler this.getUpdateString() : String
+        {
+            return this.UpdateString;
 
         }
 
@@ -95,14 +108,22 @@ module Update
             this.ExecString="UPDATE";
             this.ExecString=this.ExecString+" "  +this.Name + "\n";
             this.ExecString=this.ExecString + String(" SET ");
-            for i=0 , i< this.Data.getLength()-1 , i=i+1
+            if(this.UpdateString=="")
             {
-                this.ExecString = this.ExecString + this.ColsName(i) + String(" = ") + this.Data(i) + String(" , ");
+                for i=0 , i< this.Data.getLength()-1 , i=i+1
+                {
+                    this.ExecString = this.ExecString + this.ColsName(i) + String(" = ") + this.Data(i) + String(" , ");
+                }
+                if (this.Data.getLength()>0)
+                {
+                    this.ExecString = this.ExecString + this.ColsName(this.ColsName.getLength()-1) + String(" = ") + this.Data(this.Data.getLength()-1) + String("\n");
+                }
             }
-            if (this.Data.getLength()>0)
+            else
             {
-                this.ExecString = this.ExecString + this.ColsName(this.ColsName.getLength()-1) + String(" = ") + this.Data(this.Data.getLength()-1) + String("\n");
+                this.ExecString=this.ExecString + this.UpdateString + String("\n");
             }
+
 
             this.ExecString=this.ExecString + " WHERE " ;
             this.ExecString=this.ExecString + this.ConString + "\n" ;

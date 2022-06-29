@@ -43,7 +43,6 @@ class cars
 
 
 
-
 def Tname : String;
 Tname="Cars";
 def DbName : String="testdb";
@@ -70,10 +69,13 @@ a=String("Cars");
 def c : cars;
 def d: Array[cars]
 c.setDbCon(DbsCon);
-d=cars.where[id > 5 ].getData();
+def sw2 : int=2;
+
+d=cars.where[not (price $ (sw2  , 7)) and  id > 10 ].getData();
 def k: int=0;
 def s: String="";
-Console.print("\n");
+
+Console.print(s);
 Console.print("\n");
 Console.print("\n");
 for k=0 , k<d.getLength() , k=k+1
@@ -89,21 +91,22 @@ c.id=900;
 c.name=String("'SlemanCar'");
 c.price=2500000.50;
 c.saveData();
-def where : String="id=3030";
-c.deleteRowData(,where  );
 //
 c.id=900;
 c.name=String("'Sleman ford Car'");
 c.price=2500000.50;
-where = String("id=900");
-c.updateData(where);
 
+cars.where[id=40 ]
 
+cars.updateData[price=20 ].getData();
+cars._MyClass.updateData()
+Console.print(cars._MyClass._Update+"\n");
 
     def firstName: String("Mohammed");
     def position: String("Engineer");
 
-Console.print(cars._MyClass._Where);
+Console.print(cars._MyClass._Where+"\n");
+
 func test {
     def firstName: String("Mohammed");
     def position: String("Engineer");
