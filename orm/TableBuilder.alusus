@@ -289,7 +289,7 @@ module TableBuilder
        return -1;
     }
 
-    macro autoCreate [parent , tableName , dbCon ]
+    macro autoCreate [parent , tableName ,dbCon ]
     {
         use DataType;
 
@@ -334,8 +334,12 @@ module TableBuilder
     def charTypeDataType : CharType;
     def textDataType : Text;
     def datesDataType : Dates;
+    index=-1
+     for j=0 , j< colsMod(i).getLength() && index==-1, j+=1
+       {
 
-        index=TableBuilder.isDataType(types(i));
+        index=TableBuilder.isDataType(colsMod(i)(j));
+        }
 
 
 
