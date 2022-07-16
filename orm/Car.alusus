@@ -1,0 +1,160 @@
+import "Receive";
+import "DbConBuilder";
+import "Insert";
+class Car
+{
+    def id : int;
+    def name : String;
+    def price : float;
+    handler this~init(ref[Car])
+        {
+
+            this.id=value.id;
+
+            this.name=value.name;
+            this.price=value.price;
+
+
+        }
+            handler this~init()
+        {
+
+
+        }
+        handler this = ref[Db]
+        {
+
+            this.id=value.id;
+
+            this.name=value.name;
+            this.price=value.price;
+        }
+
+}
+func getdata(DbCon : DbConBuilder.DbConBuilder) :Array[Car]
+{
+    def Dataw : Array[Array[String]];
+    def par : String="cars";
+    def CarData : Array[Car];
+    def CarRowData : Car;
+    def table : Receive.Receive;
+    def t : Array[String];
+    t.add(par);
+    table.setTableName(t);
+    table.setExecString();
+    Console.print(table.getExecString()+"\n");
+    if (DbCon.DbConType==0)
+    {
+         def  MySqlObj : MySql.Db;
+         MySqlObj=DbCon.mySqlConBuilder();
+         table.setMySqlObj(MySqlObj);
+         table.setData();
+         Dataw=table.getData();
+
+    }
+    def i : int=0;
+    def j : int=0;
+    for i=0 ,i< Dataw.getLength(), i = i+ 1
+    {
+
+            CarRowData.id=Receive.getInt(Dataw(i)(0).buf);
+            CarRowData.name=Dataw(i)(1);
+            CarRowData.price=Receive.getFloat(Dataw(i)(2).buf);
+            CarData.add(CarRowData);
+
+
+    }
+    return CarData;
+
+}
+
+func addData(DbCon : DbConBuilder.DbConBuilder , CarData :Array[Car])
+{
+
+def MySqlObj :MySql.Db;
+MySqlObj=DbCon.mySqlConBuilder();
+def table : Insert.Insert;
+def tableName : String;
+def data : Array[String];
+def colname : Array[String];
+def i : int=0;
+def stringdata : String;
+tableName="cars";
+colname.add(String("id"));
+colname.add(String("name"));
+colname.add(String("price"));
+table.setColsName(colname);
+table.setMySqlObj(MySqlObj);
+table.setTableName(tableName);
+for i=0 , i<CarData.getLength() , i = i+1
+{
+    data.clear();
+    stringdata="";
+    stringdata=stringdata + CarData(i).id;
+    data.add(stringdata);
+    stringdata="'" ;
+   stringdata=stringdata + CarData(i).name + "'";
+    data.add(stringdata);
+    stringdata="";
+    stringdata= stringdata + CarData(i).price;
+    data.add(stringdata);
+    table.setData(data);
+    table.genrateColsString();
+    table.setValString();
+    table.setExecString();
+    Console.print(table.getExecString());
+    table.exec();
+
+}
+
+}
+
+def DbName : String="testdb";
+
+def UserName : String="user12";
+
+def Password : String="Qwerty231@#!";
+
+def server : String="localhost";
+
+def DbsCon :  DbConBuilder.DbConBuilder;
+def MySqlObj : MySql.Db;
+
+DbsCon.setDBName(DbName);
+
+DbsCon.setUserName(UserName);
+
+DbsCon.setPassword(Password);
+
+DbsCon.setServer(server);
+DbsCon.setDbConType(0);
+def MyDaya : Array[Car];
+MyDaya=getdata(DbsCon);
+def i : int;
+for i=0 , i< MyDaya.getLength() , i = i + 1
+{
+
+    Console.print(MyDaya(i).id);
+    Console.print("   ");
+    Console.print(MyDaya(i).name);
+    Console.print("   ");
+    Console.print(MyDaya(i).price);
+    Console.print("\n");
+}
+def dataArrayCar : Array[Car];
+def c : Car;
+c.id=40;
+c.name=String("forti");
+c.price=75000.0;
+dataArrayCar.add(c);
+def x : Car;
+x.id=50;
+x.name=String("jeep");
+x.price=875000.0;
+def zc : Car;
+dataArrayCar.add(x);
+zc.id=60;
+zc.name=String("metso");
+zc.price=975000.0;
+dataArrayCar.add(zc);
+addData(DbsCon,dataArrayCar);

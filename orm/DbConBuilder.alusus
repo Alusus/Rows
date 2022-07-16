@@ -19,6 +19,50 @@ module DbConBuilder
 
         handler this~init() {}
 
+        handler this~init(DbName : String , UserName : String , Password : String ,  Server : String )
+         {
+                       this.DbName=DbName;
+
+            this.UserName=UserName;
+            this.Password=Password;
+            this.Server=Server
+
+         }
+
+         handler this~init(ref[DbConBuilder])
+        {
+
+            this.DbName=value.DbName;
+
+            this.UserName=value.UserName;
+            this.Password=value.Password;
+            this.Server=value.Server;
+
+
+	    this.Password=value.Password;
+	    this.Port=value.Port;
+	    this.UnixSocket=null;
+	    this.ClientFlag=value.ClientFlag;
+	    this.DbConType=value.DbConType;
+        }
+        handler this = ref[DbConBuilder]
+        {
+
+            this.DbName=value.DbName;
+
+            this.UserName=value.UserName;
+            this.Password=value.Password;
+            this.Server=value.Server;
+
+
+	    this.Password=value.Password;
+	    this.Port=value.Port;
+	    this.UnixSocket=null;
+	    this.ClientFlag=value.ClientFlag;
+	    this.DbConType=value.DbConType;
+        }
+
+
         handler this.setDBName(DbName : String)
         {
             this.DbName=DbName;

@@ -829,6 +829,7 @@ module AutoBuild
            {
                def table : Receive.Receive ;
                def  mySqlObj : MySql.Db ;
+               def  pgSqlObj : PostgresSql.Db ;
                def  dataArray : Array[Array[String]];
                def data : Array[cn];
 
@@ -836,6 +837,11 @@ module AutoBuild
                  {
                       mySqlObj=DbCon.mySqlConBuilder();  table.setMySqlObj(mySqlObj);
                      mySqlObj.endConnection();
+                 }
+                 else if DbCon.getDbConType()==1
+                 {
+                      pgSqlObj=DbCon.pgSqlConBuilder();  table.setPgSqlObj(pgSqlObj);
+                     pgSqlObj.endConnection();
                  }
                  if this._Where!=""
                  {
@@ -881,6 +887,7 @@ module AutoBuild
            {
                def table2 : Insert.Insert;
                def  mySqlObj : MySql.Db ;
+               def  pgSqlObj : PostgresSql.Db ;
                def  data : Array[String];
                def colname : Array[String];
                def state : int=0;
@@ -889,6 +896,12 @@ module AutoBuild
                  {
                       mySqlObj=DbCon.mySqlConBuilder();  table2.setMySqlObj(mySqlObj);
                       mySqlObj.endConnection();
+                 }
+
+                 else if DbCon.getDbConType()==1
+                 {
+                      pgSqlObj=DbCon.pgSqlConBuilder();  table2.setPgSqlObj(pgSqlObj);
+                     pgSqlObj.endConnection();
                  }
                  table2.setTableName(String("{{tableName}}" ));
                  getclassData
@@ -922,6 +935,7 @@ module AutoBuild
            (ast handler this.deleteRowData( )
            {
                def  mySqlObj : MySql.Db ;
+               def  pgSqlObj : PostgresSql.Db ;
                def table : Delete.Delete;
                if DbCon.getDbConType()==0
                {
@@ -929,6 +943,12 @@ module AutoBuild
                         table.setMySqlObj(mySqlObj);
                         mySqlObj.endConnection();
                 }
+
+                 else if DbCon.getDbConType()==1
+                 {
+                      pgSqlObj=DbCon.pgSqlConBuilder();  table.setPgSqlObj(pgSqlObj);
+                     pgSqlObj.endConnection();
+                 }
                 table.setTableName(String("{{tableName}}" ));
                 table.setWhereCond(this._Where);
                 table.genareteExecString();
@@ -946,6 +966,7 @@ module AutoBuild
                 System.fail(1, "generateDataType/build Data Type var : error\n");
         }
         listContainer.addElement(result.obj);
+        // def arabicname : alias updateData;
 
         if !Spp.astMgr.buildAst(
            (ast handler this.updateData()
@@ -953,6 +974,7 @@ module AutoBuild
 
                def table2 : Update.Update;
                def  mySqlObj : MySql.Db ;
+               def  pgSqlObj : PostgresSql.Db ;
                def  data : Array[String];
                def colname : Array[String];
                def state : int=0;
@@ -961,6 +983,12 @@ module AutoBuild
                       mySqlObj=DbCon.mySqlConBuilder();  table2.setMySqlObj(mySqlObj);
                       mySqlObj.endConnection();
                 }
+
+                 else if DbCon.getDbConType()==1
+                 {
+                      pgSqlObj=DbCon.pgSqlConStringBuilder();  table2.setPgSqlObj(pgSqlObj);
+                     pgSqlObj.endConnection();
+                 }
                 table2.setTableName(String("{{tableName}}" ));
                 getclassData
                 if(this._Update=="")
@@ -1061,14 +1089,14 @@ module AutoBuild
         return castSrdRef[list, TiObject];
     }
 
-    macro getDataType [className , tableName , parent]
+    macro getDataFunc [className , tableName , parent]
     {
         preprocess
          {
             def varArray : Array[String];
             varArray =AutoBuild.implementGetElementNames[elementType == "var",parent];
             def  typeArray : Array[String];
-            typeArray=AutoBuild.implementGetElementTypes[elementType == "var", cars~ast];
+            typeArray=AutoBuild.implementGetElementTypes[elementType == "var", parent];
             if !Spp.astMgr.insertAst(
                 AutoBuild.generateDataType(className ,tableName, parent ,varArray , typeArray  ).obj
             )

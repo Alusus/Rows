@@ -10,7 +10,6 @@ import "libmysqlclient.so";
 module MySql {
 
 		use Srl;
-Console.print("first line in mysql !!! \n");
 	class MYSQL{}
 	class MYSQL_RES{}
 	def MYSQL_ROW: alias ptr[array[CharsPtr]];
@@ -48,23 +47,24 @@ Console.print("first line in mysql !!! \n");
 	def ResultState: int ;
 	def Row: MYSQL_ROW;
 	def Field: ptr[MYSQL_FIELD];
-	def Host: CharsPtr="";
-	def User: CharsPtr="";
-	def Password: CharsPtr="";
-	def DbName: CharsPtr="";
+	def Host: String="";
+	def User: String="";
+	def Password: String="";
+	def DbName: String="";
 	def Port: int=0;
-	def UnixSocket: CharsPtr=null;
+	def UnixSocket: String=null;
 	def ClientFlag: int=0;
+	def ConState: String="connected";
 
-        handler this~init(Host: CharsPtr , User: CharsPtr ,Password: CharsPtr , DbName: CharsPtr , Port :int , UnixSocket: CharsPtr ,ClientFlag :int )
+        handler this~init(Host: String , User: String ,Password: String , DbName: String , Port :int , UnixSocket: String ,ClientFlag :int )
         {
-	    this.Conn=initl(null);
+
 	    this.Host=Host;
 	    this.User=User;
 	    this.Password=Password;
 	    this.DbName=DbName;
 	    this.Port=Port;
-	    this.UnixSocket=UnixSocket;
+	    this.UnixSocket=null;
 	    this.ClientFlag=ClientFlag;
             this.connectDb();
             
@@ -73,9 +73,9 @@ Console.print("first line in mysql !!! \n");
 
         handler this~init(ref[Db]) 
         { 
-            this.Conn=value.Conn;
+
             this.Res=value.Res;
-            this.ResultState=value.ResultState;
+
             this.Field=value.Field;
             this.Row=value.Row;
             this.Port=value.Port;
@@ -84,14 +84,13 @@ Console.print("first line in mysql !!! \n");
 	    this.Password=value.Password;
 	    this.DbName=value.DbName;
 	    this.Port=value.Port;
-	    this.UnixSocket=value.UnixSocket;
-	    this.ClientFlag=value.ClientFlag;            
+	    this.UnixSocket=null;
+	    this.ClientFlag=value.ClientFlag;
+	    this.connectDb();
         }
         handler this = ref[Db]
         {
-            this.Conn=value.Conn;
-            this.Res=value.Res;
-            this.ResultState=value.ResultState;
+
             this.Field=value.Field;
             this.Row=value.Row;
             this.Port=value.Port;
@@ -101,47 +100,49 @@ Console.print("first line in mysql !!! \n");
 	    this.DbName=value.DbName;
 	    this.Port=value.Port;
 	    this.UnixSocket=value.UnixSocket;
-	    this.ClientFlag=value.ClientFlag;  	
+	    this.ClientFlag=value.ClientFlag;
+	    this.connectDb();
         }
 
 
         handler this~init() 
         {
-	    this.Conn=initl(null);  
+
         }
 
-        handler this.setHost(Host: CharsPtr) 
+
+        handler this.setHost(Host: String)
         {
 	    this.Host=Host;  
         } 
-        handler this.getHost() : CharsPtr 
+        handler this.getHost() : String
         {
 	    return this.Host;  
         }
 
-        handler this.setUser(User: CharsPtr) 
+        handler this.setUser(User: String)
         {
 	    this.User=User;  
         } 
-        handler this.getUser() : CharsPtr 
+        handler this.getUser() : String
         {
 	    return this.User;  
         }   
 
-        handler this.setPassword(Password: CharsPtr) 
+        handler this.setPassword(Password: String)
         {
 	    this.Password=Password;  
         } 
-        handler this.getPassword() : CharsPtr 
+        handler this.getPassword() : String
         {
 	    return this.Password;  
         }
 
-        handler this.setDbName(DbName: CharsPtr) 
+        handler this.setDbName(DbName: String)
         {
 	    this.DbName=DbName;  
         } 
-        handler this.getDbName() : CharsPtr 
+        handler this.getDbName() : String
         {
 	    return this.DbName;  
         }
@@ -155,11 +156,11 @@ Console.print("first line in mysql !!! \n");
 	    return this.Port;  
         }
 
-        handler this.setUnixSocket(UnixSocket: CharsPtr) 
+        handler this.setUnixSocket(UnixSocket: String)
         {
 	    this.UnixSocket=UnixSocket;  
         } 
-        handler this.getUnixSocket() : CharsPtr 
+        handler this.getUnixSocket() : String
         {
 	    return this.UnixSocket;  
         }
@@ -173,7 +174,7 @@ Console.print("first line in mysql !!! \n");
 	    return this.ClientFlag;  
         }
 
-        handler this.setConnPra( Host: CharsPtr , User: CharsPtr ,Password: CharsPtr , DbName: CharsPtr , Port :int , UnixSocket: CharsPtr ,ClientFlag :int)
+        handler this.setConnPra( Host: String , User: String ,Password: String , DbName: String , Port :int , UnixSocket: String ,ClientFlag :int)
         {
 	    this.Host=Host;
 	    this.User=User;
@@ -185,15 +186,30 @@ Console.print("first line in mysql !!! \n");
 	    this.connectDb();  
         }
 
-        handler this.connectDb()  
+        handler this.connectDb()
         {
-	    this.Conn=  connect(this.Conn,this.Host , this.User , this.Password , this.DbName , this.Port ,this.UnixSocket ,  this.ClientFlag); 
-        }      
+            this.Conn=initl(null);
+
+
+	    if (connect(this.Conn,this.Host.buf , this.User.buf  , this.Password.buf , this.DbName.buf  , this.Port ,null,  this.ClientFlag)==null)
+	    {
+	        this.ConState= MySql.errorMessage(this.Conn);
+	    }
+	    else
+	    {
+	        this.ConState=="connected";
+	    }
+
+
+        }
        
 
         handler this.exec(Sql: CharsPtr) 
         {   
-            this.ResultState= MySql.exec(this.Conn,Sql);   
+
+            this.ResultState= MySql.exec(this.Conn,Sql);
+
+            this.Res= MySql.storeRes(this.Conn);
         }
 
         handler this.storeRes() {
@@ -221,6 +237,8 @@ Console.print("first line in mysql !!! \n");
         }
 
         handler this.errorMessage():CharsPtr{
+
+
              return MySql.errorMessage(this.Conn);
         }
 

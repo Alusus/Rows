@@ -58,9 +58,10 @@ module PostgresSql {
 
             this.ResultState=value.ResultState;
             this.Connstring=value.Connstring;
+            this.Conn=value.Conn;
         }
 
-        handler this.setConnstring(Connstring: String) {
+        handler this.setConnstring(Connstring: String ) {
 
            this.Connstring= Connstring;
            connectDb();

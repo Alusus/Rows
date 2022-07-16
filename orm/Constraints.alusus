@@ -2,8 +2,8 @@ import "Srl/Console.alusus";
 import "Srl/Array";
 import "Srl/Map";
 import "Srl/String";
-import "mysql";
-import "pgsql";
+import "../mysql/mysql";
+import "../pgsql/pgsql";
 import "Core/Data";
 import "Spp";
 import "Apm";
@@ -14,14 +14,14 @@ use Srl;
 module Constraints
 {
     class FiledConstraints
-    {	
+    {
         def NotNull : int=-1;
         def Unique : int=-1;
         def Default : int=-1;
         def Check : int=-1;
         def StringRep: Array[String];
         def FieldConsString : String="";
-        handler this~init() 
+        handler this~init()
         {
             def v:String;
             v="NOT NULL";
@@ -41,7 +41,7 @@ module Constraints
                 def par : String="";
                 this.addConstraint(this.NotNull,par);
             }
-    
+
             }
         handler this.setUniqueConstraint()
         {
@@ -51,7 +51,7 @@ module Constraints
                 def par : String="";
                 this.addConstraint(this.Unique,par);
             }
-  
+
         }
         handler this.setDefaultConstraint(defaultValue : String)
         {
@@ -59,7 +59,7 @@ module Constraints
             {
                 this.Default=2;
                 this.addConstraint(this.Default,defaultValue);
-            } 
+            }
 
         }
         handler this.setCheckConstraint(cond : String){
@@ -67,7 +67,8 @@ module Constraints
             {
                 this.Check=3;
                 def conString : String;
-                conString="( " + cond + ")";
+                conString= "( ";
+                conString=conString+ cond + ")";
                 this.addConstraint(this.Check,conString);
             }
              }
@@ -85,10 +86,10 @@ module Constraints
             }}
         handler this.getFieldConsString() : String{
             return this.FieldConsString;
-            }   
+            }
     }
     class TableConstraints
-    {	
+    {
         def PrimaryKeyConsString : String;
         def ForgenKeyConsString : Array[String];
 
@@ -101,20 +102,20 @@ module Constraints
                 this.PrimaryKeyConsString = this.PrimaryKeyConsString + ", " + Columns(i);
             }
             this.PrimaryKeyConsString=this.PrimaryKeyConsString+ " )"
-    
+
             }
         handler this.addForgenKey(Col : String , RefTable : String , RefCol : String)
         {
             def ForKey : String = "FOREIGN KEY ( ";
             ForKey = ForKey + Col + ") " + "REFERENCES " + RefTable + " (" + RefCol + ")";
             this.ForgenKeyConsString.add(ForKey);
-  
+
         }
         handler this.getPrimaryKeyConsString() : String{
             return this.PrimaryKeyConsString;
             }
         handler this.getForgenKeyConsString() : Array[String]{
             return this.ForgenKeyConsString;
-            }   
+            }
     }
 }

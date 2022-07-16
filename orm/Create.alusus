@@ -7,11 +7,12 @@ module Create
 {
     class Create
     {
-        def Mysql : bool=false;
+
         def MySqlObj : MySql.Db;
-        def Pg : bool=false;
-        def PgObj : PostgresSql.Db;
-        def SqLite : bool=false;
+        def DbType : int;
+
+        def PgSqlObj : PostgresSql.Db;
+
         def SqLiteObj : Sqlite.Db;
         def ExecString : String="CREATE TABLE";
         def NotExistFlag : bool=0;
@@ -120,7 +121,7 @@ module Create
         handler this.setMysqlObj(MySqlObj : MySql.Db)
         {
             this.MySqlObj=MySqlObj;
-            this.Mysql=true;
+            this.DbType=0;
 
         }
         handler this.getMysqlObj() : MySql.Db
@@ -128,11 +129,11 @@ module Create
 
             return this.MySqlObj;
         }
-        handler this.setPgObj(PgObj :Db)
+        handler this.setPgSqlObj(PgSqlObj :Db)
         {
 
-            this.PgObj=PgObj;
-            this.Pg=true;
+            this.PgSqlObj=PgSqlObj;
+            this.DbType=1;
 
 
         }
@@ -140,11 +141,12 @@ module Create
         {
 
 
-            return this.PgObj;
+            return this.PgSqlObj;
         }
         handler this.setSqLiteObj(SqLiteObj : Sqlite.Db)
         {
             this.SqLiteObj=SqLiteObj;
+            this.DbType=2;
 
         }
         handler this.getSqLiteObj() : Sqlite.Db
@@ -154,17 +156,17 @@ module Create
         }
         handler this.exec()
         {
-            if(this.Pg==true)
+            if(this.DbType==1)
             {
                 Console.print("inside exec : ");
-                Console.print(this.PgObj.Connstring);
+                Console.print(this.PgSqlObj.Connstring);
                 Console.print("\n");
-                this.PgObj.connectDb();
-                this.PgObj.exec(this.ExecString.buf);
-                Console.print(this.PgObj.errorMessage());
+                this.PgSqlObj.connectDb();
+                this.PgSqlObj.exec(this.ExecString.buf);
+                Console.print(this.PgSqlObj.errorMessage());
 
             }
-            else if(this.Mysql==true)
+            else if(this.DbType==0)
             {
                 Console.print("inside exec mysql: ");
 
@@ -172,7 +174,7 @@ module Create
 
                 Console.print(this.ExecString.buf );
                 Console.print("\n");
-                if (mysql.Conn==null)
+                if (this.MySqlObj.Conn==null)
                 {
                     Console.print("after conn %s \n",this.MySqlObj.errorMessage() );
                 }
@@ -189,3 +191,5 @@ module Create
         }
     }
 }
+
+

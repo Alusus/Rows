@@ -114,11 +114,13 @@ module TableBuilder
 
     macro implementGetElementMods [condition, parent  ]
     {
-        preprocess
-        {
-            def var : Array[String];
-            var=TableBuilder.implementGetElementNames[elementType == "var", parent];
+
+
+
+
             def elements: Array[ref[Core.Basic.TiObject]];
+            def i : int =0;
+            def j : int =0;
             elements = Spp.astMgr.findElements(
                 ast { condition },
                 parent,
@@ -127,6 +129,7 @@ module TableBuilder
             colsMod=TableBuilder.generateAddingElementMods( elements ,var );
             def params : Array[String];
             def cmpar:Array[Array[String]]
+
             for i=0 , i<colsMod.getLength() , ++i
             {
                 cmpar.clear();
@@ -146,7 +149,10 @@ module TableBuilder
                 }
                 modsParams.add(cmpar);
             }
-        }
+
+
+
+
     }
     macro implementGetElementTypes [condition, parent]
     {
@@ -288,183 +294,504 @@ module TableBuilder
        }
        return -1;
     }
-
-    macro autoCreate [parent , tableName ,dbCon ]
-    {
-        use DataType;
-
-        def DataTypePtr : ptr[Data];
-        def paramsModsArray : Array[String];
-        def val : String;
-        def  mySqlObj : MySql.Db ;
-        def var : Array[String];
-        def colsMod : Array[Array[String]];
-        def modsParams :Array[ Array[Array[String]]];
-        def pkArray : Array[String];
-        def tableConst :Constraints.TableConstraints;
-        def table : Create.Create;
-        def colsName : Array[String];
-        def tableNameMod : String;
-         if dbCon.getDbConType()==0
-         {
-             mySqlObj=dbCon.mySqlConBuilder();  table.setMysqlObj(mySqlObj);
-        }
-        var=TableBuilder.implementGetElementNames[elementType == "var", parent];
-        def types : Array[String];
-        types=TableBuilder.implementGetElementTypes[elementType == "var", parent];
-        def i : int;
-        def j : int;
-        def k : int;
-        def c : int;
-        def index: int;
-        TableBuilder.implementGetElementMods[elementType == "var", parent ];
-
-    for i=0 , i< var.getLength() , i+=1
-       {
-
-       def integerDataType : DataType.Integer;
-    def bigIntegerDataType : DataType.BigInteger;
-    def smallIntegerDataType : SmallInteger;
-    def tinyIntegerDataType : TinyInteger;
-    def realDataType : Real;
-    def floatDataType : DataType.Float;
-    def decimalDataType : Decimal;
-    def xmlDataType : Xml;
-    def varCharDataType : VarChar;
-    def charTypeDataType : CharType;
-    def textDataType : Text;
-    def datesDataType : Dates;
-    index=-1
-     for j=0 , j< colsMod(i).getLength() && index==-1, j+=1
-       {
-
-        index=TableBuilder.isDataType(colsMod(i)(j));
-        }
-
-
-
-
-
-        if(index>-1)
+        func generateTable( tableName : String ,colsMod : Array[Array[String]] ,modsParams : Array[ Array[Array[String]]] , var : Array[String] , types : Array[String]) : TioSrdRef
         {
-            table.setColsName(var(i));
-            if (index==0)
-            {
+            def TioSrdRef: alias SrdRef[Core.Basic.TiObject];
+            use Core.Basic;
+            def result: TioSrdRef;
+            def resArray : Array[TioSrdRef];
 
-
-                DataTypePtr = integerDataType~ptr;
-            }
-            else if (index==1)
-            {
-                DataTypePtr = bigIntegerDataType~ptr;
-            }
-            else if (index==2)
-            {
-                DataTypePtr = smallIntegerDataType~ptr;
-            }
-            else if (index==3)
-            {
-                DataTypePtr = tinyIntegerDataType~ptr;
-            }
-            else if (index==4)
-            {
-                DataTypePtr = realDataType~ptr;
-            }
-            else if (index==5)
-            {
-                DataTypePtr = floatDataType~ptr;
-            }
-            else if (index==6)
-            {
-                DataTypePtr = decimalDataType~ptr;
-            }
-            else if (index==7)
-            {
-                DataTypePtr = xmlDataType~ptr;
-            }
-            else if (index==8)
-            {
-                DataTypePtr = varCharDataType~ptr;
-            }
-            else if (index==9)
-            {
-                DataTypePtr = charTypeDataType~ptr;
-            }
-            else if (index==10)
-            {
-                DataTypePtr = textDataType~ptr;
-            }
-            else if (index==11)
-            {
-                DataTypePtr = datesDataType~ptr;
-            }
-
-
-
-
-
-        for j=0 , j< colsMod(i).getLength() , j+=1
-       {
-
-
-
-           Console.print(" ");
-           if(TableBuilder.numOfParams(colsMod(i)(j))!=-1)
-           {
-
-                if(colsMod(i)(j)=="notnull")
-                {
-                    DataTypePtr~cnt.FConstrants.setNotNullConstraint();
-                }
-                else if(colsMod(i)(j)=="unique")
-                {
-                    DataTypePtr~cnt.FConstrants.setUniqueConstraint();
-                }
-                else if(colsMod(i)(j)=="pk")
-                {
-                    pkArray.add(var(i));
-                }
-
-                if(TableBuilder.numOfParams(colsMod(i)(j))>0)
-                {
-
-                    if(colsMod(i)(j)=="defult")
+            def i : int;
+            def j : int;
+            def k : int;
+            def c : int;
+            def index: int;
+            if !Spp.astMgr.buildAst
+                        (
+                        (ast  def  mySqlObj : MySql.Db ),
+                        Map[String, ref[TiObject]]()
+                            .set(String("mySqlObj"), Core.Data.Ast.Identifier("mySqlObj")),
+                        result
+                        )
                     {
-                        DataTypePtr~cnt.FConstrants.setDefaultConstraint(modsParams(i)(j)(0));
+                        System.fail(1, "generateTable/build table var : error\n");
                     }
-                    else if(colsMod(i)(j)=="check")
-                    {
-                        DataTypePtr~cnt.FConstrants.setCheckConstraint(modsParams(i )(j)(0));
-                    }
-                    else if(colsMod(i)(j)=="fk")
-                    {
-                        tableConst.addForgenKey(modsParams(i )(j)(0),modsParams(i)(j)(1),modsParams(i)(j)(2))
-                    }
-
-
+                    resArray.add(result);
+                    k=0;
+            for i=0 , i< var.getLength() , i+=1
+            {
+                index=-1
+                for j=0 , j< colsMod(i).getLength() && index==-1, j+=1
+                {
+                    index=TableBuilder.isDataType(colsMod(i)(j));
                 }
 
+                if(index>-1)
+                {
 
+
+                    if (index==0)
+                    {
+
+                        if !Spp.astMgr.buildAst
+                        (
+                        (ast{ beforData table.setColsName(String("{{varname}}"));  DataTypePtr = integerDataType~ptr;  } ),
+                        Map[String, ref[TiObject]]()
+
+                            .set(String("beforData"), resArray(k))
+                            .set(String("DataTypePtr"), Core.Data.Ast.Identifier("DataTypePtr"))
+                            .set(String("varname"), Core.Data.Ast.Identifier(var(i)))
+                            .set(String("integerDataType"), Core.Data.Ast.Identifier("integerDataType")),
+                        result
+                        )
+                    {
+                        System.fail(1, "generateTable/build Data Type var : error\n");
+                    }
+                    k=k+1;
+                    }
+                    else if (index==1)
+                    {
+
+                        if !Spp.astMgr.buildAst
+                        (
+                        (ast{ beforData table.setColsName(String("{{varname}}"));  DataTypePtr = bigIntegerDataType~ptr;  } ),
+                        Map[String, ref[TiObject]]()
+
+                            .set(String("beforData"), resArray(k))
+                            .set(String("DataTypePtr"), Core.Data.Ast.Identifier("DataTypePtr"))
+                            .set(String("varname"), Core.Data.Ast.Identifier(var(i)))
+                            .set(String("bigIntegerDataType"), Core.Data.Ast.Identifier("bigIntegerDataType")),
+                        result
+                        )
+                    {
+                        System.fail(1, "generateTable/build Data Type var : error\n");
+                    }
+                    k=k+1;
+                    }
+                    else if (index==2)
+                    {
+
+                        if !Spp.astMgr.buildAst
+                        (
+                        (ast{ beforData table.setColsName(String("{{varname}}"));  DataTypePtr = smallIntegerDataType~ptr;  } ),
+                        Map[String, ref[TiObject]]()
+
+                            .set(String("beforData"), resArray(k))
+                            .set(String("DataTypePtr"), Core.Data.Ast.Identifier("DataTypePtr"))
+                            .set(String("varname"), Core.Data.Ast.Identifier(var(i)))
+                            .set(String("smallIntegerDataType"), Core.Data.Ast.Identifier("smallIntegerDataType")),
+                        result
+                        )
+                    {
+                        System.fail(1, "generateTable/build Data Type var : error\n");
+                    }
+                    k=k+1;
+                    }
+                    else if (index==3)
+                    {
+
+                        if !Spp.astMgr.buildAst
+                        (
+                        (ast{ beforData table.setColsName(String("{{varname}}"));  DataTypePtr = tinyIntegerDataType~ptr;  } ),
+                        Map[String, ref[TiObject]]()
+
+                            .set(String("beforData"), resArray(k))
+                            .set(String("DataTypePtr"), Core.Data.Ast.Identifier("DataTypePtr"))
+                            .set(String("varname"), Core.Data.Ast.Identifier(var(i)))
+                            .set(String("tinyIntegerDataType"), Core.Data.Ast.Identifier("tinyIntegerDataType")),
+                        result
+                        )
+                    {
+                        System.fail(1, "generateTable/build Data Type var : error\n");
+                    }
+                    k=k+1;
+                    }
+                    else if (index==4)
+                    {
+
+                        if !Spp.astMgr.buildAst
+                        (
+                        (ast{ beforData table.setColsName(String("{{varname}}"));  DataTypePtr = realDataType~ptr;  } ),
+                        Map[String, ref[TiObject]]()
+
+                            .set(String("beforData"), resArray(k))
+                            .set(String("DataTypePtr"), Core.Data.Ast.Identifier("DataTypePtr"))
+                            .set(String("varname"), Core.Data.Ast.Identifier(var(i)))
+                            .set(String("realDataType"), Core.Data.Ast.Identifier("realDataType")),
+                        result
+                        )
+                    {
+                        System.fail(1, "generateTable/build Data Type var : error\n");
+                    }
+                    k=k+1;
+                    }
+                    else if (index==5)
+                    {
+
+                        if !Spp.astMgr.buildAst
+                        (
+                        (ast{ beforData table.setColsName(String("{{varname}}"));  DataTypePtr = floatDataType~ptr;  } ),
+                        Map[String, ref[TiObject]]()
+
+                            .set(String("beforData"), resArray(k))
+                            .set(String("DataTypePtr"), Core.Data.Ast.Identifier("DataTypePtr"))
+                            .set(String("varname"), Core.Data.Ast.Identifier(var(i)))
+                            .set(String("floatDataType"), Core.Data.Ast.Identifier("floatDataType")),
+                        result
+                        )
+                    {
+                        System.fail(1, "generateTable/build Data Type var : error\n");
+                    }
+                    k=k+1;
+                    }
+                    else if (index==6)
+                    {
+
+                        if !Spp.astMgr.buildAst
+                        (
+                        (ast{ beforData table.setColsName(String("{{varname}}"));  DataTypePtr = decimalDataType~ptr;  } ),
+                        Map[String, ref[TiObject]]()
+
+                            .set(String("beforData"), resArray(k))
+                            .set(String("DataTypePtr"), Core.Data.Ast.Identifier("DataTypePtr"))
+                            .set(String("varname"), Core.Data.Ast.Identifier(var(i)))
+                            .set(String("decimalDataType"), Core.Data.Ast.Identifier("decimalDataType")),
+                        result
+                        )
+                    {
+                        System.fail(1, "generateTable/build Data Type var : error\n");
+                    }
+                    k=k+1;
+                    }
+                    else if (index==7)
+                    {
+
+                        if !Spp.astMgr.buildAst
+                        (
+                        (ast{ beforData table.setColsName(String("{{varname}}"));  DataTypePtr = xmlDataType~ptr;  } ),
+                        Map[String, ref[TiObject]]()
+
+                            .set(String("beforData"), resArray(k))
+                            .set(String("DataTypePtr"), Core.Data.Ast.Identifier("DataTypePtr"))
+                            .set(String("varname"), Core.Data.Ast.Identifier(var(i)))
+                            .set(String("xmlDataType"), Core.Data.Ast.Identifier("xmlDataType")),
+                        result
+                        )
+                    {
+                        System.fail(1, "generateTable/build Data Type var : error\n");
+                    }
+                    k=k+1;
+                    }
+                    else if (index==8)
+                    {
+
+                        if !Spp.astMgr.buildAst
+                        (
+                        (ast{ beforData table.setColsName(String("{{varname}}"));  DataTypePtr = varCharDataType~ptr;  } ),
+                        Map[String, ref[TiObject]]()
+
+                            .set(String("beforData"), resArray(k))
+                            .set(String("DataTypePtr"), Core.Data.Ast.Identifier("DataTypePtr"))
+                            .set(String("varname"), Core.Data.Ast.Identifier(var(i)))
+                            .set(String("varCharDataType"), Core.Data.Ast.Identifier("varCharDataType")),
+                        result
+                        )
+                    {
+                        System.fail(1, "generateTable/build Data Type var : error\n");
+                    }
+                    k=k+1;
+                    }
+                    else if (index==9)
+                    {
+
+                        if !Spp.astMgr.buildAst
+                        (
+                        (ast{ beforData table.setColsName(String("{{varname}}"));  DataTypePtr = charTypeDataType~ptr;  } ),
+                        Map[String, ref[TiObject]]()
+
+                            .set(String("beforData"), resArray(k))
+                            .set(String("DataTypePtr"), Core.Data.Ast.Identifier("DataTypePtr"))
+                            .set(String("varname"), Core.Data.Ast.Identifier(var(i)))
+                            .set(String("charTypeDataType"), Core.Data.Ast.Identifier("charTypeDataType")),
+                        result
+                        )
+                    {
+                        System.fail(1, "generateTable/build Data Type var : error\n");
+                    }
+                    k=k+1;
+                    }
+                    else if (index==10)
+                    {
+
+                        if !Spp.astMgr.buildAst
+                        (
+                        (ast{ beforData table.setColsName(String("{{varname}}"));  DataTypePtr = textDataType~ptr;  } ),
+                        Map[String, ref[TiObject]]()
+
+                            .set(String("beforData"), resArray(k))
+                            .set(String("DataTypePtr"), Core.Data.Ast.Identifier("DataTypePtr"))
+                            .set(String("varname"), Core.Data.Ast.Identifier(var(i)))
+                            .set(String("textDataType"), Core.Data.Ast.Identifier("textDataType")),
+                        result
+                        )
+                    {
+                        System.fail(1, "generateTable/build Data Type var : error\n");
+                    }
+                    k=k+1;
+                    }
+                    else if (index==11)
+                    {
+
+                        if !Spp.astMgr.buildAst
+                        (
+                        (ast{ beforData table.setColsName(String("{{varname}}"));  DataTypePtr = datesDataType~ptr;  } ),
+                        Map[String, ref[TiObject]]()
+
+                            .set(String("beforData"), resArray(k))
+                            .set(String("DataTypePtr"), Core.Data.Ast.Identifier("DataTypePtr"))
+                            .set(String("varname"), Core.Data.Ast.Identifier(var(i)))
+                            .set(String("datesDataType"), Core.Data.Ast.Identifier("datesDataType")),
+                        result
+                        )
+                    {
+                        System.fail(1, "generateTable/build Data Type var : error\n");
+                    }
+                    k=k+1;
+                    }
+                     resArray.add(result)
+                    for j=0 , j< colsMod(i).getLength() , j+=1
+                    {
+
+                        if(TableBuilder.numOfParams(colsMod(i)(j))!=-1)
+                        {
+                            if(colsMod(i)(j)=="notnull")
+                            {
+
+                                 if !Spp.astMgr.buildAst
+                        (
+                        (ast{ beforData DataTypePtr~cnt.FConstrants.setNotNullConstraint();  } ),
+                        Map[String, ref[TiObject]]()
+
+                            .set(String("beforData"), resArray(k))
+                            .set(String("DataTypePtr"), Core.Data.Ast.Identifier("DataTypePtr"))
+                            .set(String("varname"), Core.Data.Ast.Identifier(var(i)))
+                            .set(String("datesDataType"), Core.Data.Ast.Identifier("datesDataType")),
+                        result
+                        )
+                    {
+                        System.fail(1, "generateTable/build Data Type var : error\n");
+                    }
+                    k=k+1;
+                            }
+                            else if(colsMod(i)(j)=="unique")
+                            {
+
+                                if !Spp.astMgr.buildAst
+                        (
+                        (ast{ beforData DataTypePtr~cnt.FConstrants.setUniqueConstraint();  } ),
+                        Map[String, ref[TiObject]]()
+
+                            .set(String("beforData"), resArray(k))
+                            .set(String("DataTypePtr"), Core.Data.Ast.Identifier("DataTypePtr"))
+                            .set(String("varname"), Core.Data.Ast.Identifier(var(i)))
+                            .set(String("datesDataType"), Core.Data.Ast.Identifier("datesDataType")),
+                        result
+                        )
+                    {
+                        System.fail(1, "generateTable/build Data Type var : error\n");
+                    }
+                    k=k+1;
+                            }
+                            else if(colsMod(i)(j)=="pk")
+                            {
+
+                                if !Spp.astMgr.buildAst
+                        (
+                        (ast{ beforData pkArray.add(String("{{varname}}")); } ),
+                        Map[String, ref[TiObject]]()
+
+                            .set(String("beforData"), resArray(k))
+                            .set(String("DataTypePtr"), Core.Data.Ast.Identifier("DataTypePtr"))
+                            .set(String("varname"), Core.Data.Ast.Identifier(var(i)))
+                            .set(String("datesDataType"), Core.Data.Ast.Identifier("datesDataType")),
+                        result
+                        )
+                    {
+                        System.fail(1, "generateTable/build Data Type var : error\n");
+                    }
+                    k=k+1;
+                            }
+                            if(TableBuilder.numOfParams(colsMod(i)(j))>0)
+                            {
+                                if(colsMod(i)(j)=="defult")
+                                {
+
+                                    if !Spp.astMgr.buildAst
+                        (
+                        (ast{ beforData DataTypePtr~cnt.FConstrants.setDefaultConstraint(String("{{myvar}}")); } ),
+                        Map[String, ref[TiObject]]()
+
+                            .set(String("beforData"), resArray(k))
+                            .set(String("DataTypePtr"), Core.Data.Ast.Identifier("DataTypePtr"))
+                            .set(String("myvar"), Core.Data.Ast.Identifier(modsParams(i)(j)(0)))
+                            .set(String("datesDataType"), Core.Data.Ast.Identifier("datesDataType")),
+                        result
+                        )
+                    {
+                        System.fail(1, "generateTable/build Data Type var : error\n");
+                    }
+                    k=k+1;
+                                }
+                                else if(colsMod(i)(j)=="check")
+                                {
+
+                                    if !Spp.astMgr.buildAst
+                        (
+                        (ast{ beforData DataTypePtr~cnt.FConstrants.setCheckConstraint(String("{{myvar}}")); } ),
+                        Map[String, ref[TiObject]]()
+
+                            .set(String("beforData"), resArray(k))
+                            .set(String("DataTypePtr"), Core.Data.Ast.Identifier("DataTypePtr"))
+                            .set(String("myvar"), Core.Data.Ast.Identifier(modsParams(i)(j)(0)))
+                            .set(String("datesDataType"), Core.Data.Ast.Identifier("datesDataType")),
+                        result
+                        )
+                    {
+                        System.fail(1, "generateTable/build Data Type var : error\n");
+                    }
+                     k=k+1;
+                                }
+                                else if(colsMod(i)(j)=="fk")
+                                {
+
+                                    if !Spp.astMgr.buildAst
+                        (
+                        (ast{ beforData tableConst.addForgenKey(String("{{myvar}}"),String("{{myvar2}}"),String("{{myvar3}}")); } ),
+                        Map[String, ref[TiObject]]()
+
+                            .set(String("beforData"), resArray(k))
+                            .set(String("DataTypePtr"), Core.Data.Ast.Identifier("DataTypePtr"))
+                            .set(String("myvar"), Core.Data.Ast.Identifier(modsParams(i)(j)(0)))
+                            .set(String("myvar2"), Core.Data.Ast.Identifier(modsParams(i)(j)(3)))
+                            .set(String("myvar3"), Core.Data.Ast.Identifier(modsParams(i)(j)(2)))
+                            .set(String("datesDataType"), Core.Data.Ast.Identifier("datesDataType")),
+                        result
+                        )
+                    {
+                        System.fail(1, "generateTable/build Data Type var : error\n");
+                    }
+                     k=k+1;
+                                }
+
+
+                            }
+                            resArray.add(result);
+                    }
+
+                }
+                if !Spp.astMgr.buildAst
+                        (
+                        (ast{ beforData table.setDataType(DataTypePtr); table.addToColsString(); DataTypePtr~cnt.FConstrants.clearFConstraint(); } ),
+                        Map[String, ref[TiObject]]()
+
+                            .set(String("beforData"), resArray(k))
+                            .set(String("DataTypePtr"), Core.Data.Ast.Identifier("DataTypePtr"))
+                            .set(String("myvar"), Core.Data.Ast.Identifier(modsParams(i)(j)(0)))
+                            .set(String("myvar2"), Core.Data.Ast.Identifier(modsParams(i)(j)(3)))
+                            .set(String("myvar3"), Core.Data.Ast.Identifier(modsParams(i)(j)(2)))
+                            .set(String("datesDataType"), Core.Data.Ast.Identifier("datesDataType")),
+                        result
+                        )
+                    {
+                        System.fail(1, "generateTable/build Data Type var : error\n");
+                    }
+                     k=k+1;
+                     resArray.add(result);
+            }
         }
 
+         if !Spp.astMgr.buildAst
+                        (
+                        (ast function create(dbCon : DbConBuilder.DbConBuilder )
+                        {
+                            use DataType;
+                            def DataTypePtr : ptr[Data];
+                            def integerDataType : DataType.Integer;
+                            def bigIntegerDataType : DataType.BigInteger;
+                            def smallIntegerDataType : SmallInteger;
+                            def tinyIntegerDataType : TinyInteger;
+                            def realDataType : Real;
+                            def floatDataType : DataType.Float;
+                            def decimalDataType : Decimal;
+                            def xmlDataType : Xml;
+                            def varCharDataType : VarChar;
+                            def charTypeDataType : CharType;
+                            def textDataType : Text;
+                            def datesDataType : Dates;
+                            def paramsModsArray : Array[String];
+                            def val : String;
+                            def  mySqlObj : MySql.Db ;
+                            def  pgSqlObj : PostgresSql.Db ;
+                            def pkArray : Array[String];
+                            def tableConst :Constraints.TableConstraints;
+                            def table : Create.Create;
+                            def colsName : Array[String];
+                            def tableNameMod : String;
+                            if dbCon.getDbConType()==0
+                            {
+                                mySqlObj=dbCon.mySqlConBuilder();  table.setMysqlObj(mySqlObj);
+                            }
+                            else if dbCon.getDbConType()==0
+                            {
+                                pgSqlObj=dbCon.pgSqlConBuilder(); table.setPgSqlObj(pgSqlObj);
+                            }
+                            insertCols
+                            tableConst.setPrimaryKeyConstraint(pkArray);
+                            table.setTConst(tableConst~ptr);
+                            table.setTConstString();
+                            table.setExecString();
+                            table.setTableName(String("{{tableName}}"));
+                            def ex:String;
+                            table.setExecString();
+                            ex=table.getExecString();
+                            table.exec();
+                        } ),
+                        Map[String, ref[TiObject]]()
 
-        }
-        table.setDataType(DataTypePtr);
+                            .set(String("insertCols"), resArray(k))
+                            .set(String("DataTypePtr"), Core.Data.Ast.Identifier("DataTypePtr"))
+                            .set(String("tableName"), Core.Data.Ast.Identifier(tableName))
+                            .set(String("datesDataType"), Core.Data.Ast.Identifier("datesDataType")),
+                        result
+                        )
+                    {
+                        System.fail(1, "generateTable/build Data Type var : error\n");
+                    }
+                    return result
 
-        table.addToColsString();
-
-       }
     }
 
-    tableConst.setPrimaryKeyConstraint(pkArray);
-    table.setTConst(tableConst~ptr);
-    table.setTConstString();
-    table.setExecString();
-    table.setTableName(tableName);
-    def ex:String;
-    table.setExecString();
-    ex=table.getExecString();
-    table.exec();
+
+    macro autoCreate[parent , tableName ]
+    {
+             preprocess
+        {
+
+            def colsMod : Array[Array[String]];
+            def modsParams :Array[ Array[Array[String]]];
+            def var : Array[String];
+            var=TableBuilder.implementGetElementNames[elementType == "var", parent];
+            def types : Array[String];
+            types=TableBuilder.implementGetElementTypes[elementType == "var", parent];
+            TableBuilder.implementGetElementMods[elementType == "var", parent ];
+
+            if !Spp.astMgr.insertAst(
+                                                        TableBuilder.generateTable(tableName , colsMod , modsParams , var ,types ).obj
+                                                             ) {
+                                                           System.fail(1, "Failed to insert statment.\n");
+                                                                 }
+        }
+
 
 }
 }

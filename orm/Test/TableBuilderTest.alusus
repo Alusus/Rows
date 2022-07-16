@@ -16,7 +16,8 @@ def ssd:int;
 def ss:String;
 
 @defult["'sleman'" ]
-def Name :VarChar;
+@VarChar
+def Name :String;
 
 }
 
@@ -41,4 +42,5 @@ DbCon.setPassword(Password);
 DbCon.setServer(server);
 DbCon.setDbConType(0);
 
-TableBuilder.autoCreate[Cars~ast , String("Cars") , DbCon]
+TableBuilder.autoCreate[Cars~ast , String("Cars")]
+create(DbCon);

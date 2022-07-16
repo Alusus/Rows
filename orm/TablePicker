@@ -1,0 +1,43 @@
+    this.MySqlObj.exec(this.ExecString.buf);
+               Console.print("inside genrateColsData  \n");
+               if (this.MySqlObj.ResultState != 0)
+	       {
+		    Console.print("after exec %s \n",this.MySqlObj.errorMessage() );
+	       }
+	       if (this.MySqlObj.Res==null)
+	       {
+		    Console.print("after storeRes %s \n",this.MySqlObj.errorMessage() );
+	       }
+	       else
+	       {
+	           def numberOfFileds : int;
+	           numberOfFileds=this.MySqlObj.getFiledsNumber();
+	           this.MySqlObj.getRow();
+	           this.MySqlObj.getCol();
+	           def i:int;
+	           while(this.MySqlObj.Row!=null)
+	           {
+	               for i = 0, i < numFields, i = i+1
+	               {
+	                   if (i==0)
+			   {
+			       while(this.MySqlObj.Field!=null)
+			       {
+			           Console.print("%s ",this.MySqlObj.Field~cnt.name);
+			           this.MySqlObj.getCol();
+			       }
+			       Console.print("\n");
+
+			   }
+                           Console.print("%s %d ", this.MySqlObj.Row~cnt(i),i);
+	               }
+	               this.MySqlObj.getRow();
+	           }
+	       }
+           }
+           else if(this.Pg==true)
+           {
+               ExecString="select column_name, data_type from information_schema.columns where table_name = '";
+               ExecString=ExecString+this.TableName +"';" ;
+           }
+           this.setExecString(ExecString);

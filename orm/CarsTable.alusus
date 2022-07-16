@@ -1,3 +1,81 @@
-//this is my auto genrated Class !
- import "Data";
-Console.print(" hello there!   \n");
+import "Srl/Console";
+import "Srl/refs";
+import "Srl/System";
+import "Core/Data";
+import "Spp";
+
+use Srl;
+use Core.Basic;
+use Core.Data;
+use Core.Data.Ast;
+def TioSrdRef: alias SrdRef[Core.Basic.TiObject];
+
+func generateWhere (obj: ref[TiObject]): TioSrdRef {
+    def result: TioSrdRef;
+    def var : Array[String];
+    def types : Array[String];
+
+     def list: SrdRef[Core.Data.Ast.Scope] = newSrdObj[Core.Data.Ast.Scope];
+
+def listContainer: DynContainerOf[list.obj];
+    if obj~ptr == 0 {
+        System.fail(1, "generateWhere: obj is null.\n");
+    }
+
+
+        def binding: ref[Binding](getInterface[obj, Binding]);
+        def mapContaining: ref[MapContaining](getInterface[obj, MapContaining]);
+                if !Spp.astMgr.buildAst(
+           ( ast def names:X="test"  ),
+            Map[String, ref[TiObject]]()
+                .set(String("name"), Core.Data.Ast.Identifier(String("haha")))
+                .set(String("op"), binding.getMember("type"))
+                .set(String("X"), Core.Data.Ast.Identifier(String("sw")))
+                .set(String("val"), Core.Data.Ast.Identifier(String("sw"))),
+            result
+        ) {
+            System.fail(1, "generateWhere/ComparisonOperator: error\n");
+        }
+       listContainer.addElement(result.obj);
+
+
+
+        if !Spp.astMgr.buildAst(
+            ast {q=String("{{name}}") + String(" {{op}} ") + val   },
+            Map[String, ref[TiObject]]()
+                .set(String("name"), Core.Data.Ast.Identifier(String("haha")))
+                .set(String("q"), Core.Data.Ast.Identifier(String("query")))
+                .set(String("op"), binding.getMember("type"))
+                .set(String("val"), Core.Data.Ast.Identifier(String("names"))),
+
+            result
+        ) {
+            System.fail(1, "generateWhere/ComparisonOperator: error\n");
+        }
+ listContainer.addElement(result.obj);
+    return castSrdRef[list, TiObject];
+}
+
+macro where [condition] {
+    preprocess {
+        if !Spp.astMgr.insertAst(
+            generateWhere(ast condition).obj
+        ) {
+            System.fail(1, "Failed to insert condition.\n");
+        }
+    }
+}
+
+func test {
+
+    def firstName: String("Mohammed");
+    def position: String("Engineer");
+    def sw: String="dfg";
+
+    def query: String;
+     where[name == firstName && (pos == position || pos == "Lawyer")];
+
+    Console.print("%s\n", query.buf);
+}
+test();
+dump_ast test;

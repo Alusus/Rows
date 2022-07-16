@@ -1,0 +1,35 @@
+import "Insert";
+import "DbConBuilder";
+
+def DbCon :  DbConBuilder.DbConBuilder;
+def DbName : String="testdb";
+DbCon.setDBName(DbName);
+def UserName : String="user12";
+DbCon.setUserName(UserName);
+def Password : String="Qwerty231@#!";
+DbCon.setPassword(Password);
+def server : String="localhost";
+DbCon.setServer(server);
+
+def mysql :MySql.Db;
+mysql=DbCon.mySqlConBuilder();
+def table : Insert.Insert;
+def tableName : String;
+def data : Array[String];
+def colname : Array[String];
+data.add(String("149"));
+data.add(String("'KIA'"));
+data.add(String("750000"));
+tableName="cars";
+colname.add(String("id"));
+colname.add(String("name"));
+colname.add(String("price"));
+table.setTableName(tableName);
+table.setData(data);
+table.setMySqlObj(mysql);
+table.setColsName(colname);
+table.genrateColsString();
+table.setValString();
+table.setExecString();
+Console.print(table.getExecString());
+table.exec();

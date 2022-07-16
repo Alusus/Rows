@@ -1,0 +1,51 @@
+import "Srl/Console";
+import "mysql";
+func main {
+	use Srl;
+	def mysql: MySql.Db ( "localhost", "user12", "Qwerty231@#!","testdb", 0, null, 0);
+        def ms:MySql.Db;
+        ms=mysql;
+
+	if (mysql.Conn==null)
+		Console.print("after conn %s \n",mysql.errorMessage() );
+	ms.exec("SELECT * FROM cars");
+	if (ms.ResultState != 0)
+		Console.print("after exec %s \n",mysql.errorMessage() );
+	ms.storeRes();
+	if (mysql.Res==null)
+		Console.print("after storeRes %s \n",mysql.errorMessage() );	
+	def numFields:int;
+
+	numFields=ms.getFiledsNumber();
+	Console.print("numFields %d\n",numFields);
+	ms.getRow();
+	ms.getCol();
+	def i:int;
+	while(ms.Row!=null)
+		{
+			for i = 0, i < numFields, i = i+1
+				{
+                                        
+					if (i==0)
+						{
+							while(ms.Field!=null)
+								{
+                                                                  
+								  Console.print("%s ",ms.Field~cnt.name);	
+								  ms.getCol();
+								}
+							Console.print("\n");
+								
+						}
+					Console.print("%s %d ", ms.Row~cnt(i),i);
+					
+				}
+			ms.getRow();
+			
+		}
+	Console.print("\n");
+
+ms.clearResult();
+ms.endConnection();
+}
+main();
