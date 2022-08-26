@@ -1,0 +1,227 @@
+import "Constraints";
+module DataType
+{
+    class Data
+    {
+
+        def FConstrants :  Constraints.FiledConstraints;
+        def MySqlString : String;
+        def SqliteString : String;
+        def PgSqlString : String ;
+        def Type : String ;
+        def IntValue:int;
+        def IsIntValue:bool=0;
+        def FloatValue:float;
+        def IsFloatValue:bool=0;
+        def CharValue:char;
+        def IsCharValue:bool=0;
+        def StringValue:String;
+        def IsStringValue:bool=0;
+        def DataBaseType:int=0;  //0 for mysql 1 for sqlite and 2 for pgsql
+
+        handler this.getDataString() :String
+        {
+            if this.DataBaseType==0
+                {return this.MySqlString;}
+            else if this.DataBaseType==1
+                {return this.SqliteString;}
+            else if this.DataBaseType==2
+                {return this.PgSqlString;}
+            else
+                {return this.PgSqlString;}
+        }
+        handler this.setCostType(Type : String)
+        {
+           this.Type=Type;
+        }
+        handler this.getCostType() :String
+        {
+            return this.Type;
+        }
+        handler this.getFConstrants() :Constraints.FiledConstraints
+        {
+            return this.FConstrants;
+        }
+        handler this.getIntValue() :int
+        {
+            return this.IntValue;
+
+        }
+        handler this.setIntValue (IntValue : int)
+        {
+            this.IntValue=IntValue;
+        }
+        handler this.getCharValue() :char
+        {
+            return this.CharValue;
+
+        }
+        handler this.setCharValue (CharValue : char)
+        {
+            this.CharValue=CharValue;
+        }
+        handler this.getStringValue() :String
+        {
+            return this.StringValue;
+
+        }
+        handler this.setStringValue (StringValue : String)
+        {
+            this.StringValue=StringValue;
+        }
+        handler this.getFloatValue() :float
+        {
+            return this.StringValue;
+
+        }
+        handler this.setFloatValue (FloatValue : float)
+        {
+            this.FloatValue=FloatValue;
+        }
+    }
+    class Integer
+    {
+        @injection def data:Data;
+        this.MySqlString ="INT";
+        this.SqliteString  ="INTEGER";
+        this.PgSqlString  ="integer";
+        this.IsIntValue=1;
+    }
+    class BigInteger
+    {
+        @injection def data:Data;
+        this.MySqlString  ="BIGINT";
+        this.PgSqlString   ="bigint";
+        this.SqliteString   ="INTEGER";
+        this.IsIntValue=1;
+    }
+    class SmallInteger
+    {
+        @injection def data:Data;
+        this.MySqlString  ="SMALLINT";
+        this.PgSqlString   ="smallint";
+        this.SqliteString   ="INTEGER";
+        this.IsIntValue=1;
+
+
+    }
+    class TinyInteger
+    {
+        @injection def data:Data;
+        this.MySqlString  ="TINYINT";
+        this.PgSqlString   ="smallint";
+        this.SqliteString   ="INTEGER";
+        this.IsIntValue=1;
+    }
+    class Real
+    {
+        @injection def data:Data;
+        this.MySqlString  ="REAL";
+        this.PgSqlString   ="real";
+        this.SqliteString   ="REAL";
+        this.IsFloatValue=1;
+    }
+    class Float
+    {
+        @injection def data:Data;
+        this.MySqlString  ="FLOAT";
+        this.PgSqlString   ="double precision";
+        this.SqliteString   ="REAL";
+        this.IsFloatValue=1;
+    }
+    class Decimal
+    {
+        @injection def data:Data;
+        this.MySqlString ="DECIMAL";
+        this.PgSqlString   ="double precision";
+        this.SqliteString ="DECIMAL";
+        this.IsFloatValue=1;
+    }
+    class Xml
+    {
+        @injection def data:Data;
+        this.MySqlString  ="XML";
+        this.PgSqlString   ="";
+        this.SqliteString   ="";
+        this.IsStringValue=1;
+    }
+  class VarChar
+    {
+        @injection def data:Data;
+        def length : int=50;
+        this.MySqlString ="VARCHAR";
+        this.PgSqlString ="varchar";
+        this.SqliteString  ="VARCHAR";
+        this.IsStringValue=1;
+        handler this~init(length: int)
+        {
+            this.length=length;
+            this.MySqlString=this.MySqlString + "(" + this.length + ")";
+            this.PgSqlString=this.PgSqlString + "(" + this.length + ")";
+            this.SqliteString=this.SqliteString + "(" + this.length + ")";
+
+        }
+        handler this~init()
+        {
+            this.MySqlString=this.MySqlString + "(" + this.length + ")";
+            this.PgSqlString=this.PgSqlString + "(" + this.length + ")";
+            this.SqliteString=this.SqliteString + "(" + this.length + ")";
+        }
+    }
+    class CharType
+    {
+        @injection def data:Data;
+        def length : int=1;
+        this.MySqlString ="CHAR";
+        this.PgSqlString  ="char";
+        this.SqliteString   ="CHAR";
+        this.IsCharValue=1;
+        handler this~init(length: int)
+        {
+            this.length=length;
+            this.MySqlString=this.MySqlString + "(" + this.length + ")";
+            this.PgSqlString=this.PgSqlString + "(" + this.length + ")";
+            this.SqliteString=this.SqliteString + "(" + this.length + ")";
+
+        }
+        handler this~init()
+        {
+            this.MySqlString=this.MySqlString + "(" + this.length + ")";
+            this.PgSqlString=this.PgSqlString + "(" + this.length + ")";
+            this.SqliteString=this.SqliteString + "(" + this.length + ")";
+        }
+
+    }
+    class Text
+    {
+        @injection def data:Data;
+        def length : int=50;
+        this.MySqlString ="TEXT";
+        this.PgSqlString  ="TEXT";
+        this.SqliteString   ="TEXT";
+        this.IsStringValue=1;
+        handler this~init(length: int)
+        {
+            this.length=length;
+            this.MySqlString=this.MySqlString + "(" + this.length + ")";
+            this.PgSqlString=this.PgSqlString + "(" + this.length + ")";
+            this.SqliteString=this.SqliteString + "(" + this.length + ")";
+
+        }
+        handler this~init()
+        {
+            this.MySqlString=this.MySqlString + "(" + this.length + ")";
+            this.PgSqlString=this.PgSqlString + "(" + this.length + ")";
+            this.SqliteString=this.SqliteString + "(" + this.length + ")";
+        }
+
+    }
+    class Dates
+    {
+        @injection def data:Data;
+        this.MySqlString  ="Date";
+        this.PgSqlString  ="date";
+        this.MySqlString  ="Date";
+        this.IsStringValue=1;
+    }
+}

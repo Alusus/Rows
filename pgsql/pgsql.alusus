@@ -1,0 +1,155 @@
+import "Srl/Console.alusus";
+import "Srl/String";
+import "libpq.so";
+/*
+    Linux .so | .so.0
+    Mac OS .dylib
+    Windows .lib
+*/
+
+module PostgresSql {
+	def Connection:{
+		def OK: 0;
+		def BAD: 1;
+
+			}
+	def Result:{
+		def EMPTY_QUERY: 0;
+		def COMMAND_OK: 1;
+		def TUPLES_OK: 2;
+		def COPY_OUT: 3;
+		def COPY_IN: 4;
+		def BAD_RESPONSE: 5;
+		def NONFATAL_ERROR: 6;
+		def FATAL_ERROR: 7;
+		def COPY_BOTH: 8;
+		def SINGLE_TUPLE: 9;
+		def PIPELINE_SYNC: 10;
+		def PIPELINE_ABORTED: 11;
+			}
+    class PGconn{}
+    class PGresult{}
+    class Db {
+
+        use Srl;
+        def Conn: ptr[PGconn] ;
+        def Res: ptr[PGresult] ;
+	    def ResultState: int ;
+        def Connstring : String;
+
+
+
+        handler this~init(Connstring: String) {
+            this.Connstring=Connstring;
+            this.connectDb();
+        }
+
+        handler this~init() {
+
+        }
+
+        handler this~init(ref[Db])
+        {
+            this.ResultState=value.ResultState;
+            this.Connstring=value.Connstring;
+        }
+        handler this = ref[Db]
+        {
+
+            this.ResultState=value.ResultState;
+            this.Connstring=value.Connstring;
+            this.Conn=value.Conn;
+        }
+
+        handler this.setConnstring(Connstring: String ) {
+
+           this.Connstring= Connstring;
+           connectDb();
+
+        }
+
+        handler this.connectDb() {
+            this.Conn=  connect(this.Connstring.buf);
+        }
+
+        handler this.exec(Sql: CharsPtr) {
+
+           this.Res= PostgresSql.exec(this.Conn,Sql);
+
+        }
+
+
+        handler this.connStatus(): int {
+            return PostgresSql.connStatus(this.Conn);
+        }
+
+        handler this.resStatus():int {
+            this.ResultState=PostgresSql.resStatus(this.Res);
+            return this.ResultState;
+        }
+        handler this.getValue(Row : int , Collomn : int):CharsPtr {
+            return PostgresSql.getValue(this.Res , Row , Collomn);
+        }
+        handler this.getCols():int {
+            return PostgresSql.getCols(this.Res);
+        }
+        handler this.getRows():int {
+            return PostgresSql.getRows(this.Res);
+        }
+        handler this.clearResult(){
+             PostgresSql.clearResult(this.Res);
+        }
+
+        handler this.endConnection(){
+             PostgresSql.endConnection(this.Conn);
+        }
+
+        handler this.errorMessage():CharsPtr{
+             return PostgresSql.errorMessage(this.Conn);
+        }
+
+        handler this.getColsName(Collomn : int):CharsPtr {
+            return PostgresSql.getColsName(this.Res , Collomn);
+        }
+
+        handler this.execWithParams(Query : CharsPtr , NumberOfParam : int , ParamValues :ptr[array[CharsPtr]] , DataType : int) {
+             this.Res= PostgresSql.execWithParams(this.Conn , Query , NumberOfParam , null , ParamValues , null , null , DataType);
+        }
+    }
+    @expname[PQconnectdb]
+    func connect(connString: CharsPtr): ptr[PGconn];
+
+    @expname[PQexec]
+    func exec(conn: ptr[PGconn] , query: CharsPtr): ptr[PGresult];
+
+    @expname[PQstatus]
+    func connStatus(conn: ptr[PGconn] ): int;
+
+    @expname[PQresultStatus]
+    func resStatus(res: ptr[PGresult] ): int;
+
+    @expname[PQgetvalue]
+    func getValue(res: ptr[PGresult] , row: int , collomn : int): CharsPtr;
+
+    @expname[PQntuples]
+    func getRows(res: ptr[PGresult]): int;
+
+    @expname[PQclear]
+    func clearResult(res: ptr[PGresult]);
+
+    @expname[PQfinish]
+    func endConnection(conn: ptr[PGconn]);
+
+    @expname[PQerrorMessage]
+    func errorMessage(conn: ptr[PGconn]):CharsPtr;
+
+    @expname[PQnfields]
+    func getCols(res: ptr[PGresult]):int;
+
+    @expname[PQfname]
+    func getColsName(res: ptr[PGresult] , colNumber: int):CharsPtr;
+
+    @expname[PQexecParams]
+    func execWithParams(conn: ptr[PGconn] , query: CharsPtr , numberOfParam : int , server : ptr[int] , paramValues : ptr[array[CharsPtr]] ,b : ptr[int] ,s : ptr[int] , dataType : int ):ptr[PGresult];
+
+}

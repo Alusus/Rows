@@ -1,0 +1,171 @@
+import "Data";
+module DbConBuilder
+{
+    class DbConBuilder
+    {
+        def DbName : String="";
+        def UserName : String="";
+        def Password : String="";
+        def Server : String="";
+        def Port : int=0;
+        def UnixSocket : String=null;
+        def ClientFlag : int=0;
+        def DbConType : int
+        def Db:{
+		def MYSQL: 0;
+		def SQLITE: 1;
+		def PGSQL: 2;
+			}
+
+        handler this~init() {}
+
+        handler this~init(DbName : String , UserName : String , Password : String ,  Server : String )
+         {
+                       this.DbName=DbName;
+
+            this.UserName=UserName;
+            this.Password=Password;
+            this.Server=Server
+
+         }
+
+         handler this~init(ref[DbConBuilder])
+        {
+
+            this.DbName=value.DbName;
+
+            this.UserName=value.UserName;
+            this.Password=value.Password;
+            this.Server=value.Server;
+
+
+	    this.Password=value.Password;
+	    this.Port=value.Port;
+	    this.UnixSocket=null;
+	    this.ClientFlag=value.ClientFlag;
+	    this.DbConType=value.DbConType;
+        }
+        handler this = ref[DbConBuilder]
+        {
+
+            this.DbName=value.DbName;
+
+            this.UserName=value.UserName;
+            this.Password=value.Password;
+            this.Server=value.Server;
+
+
+	    this.Password=value.Password;
+	    this.Port=value.Port;
+	    this.UnixSocket=null;
+	    this.ClientFlag=value.ClientFlag;
+	    this.DbConType=value.DbConType;
+        }
+
+
+        handler this.setDBName(DbName : String)
+        {
+            this.DbName=DbName;
+        }
+        handler this.getDbName() : String
+        {
+            return this.DbName;
+        }
+
+        handler this.setDbConType(DbConType : int)
+        {
+            this.DbConType=DbConType;
+        }
+        handler this.getDbConType() : int
+        {
+            return this.DbConType;
+        }
+
+        handler this.setUserName(UserName : String)
+        {
+            this.UserName=UserName;
+        }
+        handler this.getUserName() : String
+        {
+            return this.UserName;
+        }
+
+        handler this.setPassword(Password : String)
+        {
+            this.Password=Password;
+        }
+        handler this.getPassword() : String
+        {
+            return this.Password;
+        }
+
+        handler this.setServer(Server : String)
+        {
+            this.Server=Server;
+
+        }
+        handler this.getServer() : String
+        {
+            return this.Server;
+        }
+
+        handler this.setPort(Port : int)
+        {
+            this.Port=Port;
+        }
+        handler this.getPort() : int
+        {
+            return this.Port;
+        }
+
+        handler this.setUnixSocket(UnixSocket : String)
+        {
+            this.UnixSocket=UnixSocket;
+        }
+        handler this.getUnixSocket() : String
+        {
+            return this.UnixSocket;
+        }
+
+        handler this.setClientFlag(ClientFlag : int)
+        {
+            this.ClientFlag=ClientFlag;
+        }
+        handler this.getClientFlag() : int
+        {
+            return this.ClientFlag;
+        }
+
+        handler this.pgSqlConStringBuilder() : String
+        {
+            def PgSqlString : String ="user = ";
+            PgSqlString=PgSqlString +  this.UserName + " password = " + this.Password+" dbname = "+this.DbName;
+            return PgSqlString;
+        }
+        handler this.pgSqlConBuilder() : PostgresSql.Db
+        {
+            def PgSqlString : String ;
+            PgSqlString=this.pgSqlConStringBuilder();
+            def PgSql : PostgresSql.Db(PgSqlString);
+            return PgSql;
+        }
+
+        handler this.mySqlConBuilder() : MySql.Db
+        {
+
+            def MySql : MySql.Db(this.Server,this.UserName,this.Password,this.DbName,this.Port,this.UnixSocket,this.ClientFlag);
+
+            return MySql;
+        }
+
+        handler this.sqLiteConBuilder() : Sqlite.Db
+        {
+
+            def sqlite: Sqlite.Db = this.DbName;
+            return sqlite;
+        }
+
+
+
+    }
+}
