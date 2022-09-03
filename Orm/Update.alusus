@@ -1,16 +1,15 @@
-import "Data";
-module Insert
+@merge module Rows
 {
-    class Insert
+    class Update
     {
-        def ExecString : String="INSERT INTO ";
+        def ExecString : String="UPDATE ";
         def Name : String="";
         def Data : Array[String];
         def ColsName : Array[String];
-        def ColsString : String="";
-        def ValString : String="";
+        def ConString : String="";
+        def UpdateString : String="";
         def DbType : int;
-        def PgSqlObj : PostgresSql.Db;
+        def PgSqlObj : PostgreSql.Db;
         def MySqlObj : MySql.Db ;
         def SqliteObj : Sqlite.Db;
 
@@ -32,6 +31,18 @@ module Insert
 
         }
 
+        handler this.setUpdateString(UpdateString : String)
+        {
+            this.UpdateString=UpdateString;
+
+        }
+
+        handler this.getUpdateString() : String
+        {
+            return this.UpdateString;
+
+        }
+
         handler this.setMySqlObj(MySqlObj : MySql.Db)
         {
             this.MySqlObj=MySqlObj;
@@ -44,12 +55,12 @@ module Insert
 
         }
 
-        handler this.setPgSqlObj(PgSqlObj : PostgresSql.Db)
+        handler this.setPgSqlObj(PgSqlObj : PostgreSql.Db)
         {
             this.PgSqlObj=PgSqlObj;
 
         }
-        handler this.getPgSqlObj() : PostgresSql.Db
+        handler this.getPgSqlObj() : PostgreSql.Db
         {
             return this.PgSqlObj;
 
@@ -66,17 +77,6 @@ module Insert
 
         }
 
-        handler this.getColsString() : String
-        {
-            return this.ColsString;
-
-        }
-        handler this.setColsString(ColsString : String)
-        {
-             this.ColsString = ColsString;
-        }
-
-
         handler this.setColsName(ColsName : Array[String])
         {
             this.ColsName=ColsName;
@@ -87,48 +87,13 @@ module Insert
             return this.ColsName;
 
         }
-
-        handler this.genrateColsString()
+        handler this.setConString(ConString : String)
         {
-            this.ColsString="( ";
-            def i : int =0;
-            def size : int =0;
-            if (this.Data.getLength()<this.ColsName.getLength())
-                {size=this.Data.getLength();}
-            else{
-                size=this.ColsName.getLength();}
-            for i=0 , i<size-1 , i=i+1
-            {
-                this.ColsString=this.ColsString+this.ColsName(i) + ",";
-
-            }
-
-                this.ColsString=this.ColsString+this.ColsName(size-1) ;
-
-
-             this.ColsString=this.ColsString + ")";
-
+            this.ConString=ConString;
         }
-        handler this.setValString()
+        handler this.getConString() : String
         {
-            this.ValString="( ";
-            def i : int =0;
-            def size : int =0;
-            if (this.Data.getLength()<this.ColsName.getLength())
-                {size=this.Data.getLength();}
-            else{
-                size=this.ColsName.getLength();}
-            for i=0 , i<size-1 , i=i+1
-            {
-                this.ValString=this.ValString + this.Data(i) + ", ";
-            }
-            this.ValString=this.ValString + this.Data(size-1)  ;
-             this.ValString=this.ValString + ")";
-
-        }
-        handler this.getColsString() : String
-        {
-            return this.ColsString;
+            return this.ConString;
 
 
         }
@@ -138,12 +103,29 @@ module Insert
         }
         handler this.setExecString()
         {
-            this.ExecString="INSERT INTO";
-
+            def i : int=0;
+            this.ExecString="UPDATE";
             this.ExecString=this.ExecString+" "  +this.Name + "\n";
-            this.ExecString=this.ExecString + this.ColsString + "\n" ;
-            this.ExecString=this.ExecString + "VALUES " ;
-            this.ExecString=this.ExecString + this.ValString + "\n" ;
+            this.ExecString=this.ExecString + String(" SET ");
+            if(this.UpdateString=="")
+            {
+                for i=0 , i< this.Data.getLength()-1 , i=i+1
+                {
+                    this.ExecString = this.ExecString + this.ColsName(i) + String(" = ") + this.Data(i) + String(" , ");
+                }
+                if (this.Data.getLength()>0)
+                {
+                    this.ExecString = this.ExecString + this.ColsName(this.ColsName.getLength()-1) + String(" = ") + this.Data(this.Data.getLength()-1) + String("\n");
+                }
+            }
+            else
+            {
+                this.ExecString=this.ExecString + this.UpdateString + String("\n");
+            }
+
+
+            this.ExecString=this.ExecString + " WHERE " ;
+            this.ExecString=this.ExecString + this.ConString + "\n" ;
         }
 
         handler this.exec()
@@ -158,9 +140,6 @@ module Insert
             }
             else if(this.DbType==0)
             {
-
-                Console.print(this.ExecString.buf );
-                Console.print("\n");
                 if (this.MySqlObj.Conn==null)
                 {
                     Console.print("after conn %s \n",this.MySqlObj.errorMessage() );

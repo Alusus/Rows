@@ -1,0 +1,46 @@
+import "../Rows"
+
+class Cars {
+    @defult["10"]
+    @notnull
+    @pk
+    @Integer
+    def Id :int;
+
+    @ssw
+    def i:String;
+
+    @Integer
+    def ssd:int;
+
+    @VarChar
+    def ss:String;
+
+    @defult["'sleman'" ]
+    @VarChar
+    def Name :String;
+}
+
+def Tname : String;
+Tname="Cars";
+def DbName : String="testdb";
+
+def UserName : String="user12";
+
+def Password : String="Qwerty231@#!";
+
+def server : String="localhost";
+
+def DbCon :  Rows.DbConBuilder;
+
+DbCon.setDBName(DbName);
+
+DbCon.setUserName(UserName);
+
+DbCon.setPassword(Password);
+
+DbCon.setServer(server);
+DbCon.setDbConType(0);
+
+Rows.autoCreate[Cars~ast , String("Cars")]
+create(DbCon);

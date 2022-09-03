@@ -1,7 +1,7 @@
 import "Insert";
 import "DbConBuilder";
 
-def DbCon :  DbConBuilder.DbConBuilder;
+def DbCon :  DbConBuilder;
 def DbName : String="testdb";
 DbCon.setDBName(DbName);
 def UserName : String="user12";
@@ -13,7 +13,7 @@ DbCon.setServer(server);
 
 def mysql :MySql.Db;
 mysql=DbCon.mySqlConBuilder();
-def table : Insert.Insert;
+def table : Insert;
 def tableName : String;
 def data : Array[String];
 def colname : Array[String];

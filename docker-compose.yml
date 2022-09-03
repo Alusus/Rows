@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  mysql_db:
+    image: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: alusus
+      MYSQL_USER: alusus
+      MYSQL_PASSWORD: alusus
+      MYSQL_DATABASE: alusus
+    ports:
+      - 3306:3306
+
+  postgres_db:
+    image: postgres:13-alpine
+    environment:
+      POSTGRES_USER: alusus
+      POSTGRES_PASSWORD: alusus
+    ports:
+      - 5432:5432
+

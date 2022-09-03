@@ -1,0 +1,34 @@
+import "Srl/Console";
+import "Srl/refs";
+import "Srl/System";
+import "Srl/Array";
+import "Srl/Map";
+import "Srl/String";
+
+import "Core/Data";
+import "Spp";
+
+import "Connectors/MySql";
+import "Connectors/PostgreSql";
+
+import "Orm/AutoBuild";
+import "Orm/Constraints";
+import "Orm/Create";
+import "Orm/Data";
+import "Orm/DbConBuilder";
+import "Orm/Delete"
+import "Orm/Insert";
+import "Orm/Receive";
+import "Orm/TableBuilder";
+import "Orm/Update";
+
+@merge module Rows {
+    use Srl;
+    use Core.Basic;
+    use Core.Data;
+    use Core.Data.Ast;
+
+    @expname[atof] func parseFloat(CharsPtr): Float[64];
+    @expname[atoi] func parseInt(CharsPtr): int;
+}
+

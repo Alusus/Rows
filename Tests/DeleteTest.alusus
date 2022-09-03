@@ -1,6 +1,6 @@
 import "Delete.alusus"
 
-def DbCon :  DbConBuilder.DbConBuilder;
+def DbCon :  DbConBuilder;
 def DbName : String="testdb";
 DbCon.setDBName(DbName);
 def UserName : String="user12";
@@ -17,7 +17,7 @@ def tableName : String;
 def wherCond:String;
 tableName=String("cars");
 wherCond=String("id=900");
-def table : Delete.Delete;
+def table : Delete;
 table.setTableName(tableName);
 table.setMySqlObj(mysql);
 table.setWhereCond(wherCond);

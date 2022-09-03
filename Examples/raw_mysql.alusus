@@ -1,0 +1,37 @@
+import "Srl/Console";
+import "../Rows";
+
+use Rows;
+
+func main {
+    use Srl;
+    def mysql: MySql.Db(String("0.0.0.0"),String("alusus"), String("alusus"),String("alusus"),0,String(),0);
+    if mysql.Conn == null {
+        Console.print("%s\n", mysql.ConState);
+    } else {
+        mysql.exec("SELECT * FROM cars");
+        if mysql.ResultState != 0 {
+            Console.print("%s\n", mysql.errorMessage() );
+        }
+        if mysql.Res == null {
+            Console.print("%s\n", mysql.errorMessage());
+        } else {
+            def numberOfFileds: int;
+            numberOfFileds = mysql.getFiledsNumber();
+            mysql.getRow();
+            mysql.getCol();
+            def i: int;
+            def val: String;
+            while mysql.Row != null {
+                for i = 0, i < numberOfFileds, i = i+1 {
+                    val = mysql.Row~cnt(i);
+                    Console.print("%s\t", val.buf);
+                }
+                Console.print("\n");
+                mysql.getRow();
+            }
+        }
+    }
+}
+main();
+

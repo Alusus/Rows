@@ -1,9 +1,4 @@
-import "Data";
-import "DbConBuilder";
-use Data;
-use DbConBuilder;
-use PostgresSql;
-module Create
+@merge module Rows
 {
     class Create
     {
@@ -11,18 +6,18 @@ module Create
         def MySqlObj : MySql.Db;
         def DbType : int;
 
-        def PgSqlObj : PostgresSql.Db;
+        def PgSqlObj : PostgreSql.Db;
 
         def SqLiteObj : Sqlite.Db;
         def ExecString : String="CREATE TABLE";
         def NotExistFlag : bool=0;
         def Name : String="";
-        def Data :ptr[DataType.Data];
-        def IntData : DataType.Integer;
+        def Data :ptr[Data];
+        def IntData : Integer;
 
         def ColsName : String;
         def ColsString : String="";
-        def TConst : ptr[Constraints.TableConstraints];
+        def TConst : ptr[TableConstraints];
         def TConstString : String ="";
 
         handler this.setTableName(Name : String){
@@ -34,7 +29,7 @@ module Create
             this.NotExistFlag=1;
 
         }
-        handler this.setDataType(Data : ptr[DataType.Data])
+        handler this.setDataType(Data : ptr[Data])
         {
             this.Data=Data;
 
@@ -70,7 +65,7 @@ module Create
 
 
         }
-        handler this.setTConst(TConst : ptr[Constraints.TableConstraints])
+        handler this.setTConst(TConst : ptr[TableConstraints])
         {
             this.TConst=TConst;
 
@@ -137,7 +132,7 @@ module Create
 
 
         }
-        handler this.getPgObj() : PostgresSql.Db
+        handler this.getPgObj() : PostgreSql.Db
         {
 
 

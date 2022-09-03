@@ -1,7 +1,7 @@
 import "Receive";
 import "DbConBuilder";
 
-def table : Receive.Receive;
+def table : Receive;
 def par : String="cars";
 def Data : Array[Array[String]];
 def t : Array[String];
@@ -12,7 +12,7 @@ table.setExecString();
 def ex : String;
 ex=table.getExecString();
 Console.print(ex);
-def DbCon :  DbConBuilder.DbConBuilder;
+def DbCon :  DbConBuilder;
 def DbName : String="testdb";
 DbCon.setDBName(DbName);
 def UserName : String="user12";

@@ -1,0 +1,47 @@
+import "Srl/Console";
+import "../Rows";
+
+use Rows;
+
+func main {
+    use Srl;
+
+    def pgql: PostgreSql.Db(String("host=0.0.0.0 user=alusus password=alusus dbname=alusus"));
+    if pgql.connStatus() == PostgreSql.Connection.BAD {
+        Console.print("%s\n", pgql.errorMessage());
+        pgql.endConnection();
+        return;
+    }
+
+    pgql.exec("insert into cars (name, year) values ('Volkswagen', 2000)");
+    Console.print("conn status: %d\n", pgql.connStatus());
+    Console.print("res status: %d\n", pgql.resStatus());
+    Console.print("%s\n", pgql.errorMessage());
+    pgql.clearResult();
+
+    pgql.exec("select * from cars where id=5");
+    Console.print("res status: %d\n", pgql.resStatus());
+    Console.print("collomns count: %d\n", pgql.getCols());
+    Console.print("coll %s	%s %s\n", pgql.getColsName(0), pgql.getColsName(1), pgql.getColsName(2));
+    Console.print("Rows count: %d\n",pgql.getRows());
+    pgql.clearResult();
+    Console.print("\n");
+
+    pgql.exec("select * from cars");
+    Console.print("res status: %d\n", pgql.resStatus());
+    Console.print("Rows number: %d\n", pgql.getRows());
+    Console.print("%s\t%s\t%s\n", pgql.getColsName(0), pgql.getColsName(1), pgql.getColsName(2));
+    def i: Int;
+    for i = 0, i < pgql.getRows(), ++i {
+        Console.print ("%s\t%s\t%s\n", pgql.getValue(i, 0), pgql.getValue(i, 1), pgql.getValue(i, 2));
+    }
+    pgql.clearResult();
+    Console.print("\n");
+
+    def paramValues :array [CharsPtr , 1];
+    paramValues(0)="1";
+    pgql.execWithParams("select * from cars where id=$1",1,paramValues~ptr,0);
+    Console.print ("%s\t%s\t%s\n",pgql.getValue( 0, 0), pgql.getValue( 0, 1), pgql.getValue( 0, 2));
+}
+main();
+

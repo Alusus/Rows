@@ -1,5 +1,4 @@
-import "Data";
-module DbConBuilder
+@merge module Rows
 {
     class DbConBuilder
     {
@@ -142,11 +141,11 @@ module DbConBuilder
             PgSqlString=PgSqlString +  this.UserName + " password = " + this.Password+" dbname = "+this.DbName;
             return PgSqlString;
         }
-        handler this.pgSqlConBuilder() : PostgresSql.Db
+        handler this.pgSqlConBuilder() : PostgreSql.Db
         {
             def PgSqlString : String ;
             PgSqlString=this.pgSqlConStringBuilder();
-            def PgSql : PostgresSql.Db(PgSqlString);
+            def PgSql : PostgreSql.Db(PgSqlString);
             return PgSql;
         }
 

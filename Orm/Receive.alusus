@@ -1,9 +1,7 @@
-import "Data";
-module Receive
+@merge module Rows
 {
     class Receive
     {
-        use DataType;
         def ConString : String;
         def ExecString : String;
         def CString : String;
@@ -16,9 +14,10 @@ module Receive
         def HasNext : bool=false;
         def DataClass : Array[ptr[Data]];
         def DataBaseType : int =0;
-        def PgSqlObj : PostgresSql.Db;
+        def PgSqlObj : PostgreSql.Db;
         def MySqlObj : MySql.Db ;
-        def SqliteObj : Sqlite.Db;
+        // TODO: Implement Sqlite.
+        // def SqliteObj : Sqlite.Db;
         def ColsName : Array[String];
         def RowString : Array[CharsPtr];
         handler this.setDbCon(DbCon : DbConBuilder)
@@ -242,6 +241,7 @@ module Receive
             return this.Data;
         }
     }
+
     @expname[atoi]
     func getInt(Data: CharsPtr): int;
 

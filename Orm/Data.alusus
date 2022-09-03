@@ -1,10 +1,9 @@
-import "Constraints";
-module DataType
+@merge module Rows
 {
     class Data
     {
 
-        def FConstrants :  Constraints.FiledConstraints;
+        def FConstrants :  FiledConstraints;
         def MySqlString : String;
         def SqliteString : String;
         def PgSqlString : String ;
@@ -38,7 +37,7 @@ module DataType
         {
             return this.Type;
         }
-        handler this.getFConstrants() :Constraints.FiledConstraints
+        handler this.getFConstrants() :FiledConstraints
         {
             return this.FConstrants;
         }

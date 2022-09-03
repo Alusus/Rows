@@ -1,17 +1,4 @@
-import "Srl/Console.alusus";
-import "Srl/Array";
-import "Srl/Map";
-import "Srl/String";
-import "../mysql/mysql";
-import "../pgsql/pgsql";
-import "Core/Data";
-import "Spp";
-import "Apm";
-@expname[atof] func parseFloat(CharsPtr): Float[64];
-@expname[atoi] func parseInt(CharsPtr): int;
-Apm.importFile("Alusus/Sqlite");
-use Srl;
-module Constraints
+@merge module Rows
 {
     class FiledConstraints
     {
@@ -119,3 +106,4 @@ module Constraints
             }
     }
 }
+

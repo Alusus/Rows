@@ -1,28 +1,9 @@
-import "Data";
-import "Srl/refs";
-import "Create";
-import "Srl/Console";
-import "Srl/refs";
-import "Srl/System";
-import "Core/Data";
-import "Spp";
-import "Receive";
-import "Insert";
-import "Update";
-import "DbConBuilder";
-import "Delete.alusus"
-use Srl;
-use Core.Basic;
-use Core.Data;
-use Core.Data.Ast;
-
-module AutoBuild
-{
-    use DataType;
+@merge module Rows {
     def TioSrdRef: alias SrdRef[Core.Basic.TiObject];
-    def notFlag : bool=false;
-    function generateAddingElementNames (varName: String, elements: Array[ref[Core.Basic.TiObject]])
-    {
+    def notFlag: bool = false;
+
+    // TODO: Move to a shared location.
+    function generateAddingElementNames (varName: String, elements: Array[ref[Core.Basic.TiObject]]) {
         def i: Int;
         for i = 0, i < elements.getLength(), ++i
         {
@@ -38,6 +19,7 @@ module AutoBuild
             );
         }
     }
+
     func generateWhere (obj: ref[TiObject] ): TioSrdRef {
         def result: TioSrdRef;
         def result2: TioSrdRef;
@@ -47,28 +29,20 @@ module AutoBuild
             System.fail(1, "generateWhere: obj is null.\n");
         }
 
-       if isDerivedFrom[obj, PrefixOperator] {
-
-            AutoBuild.notFlag=true;
-
+        if isDerivedFrom[obj, PrefixOperator] {
+            notFlag=true;
             def mapContaining: ref[MapContaining](getInterface[obj, MapContaining]);
 
-              if !Spp.astMgr.buildAst(
-                ast {String("") +(name)  },
+            if !Spp.astMgr.buildAst(
+                ast { String("") + name },
                 Map[String, ref[TiObject]]()
-                .set(String("name"), generateWhere(mapContaining.getElement(0)).obj)
-                ,
+                    .set(String("name"), generateWhere(mapContaining.getElement(0)).obj),
                 result2
             ) {
                 System.fail(1, "generateWhere/Bracket: error\n");
             }
-
             return result2
-
-
-        }
-
-          else if isDerivedFrom[obj, ComparisonOperator] {
+        } else if isDerivedFrom[obj, ComparisonOperator] {
             def binding: ref[Binding](getInterface[obj, Binding]);
             def mapContaining: ref[MapContaining](getInterface[obj, MapContaining]);
             if !Spp.astMgr.buildAst(
@@ -81,8 +55,7 @@ module AutoBuild
             ) {
                 System.fail(1, "generateWhere/ComparisonOperator: error\n");
             }
-        }
-                else if isDerivedFrom[obj, AssignmentOperator] {
+        } else if isDerivedFrom[obj, AssignmentOperator] {
             def binding: ref[Binding](getInterface[obj, Binding]);
             def mapContaining: ref[MapContaining](getInterface[obj, MapContaining]);
             def containing: ref[Containing](getInterface[mapContaining.getElement("second"), Containing]);
@@ -96,8 +69,7 @@ module AutoBuild
             ) {
                 System.fail(1, "generateWhere/ComparisonOperator: error\n");
             }
-        }
-         else if isDerivedFrom[obj, LogOperator] {
+        } else if isDerivedFrom[obj, LogOperator] {
             def binding: ref[Binding](getInterface[obj, Binding]);
             def mapContaining: ref[MapContaining](getInterface[obj, MapContaining]);
             if !Spp.astMgr.buildAst(
@@ -111,7 +83,6 @@ module AutoBuild
                 System.fail(1, "generateWhere/LogOperator: error\n");
             }
         } else if isDerivedFrom[obj, Bracket] {
-
             def mapContaining: ref[MapContaining](getInterface[obj, MapContaining]);
             if !Spp.astMgr.buildAst(
                 ast { String("(") + (cond) + String(")") },
@@ -121,40 +92,34 @@ module AutoBuild
             ) {
                 System.fail(1, "generateWhere/Bracket: error\n");
             }
-        }
-        else if isDerivedFrom[obj, LinkOperator] {
+        } else if isDerivedFrom[obj, LinkOperator] {
             def mapContaining: ref[MapContaining](getInterface[obj, MapContaining]);
             def binding: ref[Binding](getInterface[obj, Binding]);
             def mapContaining2 : ref[MapContaining](getInterface[mapContaining.getElement("second"), MapContaining]);
             def containing: ref[Containing](getInterface[mapContaining2.getElement("operand"), Containing]);
             def i : int =0;
-            if (AutoBuild.notFlag==false)
+            if (notFlag==false)
             {
-
-
-                        if !Spp.astMgr.buildAst(
-                ast { String("{{name}}") + String(" in (") + String(" ")  },
-                Map[String, ref[TiObject]]()
-                .set(String("name"),mapContaining.getElement("first"))
-                ,
-                result2
-            ) {
-                System.fail(1, "generateWhere/Bracket: error\n");
-            }
-            }
-             else
-            {mapContaining.getElement(0)
-
-
-                        if !Spp.astMgr.buildAst(
-                ast { String("{{name}}") + String(" NOT  in (") + String(" ")  },
-                Map[String, ref[TiObject]]()
-                .set(String("name"),mapContaining.getElement("first"))
-                ,
-                result2
-            ) {
-                System.fail(1, "generateWhere/Bracket: error\n");
-            }AutoBuild.notFlag=false;
+                if !Spp.astMgr.buildAst(
+                    ast { String("{{name}}") + String(" in (") + String(" ")  },
+                    Map[String, ref[TiObject]]()
+                    .set(String("name"),mapContaining.getElement("first"))
+                    ,
+                    result2
+                ) {
+                    System.fail(1, "generateWhere/Bracket: error\n");
+                }
+            } else {
+                mapContaining.getElement(0)
+                if !Spp.astMgr.buildAst(
+                    ast { String("{{name}}") + String(" NOT  in (") + String(" ")  },
+                    Map[String, ref[TiObject]]()
+                    .set(String("name"),mapContaining.getElement("first"))
+                    ,
+                    result2
+                ) {
+                    System.fail(1, "generateWhere/Bracket: error\n");
+                }notFlag=false;
             }
             resultArray.add(result2);
            for i=0 , i < containing.getElementCount()~cast[Int]-1 , i = i+1
@@ -194,7 +159,7 @@ module AutoBuild
 
 
             def i : int =0;
-            if (AutoBuild.notFlag==false)
+            if (notFlag==false)
             {
 
                         if !Spp.astMgr.buildAst(
@@ -217,7 +182,7 @@ module AutoBuild
                 result2
             ) {
                 System.fail(1, "generateWhere/Bracket: error\n");
-            }AutoBuild.notFlag=false}
+            }notFlag=false}
             resultArray.add(result2);
            for i=0 , i < containing.getElementCount()~cast[Int]-1 , i = i+1
            {
@@ -261,7 +226,7 @@ module AutoBuild
         return result;
     }
 
-   func generateUpdateData (obj: ref[TiObject] ): TioSrdRef {
+    func generateUpdateData (obj: ref[TiObject]): TioSrdRef {
         def result: TioSrdRef;
         def result2: TioSrdRef;
         def resultArray: Array[TioSrdRef];
@@ -353,6 +318,8 @@ module AutoBuild
         }
         return result;
     }
+
+    // TODO: Move to a shared location.
     function generateAddingElementTypes (varName: String, elements: Array[ref[Core.Basic.TiObject]])
     {
         def i: Int;
@@ -382,7 +349,7 @@ module AutoBuild
                              parent,
                             Spp.SeekerFlags.SKIP_OWNERS | Spp.SeekerFlags.SKIP_USES | Spp.SeekerFlags.SKIP_CHILDREN
                          );
-                    AutoBuild.generateAddingElementNames(String("this"), elements);
+                    generateAddingElementNames(String("this"), elements);
              }
           }
     }
@@ -399,7 +366,7 @@ module AutoBuild
                     parent,
                     Spp.SeekerFlags.SKIP_OWNERS | Spp.SeekerFlags.SKIP_USES | Spp.SeekerFlags.SKIP_CHILDREN
                 );
-                AutoBuild.generateAddingElementTypes(String("this"), elements);
+                generateAddingElementTypes(String("this"), elements);
             }
         }
     }
@@ -419,26 +386,22 @@ module AutoBuild
         def i : int=0;
         def iString:String;
         iString="" + i;
-        if !Spp.astMgr.buildAst
-            (
-              (ast use DbConBuilder ),
-             Map[String, ref[TiObject]]()
-                 .set(String("DbCon"), Core.Data.Ast.Identifier(String("DbCon"))),
+
+        // TODO: Do we need this use statement?
+        if !Spp.astMgr.buildAst(
+             (ast use Rows),
+             Map[String, ref[TiObject]](),
              result
-            )
-        {
+        ) {
             System.fail(1, "generateDataType/build Data Type var : error\n");
         }
         listContainer.addElement(result.obj);
 
-        if !Spp.astMgr.buildAst
-            (
-             (ast  def _Where :String="" ),
-             Map[String, ref[TiObject]]()
-                 .set(String("DbCon"), Core.Data.Ast.Identifier(String("DbCon"))),
-             result
-            )
-        {
+        if !Spp.astMgr.buildAst(
+            (ast def _Where :String=""),
+            Map[String, ref[TiObject]](),
+            result
+        ) {
             System.fail(1, "generateDataType/build Data Type var : error\n");
         }
         listContainer.addElement(result.obj);
@@ -505,7 +468,7 @@ module AutoBuild
                 {
                     if !Spp.astMgr.buildAst
                         (
-                        (ast  classData.intVal=Receive.getInt(dataArray(i)(j).buf )),
+                        (ast  classData.intVal=getInt(dataArray(i)(j).buf )),
                         Map[String, ref[TiObject]]()
                             .set(String("classData"), Core.Data.Ast.Identifier("classData"))
                             .set(String("dataArray"), Core.Data.Ast.Identifier("dataArray"))
@@ -522,7 +485,7 @@ module AutoBuild
                 {
                     if !Spp.astMgr.buildAst
                         (
-                        (ast  classData.floatVal=Receive.getFloat(dataArray(i)(j).buf )),
+                        (ast  classData.floatVal=getFloat(dataArray(i)(j).buf )),
                         Map[String, ref[TiObject]]()
                             .set(String("classData"), Core.Data.Ast.Identifier("classData"))
                             .set(String("dataArray"), Core.Data.Ast.Identifier("dataArray"))
@@ -581,7 +544,7 @@ module AutoBuild
                 {
                     if !Spp.astMgr.buildAst
                         (
-                        (ast {beforData  classData.floatVal=Receive.getFloat(dataArray(i)(j).buf )}),
+                        (ast {beforData  classData.floatVal=getFloat(dataArray(i)(j).buf )}),
                         Map[String, ref[TiObject]]()
                             .set(String("classData"), Core.Data.Ast.Identifier("classData"))
                             .set(String("dataArray"), Core.Data.Ast.Identifier("dataArray"))
@@ -811,7 +774,7 @@ module AutoBuild
         }
         listContainer.addElement(result.obj);
         if !Spp.astMgr.buildAst(
-           (ast handler this.getDbCon(  ):DbConBuilder.DbConBuilder
+           (ast handler this.getDbCon(  ):DbConBuilder
            {
                return DbCon;
 
@@ -827,9 +790,9 @@ module AutoBuild
                 if !Spp.astMgr.buildAst(
            (ast handler this.getData() : Array[cn]
            {
-               def table : Receive.Receive ;
+               def table : Receive ;
                def  mySqlObj : MySql.Db ;
-               def  pgSqlObj : PostgresSql.Db ;
+               def  pgSqlObj : PostgreSql.Db ;
                def  dataArray : Array[Array[String]];
                def data : Array[cn];
 
@@ -838,11 +801,12 @@ module AutoBuild
                       mySqlObj=DbCon.mySqlConBuilder();  table.setMySqlObj(mySqlObj);
                      mySqlObj.endConnection();
                  }
-                 else if DbCon.getDbConType()==1
-                 {
-                      pgSqlObj=DbCon.pgSqlConBuilder();  table.setPgSqlObj(pgSqlObj);
-                     pgSqlObj.endConnection();
-                 }
+                 // TODO: Enable other DB connection type.
+                 // else if DbCon.getDbConType()==1
+                 // {
+                 //      pgSqlObj=DbCon.pgSqlConBuilder();  table.setPgSqlObj(pgSqlObj);
+                 //     pgSqlObj.endConnection();
+                 // }
                  if this._Where!=""
                  {
                     table.setCString(this._Where);
@@ -885,9 +849,9 @@ module AutoBuild
        if !Spp.astMgr.buildAst(
            (ast handler this.saveData()
            {
-               def table2 : Insert.Insert;
+               def table2 : Insert;
                def  mySqlObj : MySql.Db ;
-               def  pgSqlObj : PostgresSql.Db ;
+               def  pgSqlObj : PostgreSql.Db ;
                def  data : Array[String];
                def colname : Array[String];
                def state : int=0;
@@ -935,8 +899,8 @@ module AutoBuild
            (ast handler this.deleteRowData( )
            {
                def  mySqlObj : MySql.Db ;
-               def  pgSqlObj : PostgresSql.Db ;
-               def table : Delete.Delete;
+               def  pgSqlObj : PostgreSql.Db ;
+               def table : Delete;
                if DbCon.getDbConType()==0
                {
                         mySqlObj=DbCon.mySqlConBuilder();
@@ -972,9 +936,9 @@ module AutoBuild
            (ast handler this.updateData()
            {
 
-               def table2 : Update.Update;
+               def table2 : Update;
                def  mySqlObj : MySql.Db ;
-               def  pgSqlObj : PostgresSql.Db ;
+               def  pgSqlObj : PostgreSql.Db ;
                def  data : Array[String];
                def colname : Array[String];
                def state : int=0;
@@ -1043,7 +1007,7 @@ module AutoBuild
 
                                        className._MyClass._Where= preprocess {
                                                 if !Spp.astMgr.insertAst(
-                                                        AutoBuild.generateWhere(ast condition).obj
+                                                        generateWhere(ast condition).obj
                                                              ) {
                                                            System.fail(1, "Failed to insert condition.\n");
                                                                  }
@@ -1068,7 +1032,7 @@ module AutoBuild
 
                                        className._MyClass._Update= preprocess {
                                                 if !Spp.astMgr.insertAst(
-                                                        AutoBuild.generateUpdateData(ast dataSet).obj
+                                                        generateUpdateData(ast dataSet).obj
                                                              ) {
                                                            System.fail(1, "Failed to insert condition.\n");
                                                                  }
@@ -1094,11 +1058,11 @@ module AutoBuild
         preprocess
          {
             def varArray : Array[String];
-            varArray =AutoBuild.implementGetElementNames[elementType == "var",parent];
+            varArray = implementGetElementNames[elementType == "var",parent];
             def  typeArray : Array[String];
-            typeArray=AutoBuild.implementGetElementTypes[elementType == "var", parent];
+            typeArray = implementGetElementTypes[elementType == "var", parent];
             if !Spp.astMgr.insertAst(
-                AutoBuild.generateDataType(className ,tableName, parent ,varArray , typeArray  ).obj
+                generateDataType(className ,tableName, parent ,varArray , typeArray  ).obj
             )
             {
                 System.fail(1, "Failed to genrate data type.\n");

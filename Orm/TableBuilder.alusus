@@ -1,25 +1,13 @@
-
-import "Data";
-import "Srl/refs";
-import "Create";
-import "Srl/Console";
-import "Srl/refs";
-import "Srl/System";
-import "Core/Data";
-import "Spp";
-import "DbConBuilder";
-
-module TableBuilder
+@merge module Rows
 {
-    use DataType;
     def TioSrdRef: alias SrdRef[Core.Basic.TiObject];
     def DataTypeArray:Array[String];
     def DataTypeString : String;
     def DataTypePtr : ptr[Data];
     def paramsModsArray : Array[String];
     def val : String;
-    def integerDataType : DataType.Integer;
-    def bigIntegerDataType : DataType.BigInteger;
+    def integerDataType : Integer;
+    def bigIntegerDataType : BigInteger;
     def smallIntegerDataType : SmallInteger;
     def tinyIntegerDataType : TinyInteger;
     def realDataType : Real;
@@ -32,30 +20,6 @@ module TableBuilder
     def textDataType : Text;
     def datesDataType : Dates;
 
-
-    function generateAddingElementNames (varName: String, elements: Array[ref[Core.Basic.TiObject]])
-    {
-        def i: Int;
-        for i = 0, i < elements.getLength(), ++i
-        {
-
-            def node: ref[Core.Data.Node](castRef[elements(i), Core.Data.Node]);
-            def d: ref[Core.Data.Ast.Definition](castRef[node.owner, Core.Data.Ast.Definition]);
-
-            def binding: ref[Core.Basic.Binding](Core.Basic.getInterface[d, Core.Basic.Binding]);
-
-            Spp.astMgr.insertAst(
-                                        ast { names.add(Srl.String("{{name}}")) },
-                                        Srl.Map[Srl.String, ref[Core.Basic.TiObject]]()
-                                            .set(Srl.String("names"), Core.Data.Ast.Identifier(varName))
-                                            .set(Srl.String("name"), binding.getMember("name"))
-
-                                        );
-
-            }
-    }
-
-
     function generateAddingElementMods (elements: Array[ref[Core.Basic.TiObject]] , var : Array[String]) : Array[Array[String]]
      {
         def i: Int;
@@ -66,7 +30,7 @@ module TableBuilder
         for i = 0, i < elements.getLength(), ++i
         {
 
-            strArray=TableBuilder.dumpModifiers(elements(i));
+            strArray=dumpModifiers(elements(i));
 
             modArray.add(var(i))
 
@@ -77,24 +41,6 @@ module TableBuilder
         return colsMod;
     }
 
-    function generateAddingElementTypes (varName: String, elements: Array[ref[Core.Basic.TiObject]])
-    {
-        def i: Int;
-        for i = 0, i < elements.getLength(), ++i
-        {
-            def node: ref[Core.Data.Node](castRef[elements(i), Core.Data.Node]);
-            def d: ref[Core.Data.Ast.Definition](castRef[node.owner, Core.Data.Ast.Definition]);
-            def containing: ref[Core.Basic.MapContaining](Core.Basic.getInterface[d, Core.Basic.MapContaining]);
-            Spp.astMgr.insertAst(
-                              ast { names.add(Srl.String("{{name}}")) },
-                              Srl.Map[Srl.String, ref[Core.Basic.TiObject]]()
-                                  .set(Srl.String("names"), Core.Data.Ast.Identifier(varName))
-                                  .set(Srl.String("name"), castRef[containing.getElement("target"), Core.Data.Ast.Identifier])
-
-                                 );
-
-        }
-    }
     macro implementGetElementNames [condition, parent  ]
     {
         Array[String]().
@@ -107,7 +53,7 @@ module TableBuilder
                                         parent,
                                         Spp.SeekerFlags.SKIP_OWNERS | Spp.SeekerFlags.SKIP_USES | Spp.SeekerFlags.SKIP_CHILDREN
                                                               );
-                TableBuilder.generateAddingElementNames(String("this"), elements);
+                generateAddingElementNames(String("this"), elements);
             }
         }
     }
@@ -126,7 +72,7 @@ module TableBuilder
                 parent,
                 Spp.SeekerFlags.SKIP_OWNERS | Spp.SeekerFlags.SKIP_USES | Spp.SeekerFlags.SKIP_CHILDREN
             );
-            colsMod=TableBuilder.generateAddingElementMods( elements ,var );
+            colsMod=generateAddingElementMods( elements ,var );
             def params : Array[String];
             def cmpar:Array[Array[String]]
 
@@ -138,7 +84,7 @@ module TableBuilder
                     for j=0 , j<colsMod(i).getLength() , ++j
                     {
 
-                        params=TableBuilder.dumpElementModifierParams(elements(i),colsMod(i)(j).buf);
+                        params=dumpElementModifierParams(elements(i),colsMod(i)(j).buf);
                         cmpar.add(params);
                     }
                 }
@@ -166,7 +112,7 @@ module TableBuilder
                     parent,
                     Spp.SeekerFlags.SKIP_OWNERS | Spp.SeekerFlags.SKIP_USES | Spp.SeekerFlags.SKIP_CHILDREN
                 );
-                TableBuilder.generateAddingElementTypes(String("this"), elements);
+                generateAddingElementTypes(String("this"), elements);
             }
        }
     }
@@ -323,7 +269,7 @@ module TableBuilder
                 index=-1
                 for j=0 , j< colsMod(i).getLength() && index==-1, j+=1
                 {
-                    index=TableBuilder.isDataType(colsMod(i)(j));
+                    index=isDataType(colsMod(i)(j));
                 }
 
                 if(index>-1)
@@ -562,7 +508,7 @@ module TableBuilder
                     for j=0 , j< colsMod(i).getLength() , j+=1
                     {
 
-                        if(TableBuilder.numOfParams(colsMod(i)(j))!=-1)
+                        if(numOfParams(colsMod(i)(j))!=-1)
                         {
                             if(colsMod(i)(j)=="notnull")
                             {
@@ -621,7 +567,7 @@ module TableBuilder
                     }
                     k=k+1;
                             }
-                            if(TableBuilder.numOfParams(colsMod(i)(j))>0)
+                            if(numOfParams(colsMod(i)(j))>0)
                             {
                                 if(colsMod(i)(j)=="defult")
                                 {
@@ -712,16 +658,16 @@ module TableBuilder
 
          if !Spp.astMgr.buildAst
                         (
-                        (ast function create(dbCon : DbConBuilder.DbConBuilder )
+                        (ast function create(dbCon : DbConBuilder )
                         {
                             use DataType;
                             def DataTypePtr : ptr[Data];
-                            def integerDataType : DataType.Integer;
-                            def bigIntegerDataType : DataType.BigInteger;
+                            def integerDataType : Integer;
+                            def bigIntegerDataType : BigInteger;
                             def smallIntegerDataType : SmallInteger;
                             def tinyIntegerDataType : TinyInteger;
                             def realDataType : Real;
-                            def floatDataType : DataType.Float;
+                            def floatDataType : Float;
                             def decimalDataType : Decimal;
                             def xmlDataType : Xml;
                             def varCharDataType : VarChar;
@@ -731,10 +677,10 @@ module TableBuilder
                             def paramsModsArray : Array[String];
                             def val : String;
                             def  mySqlObj : MySql.Db ;
-                            def  pgSqlObj : PostgresSql.Db ;
+                            def  pgSqlObj : PostgreSql.Db ;
                             def pkArray : Array[String];
-                            def tableConst :Constraints.TableConstraints;
-                            def table : Create.Create;
+                            def tableConst :TableConstraints;
+                            def table : Create;
                             def colsName : Array[String];
                             def tableNameMod : String;
                             if dbCon.getDbConType()==0
@@ -780,13 +726,13 @@ module TableBuilder
             def colsMod : Array[Array[String]];
             def modsParams :Array[ Array[Array[String]]];
             def var : Array[String];
-            var=TableBuilder.implementGetElementNames[elementType == "var", parent];
+            var=implementGetElementNames[elementType == "var", parent];
             def types : Array[String];
-            types=TableBuilder.implementGetElementTypes[elementType == "var", parent];
-            TableBuilder.implementGetElementMods[elementType == "var", parent ];
+            types=implementGetElementTypes[elementType == "var", parent];
+            implementGetElementMods[elementType == "var", parent ];
 
             if !Spp.astMgr.insertAst(
-                                                        TableBuilder.generateTable(tableName , colsMod , modsParams , var ,types ).obj
+                                                        generateTable(tableName , colsMod , modsParams , var ,types ).obj
                                                              ) {
                                                            System.fail(1, "Failed to insert statment.\n");
                                                                  }

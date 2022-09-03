@@ -1,12 +1,10 @@
-import "Data";
-import "DbConBuilder";
-module Delete
+@merge module Rows
 {
     class Delete
     {
 
         def MySqlObj : MySql.Db;
-        def PgSqlObj : PostgresSql.Db;
+        def PgSqlObj : PostgreSql.Db;
         def SqLiteObj : Sqlite.Db;
         def ExecString : String="DELETE FROM ";
         def TableName : String="";
@@ -57,13 +55,13 @@ module Delete
             return this.MySqlObj;
         }
 
-        handler this.setPgSqlObj(PgSqlObj : PostgresSql.Db)
+        handler this.setPgSqlObj(PgSqlObj : PostgreSql.Db)
         {
             this.DataBaseType=1;
             this.PgSqlObj=PgSqlObj;
 
         }
-        handler this.getPgSqlObj():PostgresSql.Db
+        handler this.getPgSqlObj():PostgreSql.Db
         {
             return this.PgSqlObj;
         }
