@@ -1,131 +1,99 @@
-@merge module Rows
-{
-    class Delete
-    {
+@merge module Rows {
+    class Delete {
+        def MySqlObj: MySql.Db;
+        def PgSqlObj: PostgreSql.Db;
+        def SqLiteObj: Sqlite.Db;
+        def ExecString: String = "DELETE FROM ";
+        def TableName: String = "";
+        def DataBaseType: int = 0;
+        def DeleteAllDataFlag: bool = 0;
+        def WhereCond: String = "";
 
-        def MySqlObj : MySql.Db;
-        def PgSqlObj : PostgreSql.Db;
-        def SqLiteObj : Sqlite.Db;
-        def ExecString : String="DELETE FROM ";
-        def TableName : String="";
-        def DataBaseType : int =0;
-        def DeleteAllDataFlag : bool=0;
-        def WhereCond : String="";
-
-
-
-        handler this.setTableName(TableName : String)
-        {
-            this.TableName=TableName;
-
+        handler this.setTableName(TableName: String) {
+            this.TableName = TableName;
         }
-        handler this.getTableName():String
-        {
+
+        handler this.getTableName(): String {
             return this.TableName;
         }
 
-        handler this.setExecString(ExecString : String)
-        {
-            this.ExecString=ExecString;
-
+        handler this.setExecString(ExecString: String) {
+            this.ExecString = ExecString;
         }
-        handler this.getExecString():String
-        {
+
+        handler this.getExecString(): String {
             return this.ExecString;
         }
 
-        handler this.setWhereCond(WhereCond : String)
-        {
-            this.WhereCond=WhereCond;
-
+        handler this.setWhereCond(WhereCond: String) {
+            this.WhereCond = WhereCond;
         }
-        handler this.getWhereCond():String
-        {
+
+        handler this.getWhereCond(): String {
             return this.WhereCond;
         }
 
-        handler this.setMySqlObj(MySqlObj : MySql.Db)
-        {
-            this.DataBaseType=0;
-            this.MySqlObj=MySqlObj;
-
+        handler this.setMySqlObj(MySqlObj: MySql.Db) {
+            this.DataBaseType = 0;
+            this.MySqlObj = MySqlObj;
         }
-        handler this.getMySqlObj():MySql.Db
-        {
+
+        handler this.getMySqlObj(): MySql.Db {
             return this.MySqlObj;
         }
 
-        handler this.setPgSqlObj(PgSqlObj : PostgreSql.Db)
-        {
-            this.DataBaseType=1;
-            this.PgSqlObj=PgSqlObj;
-
+        handler this.setPgSqlObj(PgSqlObj: PostgreSql.Db) {
+            this.DataBaseType = 1;
+            this.PgSqlObj = PgSqlObj;
         }
-        handler this.getPgSqlObj():PostgreSql.Db
-        {
+
+        handler this.getPgSqlObj(): PostgreSql.Db {
             return this.PgSqlObj;
         }
 
-        handler this.setSqLiteObj(SqLiteObj : Sqlite.Db)
-        {
-            this.DataBaseType=2;
-            this.SqLiteObj=SqLiteObj;
-
+        handler this.setSqLiteObj(SqLiteObj: Sqlite.Db) {
+            this.DataBaseType = 2;
+            this.SqLiteObj = SqLiteObj;
         }
-        handler this.getSqLiteObj():Sqlite.Db
-        {
+
+        handler this.getSqLiteObj(): Sqlite.Db {
             return this.SqLiteObj;
         }
 
-        handler this.setDeleteAllDataFlag(DeleteAllDataFlag :bool)
-        {
-            this.DeleteAllDataFlag=DeleteAllDataFlag;
+        handler this.setDeleteAllDataFlag(DeleteAllDataFlag: bool) {
+            this.DeleteAllDataFlag = DeleteAllDataFlag;
         }
-        handler this.getDeleteAllDataFlag():bool
-        {
+
+        handler this.getDeleteAllDataFlag(): bool {
             return this.DeleteAllDataFlag;
         }
 
-        handler this.genareteExecString()
-        {
-            this.ExecString=String("DELETE FROM ");
-            this.ExecString=this.ExecString + this.TableName;
-            if(this.DeleteAllDataFlag==0)
-            this.ExecString = this.ExecString + String(" WHERE ") +this.WhereCond + String(";");
+        handler this.genareteExecString() {
+            this.ExecString = String("DELETE FROM ");
+            this.ExecString = this.ExecString + this.TableName;
+            if this.DeleteAllDataFlag == 0 {
+                this.ExecString = this.ExecString + String(" WHERE ") +this.WhereCond + String(";");
+            }
         }
-        handler this.exec()
-        {
-           if(this.DataBaseType==1)
-            {
+
+        handler this.exec() {
+            if this.DataBaseType == 1 {
                 Console.print("\n");
                 this.PgSqlObj.connectDb();
                 this.PgSqlObj.exec(this.ExecString.buf);
                 Console.print(this.PgSqlObj.errorMessage());
-
-            }
-            else if(this.DataBaseType==0)
-            {
-
+            } else if this.DataBaseType == 0 {
                 Console.print(this.ExecString.buf );
                 Console.print("\n");
-                if (this.MySqlObj.Conn==null)
-                {
-                    Console.print("after conn %s \n",this.MySqlObj.errorMessage() );
-                }
-                 else
-                {
+                if this.MySqlObj.Conn == null {
+                    Console.print("after conn %s \n", this.MySqlObj.errorMessage());
+                } else {
                     this.MySqlObj.exec(this.ExecString.buf);
                 }
                 Console.print(this.MySqlObj.errorMessage());
                 Console.print("\n");
-
             }
-
-
-
-
         }
+    }
+}
 
-        }
-
-        }    

@@ -1,15 +1,14 @@
-@merge module Rows
-{
+@merge module Rows {
     class FiledConstraints
     {
-        def NotNull : int=-1;
-        def Unique : int=-1;
-        def Default : int=-1;
-        def Check : int=-1;
+        def NotNull: int = -1;
+        def Unique: int = -1;
+        def Default: int = -1;
+        def Check: int = -1;
         def StringRep: Array[String];
-        def FieldConsString : String="";
-        handler this~init()
-        {
+        def FieldConsString: String = "";
+
+        handler this~init() {
             def v:String;
             v="NOT NULL";
             this.StringRep.add(v);
@@ -19,91 +18,81 @@
             this.StringRep.add(v);
             v="CHECK";
             this.StringRep.add(v);
-
         }
-        handler this.setNotNullConstraint(){
-            if (this.NotNull ==-1)
-            {
-                this.NotNull=0;
-                def par : String="";
-                this.addConstraint(this.NotNull,par);
-            }
 
+        handler this.setNotNullConstraint() {
+            if this.NotNull == -1 {
+                this.NotNull = 0;
+                def par: String="";
+                this.addConstraint(this.NotNull, par);
             }
-        handler this.setUniqueConstraint()
-        {
-            if (this.Unique==-1)
-            {
+        }
+
+        handler this.setUniqueConstraint() {
+            if this.Unique == -1 {
                 this.Unique=1;
                 def par : String="";
                 this.addConstraint(this.Unique,par);
             }
-
         }
-        handler this.setDefaultConstraint(defaultValue : String)
-        {
-            if (this.Default==-1)
-            {
+
+        handler this.setDefaultConstraint(defaultValue: String) {
+            if this.Default == -1 {
                 this.Default=2;
-                this.addConstraint(this.Default,defaultValue);
+                this.addConstraint(this.Default, defaultValue);
             }
-
         }
-        handler this.setCheckConstraint(cond : String){
-            if (this.Check==-1)
-            {
-                this.Check=3;
-                def conString : String;
-                conString= "( ";
-                conString=conString+ cond + ")";
-                this.addConstraint(this.Check,conString);
+
+        handler this.setCheckConstraint(cond: String) {
+            if this.Check == -1 {
+                this.Check = 3;
+                def conString: String;
+                conString = "( ";
+                conString = conString + cond + ")";
+                this.addConstraint(this.Check, conString);
             }
-             }
+        }
 
-        handler this.addConstraint(constNumber : int , par : String){
-            if (par!="")
-            {
-                this.FieldConsString=this.FieldConsString + " " + this.StringRep(constNumber) + " " + par;
-
+        handler this.addConstraint(constNumber: int, par: String) {
+            if par != "" {
+                this.FieldConsString = this.FieldConsString + " " + this.StringRep(constNumber) + " " + par;
+            } else {
+                this.FieldConsString = this.FieldConsString + " " + this.StringRep(constNumber);
             }
-            else
-            {
-                this.FieldConsString=this.FieldConsString + " " + this.StringRep(constNumber);
+        }
 
-            }}
-        handler this.getFieldConsString() : String{
+        handler this.getFieldConsString(): String {
             return this.FieldConsString;
-            }
+        }
     }
-    class TableConstraints
-    {
-        def PrimaryKeyConsString : String;
-        def ForgenKeyConsString : Array[String];
 
-        handler this.setPrimaryKeyConstraint(Columns : Array[String]){
-            this.PrimaryKeyConsString="PRIMARY KEY ( " ;
-            this.PrimaryKeyConsString=this.PrimaryKeyConsString+ Columns(0);
-            def i:int;
-            for i=1 ,i<Columns.getLength() ,i=i+1
-            {
+    class TableConstraints {
+        def PrimaryKeyConsString: String;
+        def ForgenKeyConsString: Array[String];
+
+        handler this.setPrimaryKeyConstraint(Columns: Array[String]) {
+            this.PrimaryKeyConsString = "PRIMARY KEY ( ";
+            this.PrimaryKeyConsString = this.PrimaryKeyConsString + Columns(0);
+            def i: int;
+            for i = 1, i < Columns.getLength(), i = i+1 {
                 this.PrimaryKeyConsString = this.PrimaryKeyConsString + ", " + Columns(i);
             }
-            this.PrimaryKeyConsString=this.PrimaryKeyConsString+ " )"
+            this.PrimaryKeyConsString = this.PrimaryKeyConsString + " )";
+        }
 
-            }
-        handler this.addForgenKey(Col : String , RefTable : String , RefCol : String)
-        {
-            def ForKey : String = "FOREIGN KEY ( ";
+        handler this.addForgenKey(Col: String, RefTable: String, RefCol: String) {
+            def ForKey: String = "FOREIGN KEY ( ";
             ForKey = ForKey + Col + ") " + "REFERENCES " + RefTable + " (" + RefCol + ")";
             this.ForgenKeyConsString.add(ForKey);
-
         }
-        handler this.getPrimaryKeyConsString() : String{
+
+        handler this.getPrimaryKeyConsString(): String {
             return this.PrimaryKeyConsString;
-            }
-        handler this.getForgenKeyConsString() : Array[String]{
+        }
+
+        handler this.getForgenKeyConsString(): Array[String] {
             return this.ForgenKeyConsString;
-            }
+        }
     }
 }
 

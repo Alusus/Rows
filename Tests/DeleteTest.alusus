@@ -1,26 +1,19 @@
 import "Delete.alusus"
 
-def DbCon :  DbConBuilder;
-def DbName : String="testdb";
-DbCon.setDBName(DbName);
-def UserName : String="user12";
-DbCon.setUserName(UserName);
-def Password : String="Qwerty231@#!";
-DbCon.setPassword(Password);
-def server : String="localhost";
-DbCon.setServer(server);
+def DbCon: DbConBuilder;
+DbCon.setDBName(String("testdb"));
+DbCon.setUserName(String("user12"));
+DbCon.setPassword(String("Qwerty231@#!"));
+DbCon.setServer(String("localhost"));
 
-def mysql :MySql.Db;
-mysql=DbCon.mySqlConBuilder();
+def mysql: MySql.Db;
+mysql = DbCon.mySqlConBuilder();
 
-def tableName : String;
-def wherCond:String;
-tableName=String("cars");
-wherCond=String("id=900");
-def table : Delete;
-table.setTableName(tableName);
+def table: Delete;
+table.setTableName(String("cars"));
 table.setMySqlObj(mysql);
-table.setWhereCond(wherCond);
+table.setWhereCond(String("id=900"));
 table.genareteExecString();
 Console.print(table.getExecString());
 table.exec();
+
