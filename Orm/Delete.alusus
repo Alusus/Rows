@@ -1,96 +1,94 @@
 @merge module Rows {
     class Delete {
-        def MySqlObj: MySql.Db;
-        def PgSqlObj: PostgreSql.Db;
-        def SqLiteObj: Sqlite.Db;
-        def ExecString: String = "DELETE FROM ";
-        def TableName: String = "";
-        def DataBaseType: int = 0;
-        def DeleteAllDataFlag: bool = 0;
-        def WhereCond: String = "";
+        def mysqlObj: MySql.Db;
+        def pgsqlObj: PostgreSql.Db;
+        // TODO: Implement Sqlite.
+        // def sqliteObj: Sqlite.Db;
+        def execString: String = "DELETE FROM ";
+        def tableName: String = "";
+        def dataBaseType: int = 0;
+        def deleteAllDataFlag: bool = 0;
+        def whereCond: String = "";
 
-        handler this.setTableName(TableName: String) {
-            this.TableName = TableName;
+        handler this.setTableName(tableName: String) {
+            this.tableName = tableName;
         }
 
         handler this.getTableName(): String {
-            return this.TableName;
-        }
-
-        handler this.setExecString(ExecString: String) {
-            this.ExecString = ExecString;
+            return this.tableName;
         }
 
         handler this.getExecString(): String {
-            return this.ExecString;
+            return this.execString;
         }
 
-        handler this.setWhereCond(WhereCond: String) {
-            this.WhereCond = WhereCond;
+        handler this.setWhereCond(whereCond: String) {
+            this.whereCond = whereCond;
         }
 
         handler this.getWhereCond(): String {
-            return this.WhereCond;
+            return this.whereCond;
         }
 
-        handler this.setMySqlObj(MySqlObj: MySql.Db) {
-            this.DataBaseType = 0;
-            this.MySqlObj = MySqlObj;
+        handler this.setMysqlObj(mysqlObj: MySql.Db) {
+            this.dataBaseType = 0;
+            this.mysqlObj = mysqlObj;
         }
 
-        handler this.getMySqlObj(): MySql.Db {
-            return this.MySqlObj;
+        handler this.getMysqlObj(): MySql.Db {
+            return this.mysqlObj;
         }
 
-        handler this.setPgSqlObj(PgSqlObj: PostgreSql.Db) {
-            this.DataBaseType = 1;
-            this.PgSqlObj = PgSqlObj;
+        handler this.setPgsqlObj(pgsqlObj: PostgreSql.Db) {
+            this.dataBaseType = 1;
+            this.pgsqlObj = pgsqlObj;
         }
 
-        handler this.getPgSqlObj(): PostgreSql.Db {
-            return this.PgSqlObj;
+        handler this.getPgsqlObj(): PostgreSql.Db {
+            return this.pgsqlObj;
         }
 
-        handler this.setSqLiteObj(SqLiteObj: Sqlite.Db) {
-            this.DataBaseType = 2;
-            this.SqLiteObj = SqLiteObj;
+        // TODO: Uncomment once Sqlite is implemented.
+        /* handler this.setSqliteObj(sqliteObj: Sqlite.Db) {
+            this.dataBaseType = 2;
+            this.sqliteObj = sqliteObj;
         }
 
-        handler this.getSqLiteObj(): Sqlite.Db {
-            return this.SqLiteObj;
-        }
+        handler this.getSqliteObj(): Sqlite.Db {
+            return this.sqliteObj;
+        } */
 
-        handler this.setDeleteAllDataFlag(DeleteAllDataFlag: bool) {
-            this.DeleteAllDataFlag = DeleteAllDataFlag;
+        handler this.setDeleteAllDataFlag(deleteAllDataFlag: bool) {
+            this.deleteAllDataFlag = deleteAllDataFlag;
         }
 
         handler this.getDeleteAllDataFlag(): bool {
-            return this.DeleteAllDataFlag;
+            return this.deleteAllDataFlag;
         }
 
         handler this.genareteExecString() {
-            this.ExecString = String("DELETE FROM ");
-            this.ExecString = this.ExecString + this.TableName;
-            if this.DeleteAllDataFlag == 0 {
-                this.ExecString = this.ExecString + String(" WHERE ") +this.WhereCond + String(";");
+            this.execString = String("DELETE FROM ");
+            this.execString = this.execString + this.tableName;
+            if this.deleteAllDataFlag == 0 {
+                this.execString = this.execString + String(" WHERE ") +this.whereCond + String(";");
             }
         }
 
         handler this.exec() {
-            if this.DataBaseType == 1 {
+            if this.dataBaseType == 1 {
                 Console.print("\n");
-                this.PgSqlObj.connectDb();
-                this.PgSqlObj.exec(this.ExecString.buf);
-                Console.print(this.PgSqlObj.errorMessage());
-            } else if this.DataBaseType == 0 {
-                Console.print(this.ExecString.buf );
+                this.pgsqlObj.connectDb();
+                this.pgsqlObj.exec(this.execString.buf);
+                Console.print(this.pgsqlObj.errorMessage());
+            } else if this.dataBaseType == 0 {
+                Console.print(this.execString.buf );
                 Console.print("\n");
-                if this.MySqlObj.Conn == null {
-                    Console.print("after conn %s \n", this.MySqlObj.errorMessage());
+                if this.mysqlObj.conn == null {
+                    Console.print("after conn %s \n", this.mysqlObj.errorMessage());
                 } else {
-                    this.MySqlObj.exec(this.ExecString.buf);
+                    this.mysqlObj.exec(this.execString.buf);
                 }
-                Console.print(this.MySqlObj.errorMessage());
+                Console.print(this.mysqlObj.errorMessage());
                 Console.print("\n");
             }
         }

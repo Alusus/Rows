@@ -21,10 +21,10 @@ colname.add(String("price"));
 table.setTableName(String("cars"));
 table.setData(data);
 table.setMySqlObj(mysql);
-table.setColsName(colname);
+table.setColumnNames(colname);
 table.genrateColsString();
-table.setValString();
-table.setExecString();
+table.generateValString();
+table.generateExecString();
 Console.print(table.getExecString());
 table.exec();
 

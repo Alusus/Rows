@@ -1,14 +1,15 @@
 @merge module Rows {
     class DbConBuilder {
-        def DbName: String = "";
-        def UserName: String = "";
-        def Password: String = "";
-        def Server: String = "";
-        def Port: int = 0;
-        def UnixSocket: String = null;
-        def ClientFlag: int = 0;
-        def DbConType: int
-        def Db: {
+        def dbName: String = "";
+        def userName: String = "";
+        def password: String = "";
+        def server: String = "";
+        def port: int = 0;
+        def unixSocket: String = null;
+        def clientFlags: int = 0;
+        def dbConType: int;
+
+        def DbType: {
             def MYSQL: 0;
             def SQLITE: 1;
             def PGSQL: 2;
@@ -16,124 +17,122 @@
 
         handler this~init() {}
 
-        handler this~init(DbName: String, UserName: String, Password: String, Server: String) {
-            this.DbName = DbName;
-            this.UserName = UserName;
-            this.Password = Password;
-            this.Server = Server
+        handler this~init(dbName: String, userName: String, password: String, server: String) {
+            this.dbName = dbName;
+            this.userName = userName;
+            this.password = password;
+            this.server = server
         }
 
         handler this~init(ref[DbConBuilder]) {
-            this.DbName = value.DbName;
-            this.UserName = value.UserName;
-            this.Password = value.Password;
-            this.Server = value.Server;
-            this.Password = value.Password;
-            this.Port = value.Port;
-            this.UnixSocket = null;
-            this.ClientFlag = value.ClientFlag;
-            this.DbConType = value.DbConType;
+            this.dbName = value.dbName;
+            this.userName = value.userName;
+            this.password = value.password;
+            this.server = value.server;
+            this.port = value.port;
+            this.unixSocket = null;
+            this.clientFlags = value.clientFlags;
+            this.dbConType = value.dbConType;
         }
 
         handler this = ref[DbConBuilder] {
-            this.DbName = value.DbName;
-            this.UserName = value.UserName;
-            this.Password = value.Password;
-            this.Server = value.Server;
-            this.Password = value.Password;
-            this.Port = value.Port;
-            this.UnixSocket = null;
-            this.ClientFlag = value.ClientFlag;
-            this.DbConType = value.DbConType;
+            this.dbName = value.dbName;
+            this.userName = value.userName;
+            this.password = value.password;
+            this.server = value.server;
+            this.port = value.port;
+            this.unixSocket = null;
+            this.clientFlags = value.clientFlags;
+            this.dbConType = value.dbConType;
         }
 
-        handler this.setDBName(DbName: String) {
-            this.DbName = DbName;
+        handler this.setDBName(dbName: String) {
+            this.dbName = dbName;
         }
 
         handler this.getDbName(): String {
-            return this.DbName;
+            return this.dbName;
         }
 
-        handler this.setDbConType(DbConType: int) {
-            this.DbConType = DbConType;
+        handler this.setDbConType(dbConType: int) {
+            this.dbConType = dbConType;
         }
 
         handler this.getDbConType(): int {
-            return this.DbConType;
+            return this.dbConType;
         }
 
-        handler this.setUserName(UserName: String) {
-            this.UserName = UserName;
+        handler this.setUserName(userName: String) {
+            this.userName = userName;
         }
 
         handler this.getUserName(): String {
-            return this.UserName;
+            return this.userName;
         }
 
-        handler this.setPassword(Password: String) {
-            this.Password = Password;
+        handler this.setPassword(password: String) {
+            this.password = password;
         }
 
         handler this.getPassword(): String {
-            return this.Password;
+            return this.password;
         }
 
-        handler this.setServer(Server: String) {
-            this.Server = Server;
+        handler this.setServer(server: String) {
+            this.server = server;
         }
 
         handler this.getServer(): String {
-            return this.Server;
+            return this.server;
         }
 
-        handler this.setPort(Port: int) {
-            this.Port = Port;
+        handler this.setPort(port: int) {
+            this.port = port;
         }
 
         handler this.getPort(): int {
-            return this.Port;
+            return this.port;
         }
 
-        handler this.setUnixSocket(UnixSocket: String) {
-            this.UnixSocket = UnixSocket;
+        handler this.setUnixSocket(unixSocket: String) {
+            this.unixSocket = unixSocket;
         }
 
         handler this.getUnixSocket(): String {
-            return this.UnixSocket;
+            return this.unixSocket;
         }
 
-        handler this.setClientFlag(ClientFlag: int) {
-            this.ClientFlag = ClientFlag;
+        handler this.setClientFlags(clientFlags: int) {
+            this.clientFlags = clientFlags;
         }
 
-        handler this.getClientFlag(): int {
-            return this.ClientFlag;
+        handler this.getClientFlags(): int {
+            return this.clientFlags;
         }
 
         handler this.pgSqlConStringBuilder(): String {
-            def PgSqlString: String = "user = ";
-            PgSqlString = PgSqlString + this.UserName + " password = " + this.Password + " dbname = " + this.DbName;
-            return PgSqlString;
+            def pgsqlString: String = "user = ";
+            pgsqlString = pgsqlString + this.userName + " password = " + this.password + " dbname = " + this.dbName;
+            return pgsqlString;
         }
 
         handler this.pgSqlConBuilder(): PostgreSql.Db {
-            def PgSqlString: String ;
-            PgSqlString = this.pgSqlConStringBuilder();
-            def PgSql: PostgreSql.Db(PgSqlString);
+            def pgsqlString: String ;
+            pgsqlString = this.pgSqlConStringBuilder();
+            def PgSql: PostgreSql.Db(pgsqlString);
             return PgSql;
         }
 
         handler this.mySqlConBuilder(): MySql.Db {
             def MySql: MySql.Db(
-                this.Server,this.UserName,this.Password,this.DbName,this.Port,this.UnixSocket,this.ClientFlag
+                this.server, this.userName, this.password, this.dbName, this.port, this.unixSocket, this.clientFlags
             );
 
             return MySql;
         }
 
         handler this.sqLiteConBuilder(): Sqlite.Db {
-            def sqlite: Sqlite.Db = this.DbName;
+            def sqlite: Sqlite.Db = this.dbName;
             return sqlite;
         }
     }

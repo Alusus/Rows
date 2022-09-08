@@ -6,14 +6,14 @@ use Rows;
 func main {
     use Srl;
     def mysql: MySql.Db(String("0.0.0.0"),String("alusus"), String("alusus"),String("alusus"),0,String(),0);
-    if mysql.Conn == null {
-        Console.print("%s\n", mysql.ConState);
+    if mysql.conn == null {
+        Console.print("%s\n", mysql.conState);
     } else {
         mysql.exec("SELECT * FROM cars");
-        if mysql.ResultState != 0 {
+        if mysql.resultState != 0 {
             Console.print("%s\n", mysql.errorMessage() );
         }
-        if mysql.Res == null {
+        if mysql.res == null {
             Console.print("%s\n", mysql.errorMessage());
         } else {
             def numberOfFileds: int;
@@ -22,9 +22,9 @@ func main {
             mysql.getCol();
             def i: int;
             def val: String;
-            while mysql.Row != null {
+            while mysql.row != null {
                 for i = 0, i < numberOfFileds, i = i+1 {
-                    val = mysql.Row~cnt(i);
+                    val = mysql.row~cnt(i);
                     Console.print("%s\t", val.buf);
                 }
                 Console.print("\n");

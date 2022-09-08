@@ -7,7 +7,7 @@ def t: Array[String];
 t.add(String("cars"));
 table.setTableName(t);
 
-table.setExecString();
+table.generateExecString();
 def ex: String;
 ex = table.getExecString();
 Console.print(ex);
@@ -18,7 +18,7 @@ DbCon.setPassword(String("Qwerty231@#!"));
 DbCon.setServer(String("localhost"));
 def mysql2: MySql.Db;
 mysql2 = DbCon.mySqlConBuilder();
-table.setMySqlObj(mysql2);
+table.setMysqlObj(mysql2);
 table.setData();
 Data = table.getData();
 def i: int = 0;

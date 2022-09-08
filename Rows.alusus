@@ -28,6 +28,8 @@ import "Orm/Update";
     use Core.Data;
     use Core.Data.Ast;
 
+    def TioSrdRef: alias SrdRef[Core.Basic.TiObject];
+
     @expname[atof] func parseFloat(CharsPtr): Float[64];
     @expname[atoi] func parseInt(CharsPtr): int;
 }

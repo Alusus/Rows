@@ -1,185 +1,154 @@
 @merge module Rows {
     class Receive {
-        def ConString: String;
-        def ExecString: String;
-        def CString: String;
-        def DataFiledString: String = "*";
-        def TableName: String;
-        def OrderByString: String;
-        def HavingString: String;
-        def DataRow: Array[String];
-        def Data: Array[Array[String]];
-        def HasNext: bool = false;
-        def DataClass: Array[ptr[Data]];
-        def DataBaseType: int = 0;
-        def PgSqlObj: PostgreSql.Db;
-        def MySqlObj: MySql.Db ;
-        // TODO: Implement Sqlite.
+        def execString: String;
+        def conditionString: String;
+        def dataFieldsString: String = "*";
+        def tableName: String;
+        def orderByString: String;
+        def havingString: String;
+        def data: Array[Array[String]];
+        def columnNames : Array[String];
+        def dataBaseType: int = 0;
+        def mysqlObj: MySql.Db ;
+        // TODO: Enable other DB types.
+        // def pgsqlObj: PostgreSql.Db;
         // def SqliteObj: Sqlite.Db;
-        def ColsName : Array[String];
-        def RowString : Array[CharsPtr];
 
-        handler this.setDbCon(DbCon: DbConBuilder) {
-            this.DbCon = DbCon;
-        }
-
-        handler this.getDbCon() : DbConBuilder {
-            return this.DbCon;
-        }
-
-        handler this.setCString(Cond: String) {
-            this.CString = "";
-            if Cond != "" {
-                this.CString = "WHERE ";
-                this.CString = this.CString + Cond;
+        handler this.setConditionString(cond: String) {
+            this.conditionString = "";
+            if cond != "" {
+                this.conditionString = "WHERE ";
+                this.conditionString = this.conditionString + cond;
             }
         }
 
-        handler this.getCString(): String {
-            return this.CString;
+        handler this.getConditionString(): String {
+            return this.conditionString;
         }
 
-        handler this.setDataFiledString(DataFiled: Array[String]) {
-            this.DataFiledString = "*";
-            if DataFiled.getLength() != 0 {
+        handler this.setDataFieldsString(dataFileds: Array[String]) {
+            this.dataFieldsString = "*";
+            if dataFileds.getLength() != 0 {
                 def i: int;
-                this.DataFiledString = "( ";
-                for i = 0, i < DataFiled.getLength(), i = i + 1
-                    this.DataFiledString = this.DataFiledString + " , " + DataFiled(i);
+                this.dataFieldsString = "( ";
+                for i = 0, i < dataFileds.getLength(), i = i + 1
+                    this.dataFieldsString += String(" , ") + dataFileds(i);
             }
         }
 
-        handler this.getDataFiledString(): String {
-            return this.DataFiledString;
+        handler this.getDataFieldsString(): String {
+            return this.dataFieldsString;
         }
 
-        handler this.setTableName(TableNames: Array[String]) {
-            this.TableName = "";
+        handler this.setTableName(tableNames: Array[String]) {
+            this.tableName = "";
             def i: int;
-            if TableNames.getLength() == 1 {
-                this.TableName=TableNames(0);
-            } else if TableNames.getLength() == 0 {
-                this.TableName = "";
+            if tableNames.getLength() == 1 {
+                this.tableName=tableNames(0);
+            } else if tableNames.getLength() == 0 {
+                this.tableName = "";
             } else {
-                this.TableName = "(";
-                this.TableName = this.TableName + TableNames(0);
-                for i = 1, i < TableNames.getLength(), i = i + 1 {
-                    this.TableName = this.TableName + " , " + TableNames(i);
+                this.tableName = "(";
+                this.tableName = this.tableName + tableNames(0);
+                for i = 1, i < tableNames.getLength(), i = i + 1 {
+                    this.tableName = this.tableName + " , " + tableNames(i);
                 }
-                this.TableName = this.TableName + ")";
+                this.tableName = this.tableName + ")";
             }
         }
 
         handler this.getTableName(): String {
-            return this.TableName;
+            return this.tableName;
         }
 
-        handler this.setOrderByString(TableNames: Array[String]) {
-            this.OrderByString = "";
+        handler this.setOrderByString(tableNames: Array[String]) {
+            this.orderByString = "";
             def i: int;
-            if TableNames.getLength() == 1 {
-                this.OrderByString=TableNames(0);
-            } else if TableNames.getLength() == 0 {
-                this.OrderByString = "";
+            if tableNames.getLength() == 1 {
+                this.orderByString=tableNames(0);
+            } else if tableNames.getLength() == 0 {
+                this.orderByString = "";
             } else {
-                this.OrderByString = "(";
-                this.OrderByString = this.OrderByString + TableNames(0);
-                for i = 1, i < OrderByString.getLength(), i = i + 1 {
-                    this.OrderByString = this.OrderByString + " , " + TableNames(i);
+                this.orderByString = "(";
+                this.orderByString = this.orderByString + tableNames(0);
+                for i = 1, i < tableNames.getLength(), i = i + 1 {
+                    this.orderByString += String(" , ") + tableNames(i);
                 }
-                this.OrderByString = this.OrderByString + ")";
+                this.orderByString += ")";
             }
         }
 
         handler this.getOrderByString(): String {
-            return this.OrderByString;
+            return this.orderByString;
         }
 
         handler this.setHavingString(cond: String) {
-            this.HavingString = "";
+            this.havingString = "";
             if cond.getLength() != 0 {
-                this.HavingString = "HAVING ( ";
-                this.HavingString = this.HavingString + cond + " )";
+                this.havingString = "HAVING ( ";
+                this.havingString = this.havingString + cond + " )";
             }
         }
 
         handler this.getHavingString(): String {
-            return this.HavingString;
+            return this.havingString;
         }
 
-        handler this.setDataClass(DataClass: Array[ptr[Data]]) {
-            this.DataClass = DataClass;
-        }
-
-        handler this.getDataClass(): Array[ptr[Data]] {
-            return this.DataClass;
-        }
-
-        handler this.setExecString() {
-            this.ExecString = "SELECT ";
-            this.ExecString = this.ExecString + this.DataFiledString + "\n";
-            this.ExecString = this.ExecString + "FROM " + this.TableName + "\n";
-            if this.CString != "" {
-                this.ExecString = this.ExecString + this.CString + "\n";
+        handler this.generateExecString() {
+            this.execString = "SELECT ";
+            this.execString += this.dataFieldsString + "\n";
+            this.execString += String("FROM ") + this.tableName + "\n";
+            if this.conditionString != "" {
+                this.execString += this.conditionString + "\n";
             }
-            if this.OrderByString != "" {
-                this.ExecString = this.ExecString + this.OrderByString + "\n";
+            if this.orderByString != "" {
+                this.execString += this.orderByString + "\n";
             }
-            if this.HavingString != "" {
-                this.ExecString = this.ExecString + this.HavingString + "\n";
+            if this.havingString != "" {
+                this.execString += this.havingString + "\n";
             }
         }
 
         handler this.getExecString(): String {
-            return this.ExecString;
+            return this.execString;
         }
 
-        handler this.setConString(ConString: String) {
-            this.ConString = ConString;
+        handler this.setMysqlObj(mysqlObj: MySql.Db) {
+            this.mysqlObj = mysqlObj;
         }
 
-        handler this.getConString(): String {
-            return this.ConString;
-        }
-
-        handler this.setMySqlObj(MySqlObj: MySql.Db) {
-            this.MySqlObj = MySqlObj;
-        }
-
-        handler this.setDataBaseType(DataBaseType: int) {
-            this.DataBaseType = DataBaseType;
+        handler this.setDataBaseType(dataBaseType: int) {
+            this.dataBaseType = dataBaseType;
         }
 
         handler this.getDataBaseType(): int {
-            return this.DataBaseType;
+            return this.dataBaseType;
         }
 
         handler this.setData() {
-            if this.DataBaseType ==0 {
-                if this.MySqlObj.Conn == null {
-		            Console.print(" %s \n", this.MySqlObj.ConState);
+            if this.dataBaseType ==0 {
+                if this.mysqlObj.conn == null {
+		            Console.print(" %s \n", this.mysqlObj.conState);
                 } else {
-                    this.MySqlObj.exec(this.ExecString.buf);
-                    if this.MySqlObj.ResultState != 0 {
-		                Console.print(" %s \n",this.MySqlObj.errorMessage() );
+                    this.mysqlObj.exec(this.execString.buf);
+                    if this.mysqlObj.resultState != 0 {
+		                Console.print(" %s \n",this.mysqlObj.errorMessage() );
 	                }
-	                if this.MySqlObj.Res == null {
-		                Console.print("  %s \n",this.MySqlObj.errorMessage() );
+	                if this.mysqlObj.res == null {
+		                Console.print("  %s \n",this.mysqlObj.errorMessage() );
 	                } else {
                         def numberOfFileds: int;
-                        numberOfFileds = this.MySqlObj.getFiledsNumber();
-                        this.MySqlObj.getRow();
-                        this.MySqlObj.getCol();
+                        numberOfFileds = this.mysqlObj.getFiledsNumber();
+                        this.mysqlObj.getRow();
+                        this.mysqlObj.getCol();
                         def i: int;
-                        def val: String;
-                        while this.MySqlObj.Row != null {
+                        while this.mysqlObj.row != null {
+                            def rowData: Array[String];
                             for i = 0, i < numberOfFileds, i = i + 1 {
-                                val = this.MySqlObj.Row~cnt(i);
-                                this.DataRow.add(val);
+                                rowData.add(String(this.mysqlObj.row~cnt(i)));
                             }
-                            this.Data.add(this.DataRow);
-                            this.DataRow.clear();
-                            this.MySqlObj.getRow();
+                            this.data.add(rowData);
+                            this.mysqlObj.getRow();
                         }
                     }
                 }
@@ -187,14 +156,8 @@
         }
 
         handler this.getData(): Array[Array[String]] {
-            return this.Data;
+            return this.data;
         }
     }
-
-    @expname[atoi]
-    func getInt(Data: CharsPtr): int;
-
-    @expname[atof]
-    func getFloat(Data: CharsPtr): float[64];
 }
 

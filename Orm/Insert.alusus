@@ -1,45 +1,44 @@
 @merge module Rows {
     class Insert {
-        def ExecString: String = "INSERT INTO ";
-        def Name: String = "";
-        def Data: Array[String];
-        def ColsName: Array[String];
-        def ColsString: String = "";
-        def ValString: String = "";
-        def DbType: int;
-        def PgSqlObj: PostgreSql.Db;
-        def MySqlObj: MySql.Db ;
-
+        def execString: String = "INSERT INTO ";
+        def tableName: String = "";
+        def data: Array[String];
+        def columnNames: Array[String];
+        def colsString: String = "";
+        def valString: String = "";
+        def dbType: int;
+        def pgsqlObj: PostgreSql.Db;
+        def mysqlObj: MySql.Db ;
         // TODO: Implement Sqlite.
         // def SqliteObj : Sqlite.Db;
 
-        handler this.setTableName(Name: String) {
-            this.Name = Name;
+        handler this.setTableName(tableName: String) {
+            this.tableName = tableName;
         }
 
-        handler this.setData(Data: Array[String]) {
-            this.Data = Data;
+        handler this.setData(data: Array[String]) {
+            this.data = data;
         }
 
         handler this.getData(): Array[String] {
-            return this.Data;
+            return this.data;
         }
 
-        handler this.setMySqlObj(MySqlObj: MySql.Db) {
-            this.MySqlObj = MySqlObj;
-            this.DbType = 0;
+        handler this.setMysqlObj(mysqlObj: MySql.Db) {
+            this.mysqlObj = mysqlObj;
+            this.dbType = 0;
         }
 
-        handler this.getMySqlObj(): MySql.Db {
-            return this.MySqlObj;
+        handler this.getMysqlObj(): MySql.Db {
+            return this.mysqlObj;
         }
 
-        handler this.setPgSqlObj(PgSqlObj: PostgreSql.Db) {
-            this.PgSqlObj = PgSqlObj;
+        handler this.setPgsqlObj(pgsqlObj: PostgreSql.Db) {
+            this.pgsqlObj = pgsqlObj;
         }
 
-        handler this.getPgSqlObj(): PostgreSql.Db {
-            return this.PgSqlObj;
+        handler this.getPgsqlObj(): PostgreSql.Db {
+            return this.pgsqlObj;
         }
 
         // TODO: Uncomment once Sqlite is implemented.
@@ -53,78 +52,78 @@
         } */
 
         handler this.getColsString(): String {
-            return this.ColsString;
+            return this.colsString;
         }
 
-        handler this.setColsString(ColsString: String) {
-             this.ColsString = ColsString;
+        handler this.setColsString(colsString: String) {
+             this.colsString = colsString;
         }
 
-        handler this.setColsName(ColsName: Array[String]) {
-            this.ColsName = ColsName;
+        handler this.setColumnNames(columnNames: Array[String]) {
+            this.columnNames = columnNames;
         }
 
-        handler this.getColsName(): Array[String] {
-            return this.ColsName;
+        handler this.getColumnNames(): Array[String] {
+            return this.columnNames;
         }
 
         handler this.genrateColsString() {
-            this.ColsString = "( ";
+            this.colsString = "( ";
             def i: int = 0;
             def size: int = 0;
-            if this.Data.getLength() < this.ColsName.getLength() size=this.Data.getLength()
-            else size = this.ColsName.getLength();
+            if this.data.getLength() < this.columnNames.getLength() size=this.data.getLength()
+            else size = this.columnNames.getLength();
             for i = 0, i < size - 1, i = i + 1 {
-                this.ColsString = this.ColsString + this.ColsName(i) + ",";
+                this.colsString = this.colsString + this.columnNames(i) + ",";
             }
-            this.ColsString=this.ColsString+this.ColsName(size-1) ;
-            this.ColsString=this.ColsString + ")";
-        }
-
-        handler this.setValString() {
-            this.ValString = "( ";
-            def i: int = 0;
-            def size: int = 0;
-            if this.Data.getLength() < this.ColsName.getLength() size = this.Data.getLength()
-            else size = this.ColsName.getLength();
-            for i = 0, i < size - 1, i = i + 1 {
-                this.ValString = this.ValString + this.Data(i) + ", ";
-            }
-            this.ValString = this.ValString + this.Data(size-1);
-            this.ValString = this.ValString + ")";
+            this.colsString=this.colsString+this.columnNames(size-1) ;
+            this.colsString=this.colsString + ")";
         }
 
         handler this.getColsString(): String {
-            return this.ColsString;
+            return this.colsString;
+        }
+
+        handler this.generateValString() {
+            this.valString = "( ";
+            def i: int = 0;
+            def size: int = 0;
+            if this.data.getLength() < this.columnNames.getLength() size = this.data.getLength()
+            else size = this.columnNames.getLength();
+            for i = 0, i < size - 1, i = i + 1 {
+                this.valString = this.valString + this.data(i) + ", ";
+            }
+            this.valString = this.valString + this.data(size-1);
+            this.valString = this.valString + ")";
+        }
+
+        handler this.generateExecString() {
+            this.execString = "INSERT INTO";
+            this.execString = this.execString + " " + this.tableName + "\n";
+            this.execString = this.execString + this.colsString + "\n";
+            this.execString = this.execString + "VALUES ";
+            this.execString = this.execString + this.valString + "\n";
         }
 
         handler this.getExecString(): String {
-            return this.ExecString;
-        }
-
-        handler this.setExecString() {
-            this.ExecString = "INSERT INTO";
-            this.ExecString = this.ExecString + " " + this.Name + "\n";
-            this.ExecString = this.ExecString + this.ColsString + "\n";
-            this.ExecString = this.ExecString + "VALUES ";
-            this.ExecString = this.ExecString + this.ValString + "\n";
+            return this.execString;
         }
 
         handler this.exec() {
-            if this.DbType == 1 {
+            if this.dbType == 1 {
                 Console.print("\n");
-                this.PgSqlObj.connectDb();
-                this.PgSqlObj.exec(this.ExecString.buf);
-                Console.print(this.PgSqlObj.errorMessage());
-            } else if this.DbType == 0 {
-                Console.print(this.ExecString.buf);
+                this.pgsqlObj.connectDb();
+                this.pgsqlObj.exec(this.execString.buf);
+                Console.print(this.pgsqlObj.errorMessage());
+            } else if this.dbType == 0 {
+                Console.print(this.execString.buf);
                 Console.print("\n");
-                if this.MySqlObj.Conn == null {
-                    Console.print("after conn %s \n",this.MySqlObj.errorMessage());
+                if this.mysqlObj.conn == null {
+                    Console.print("after conn %s \n",this.mysqlObj.errorMessage());
                 } else {
-                    this.MySqlObj.exec(this.ExecString.buf);
+                    this.mysqlObj.exec(this.execString.buf);
                 }
-                Console.print(this.MySqlObj.errorMessage());
+                Console.print(this.mysqlObj.errorMessage());
                 Console.print("\n");
             }
         }

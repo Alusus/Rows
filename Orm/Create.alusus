@@ -1,147 +1,145 @@
 @merge module Rows {
-    class Create
-    {
-        def DbType: int;
-        def MySqlObj: MySql.Db;
-        def PgSqlObj: PostgreSql.Db;
-        def SqLiteObj: Sqlite.Db;
+    class Create {
+        def dbType: int;
+        def mysqlObj: MySql.Db;
+        def pgsqlObj: PostgreSql.Db;
+        def sqliteObj: Sqlite.Db;
 
-        def ExecString: String = "CREATE TABLE";
-        def NotExistFlag: bool = 0;
-        def Name: String = "";
-        def Data: ptr[Data];
-        def IntData: Integer;
+        def execString: String = "CREATE TABLE";
+        def notExistFlag: bool = 0;
+        def name: String = "";
+        def data: ptr[Data];
 
-        def ColsName: String;
-        def ColsString: String = "";
-        def TConst: ptr[TableConstraints];
-        def TConstString: String = "";
+        def columnNames: String;
+        def colsString: String = "";
+        def tblConstraints: ptr[TableConstraints];
+        def tblConstraintsString: String = "";
 
-        handler this.setTableName(Name: String) {
-            this.Name=Name;
+        handler this.setTableName(name: String) {
+            this.name = name;
         }
 
         handler this.setNotExistFlag() {
-            this.NotExistFlag = 1;
+            this.notExistFlag = 1;
         }
 
-        handler this.setDataType(Data: ptr[Data]) {
-            this.Data = Data;
+        handler this.setDataType(data: ptr[Data]) {
+            this.data = data;
         }
 
         handler this.getColsString(): String {
-            return this.ColsString;
+            return this.colsString;
         }
 
-        handler this.setColsName(ColsName: String) {
-            this.ColsName = ColsName;
+        handler this.setColumnNames(columnNames: String) {
+            this.columnNames = columnNames;
         }
 
-        handler this.getColsName(): Array[String] {
-            return this.ColsName;
+        handler this.getColumnNames(): Array[String] {
+            return this.columnNames;
         }
 
         handler this.addToColsString() {
-            this.ColsString = this.ColsString + this.ColsName + " ";
-            this.ColsString = this.ColsString + this.Data~cnt.getDataString() + " ";
-            this.ColsString = this.ColsString + this.Data~cnt.FConstrants.getFieldConsString();
-            this.ColsString = this.ColsString + ",\n";
+            this.colsString = this.colsString + this.columnNames + " ";
+            this.colsString = this.colsString + this.data~cnt.getDataString() + " ";
+            this.colsString = this.colsString + this.data~cnt.fieldConstraints.getFieldConsString();
+            this.colsString = this.colsString + ",\n";
         }
 
         handler this.getColsString(): String {
-            return this.ColsString;
+            return this.colsString;
         }
 
-        handler this.setTConst(TConst: ptr[TableConstraints]) {
-            this.TConst=TConst;
+        handler this.setTblConstraints(tblConstraints: ptr[TableConstraints]) {
+            this.tblConstraints = tblConstraints;
         }
 
-        handler this.setTConstString() {
-            def PKey: String;
-            def FKey: Array[String];
-            PKey = this.TConst~cnt.getPrimaryKeyConsString();
-            FKey = this.TConst~cnt.getForgenKeyConsString();
-            this.TConstString = "";
-            this.TConstString = this.TConstString + PKey;
+        handler this.setTblConstraintsString() {
+            def pKey: String;
+            def fKey: Array[String];
+            pKey = this.tblConstraints~cnt.getPrimaryKeyConsString();
+            fKey = this.tblConstraints~cnt.getForgenKeyConsString();
+            this.tblConstraintsString = "";
+            this.tblConstraintsString = this.tblConstraintsString + pKey;
             def i: int = 0;
-            if FKey.getLength() > 0 this.TConstString=this.TConstString+ "," + "\n";
-            for i = 0, i < FKey.getLength() - 1, i = i+1 {
-                this.TConstString = this.TConstString + FKey(i);
-                this.TConstString = this.TConstString + " ,\n";
+            if fKey.getLength() > 0 this.tblConstraintsString=this.tblConstraintsString+ "," + "\n";
+            for i = 0, i < fKey.getLength() - 1, i = i+1 {
+                this.tblConstraintsString = this.tblConstraintsString + fKey(i);
+                this.tblConstraintsString = this.tblConstraintsString + " ,\n";
             }
-            if FKey.getLength() > 0 this.TConstString=this.TConstString + FKey(i);
+            if fKey.getLength() > 0 this.tblConstraintsString=this.tblConstraintsString + fKey(i);
         }
 
         handler this.getTConstString(): String {
-            return this.TConstString;
+            return this.tblConstraintsString;
         }
 
         handler this.getExecString(): String {
-            return this.ExecString;
+            return this.execString;
         }
 
-        handler this.setExecString() {
-            this.ExecString = "CREATE TABLE ";
-            if this.NotExistFlag {
-                this.ExecString = this.ExecString + "IF NOT EXISTS " +this.Name + "(\n";
+        handler this.generateExecString() {
+            this.execString = "CREATE TABLE ";
+            if this.notExistFlag {
+                this.execString = this.execString + "IF NOT EXISTS " +this.name + "(\n";
             } else {
-                this.ExecString = this.ExecString + this.Name + "(\n";
+                this.execString = this.execString + this.name + "(\n";
             }
-            this.ExecString = this.ExecString + this.ColsString ;
-            if this.TConstString != "" {
-                this.ExecString = this.ExecString + "\n";
-                this.ExecString = this.ExecString + this.TConstString +");";
+            this.execString = this.execString + this.colsString ;
+            if this.tblConstraintsString != "" {
+                this.execString = this.execString + "\n";
+                this.execString = this.execString + this.tblConstraintsString +");";
             } else {
-                this.ExecString = this.ExecString + ");";
+                this.execString = this.execString + ");";
             }
         }
 
-        handler this.setMysqlObj(MySqlObj: MySql.Db) {
-            this.MySqlObj = MySqlObj;
-            this.DbType = 0;
+        handler this.setMysqlObj(mysqlObj: MySql.Db) {
+            this.mysqlObj = mysqlObj;
+            this.dbType = 0;
         }
 
         handler this.getMysqlObj(): MySql.Db {
-            return this.MySqlObj;
+            return this.mysqlObj;
         }
 
-        handler this.setPgSqlObj(PgSqlObj: Db) {
-            this.PgSqlObj = PgSqlObj;
-            this.DbType = 1;
+        handler this.setPgsqlObj(pgsqlObj: Db) {
+            this.pgsqlObj = pgsqlObj;
+            this.dbType = 1;
         }
 
-        handler this.getPgObj(): PostgreSql.Db {
-            return this.PgSqlObj;
+        handler this.getPgsqlObj(): PostgreSql.Db {
+            return this.pgsqlObj;
         }
 
-        handler this.setSqLiteObj(SqLiteObj: Sqlite.Db) {
-            this.SqLiteObj = SqLiteObj;
-            this.DbType = 2;
+        handler this.setSqliteObj(sqliteObj: Sqlite.Db) {
+            this.sqliteObj = sqliteObj;
+            this.dbType = 2;
         }
 
-        handler this.getSqLiteObj(): Sqlite.Db {
-            return this.SqLiteObj;
+        handler this.getSqliteObj(): Sqlite.Db {
+            return this.sqliteObj;
         }
 
         handler this.exec() {
-            if this.DbType == 1 {
+            if this.dbType == 1 {
                 Console.print("inside exec : ");
-                Console.print(this.PgSqlObj.Connstring);
+                Console.print(this.pgsqlObj.Connstring);
                 Console.print("\n");
-                this.PgSqlObj.connectDb();
-                this.PgSqlObj.exec(this.ExecString.buf);
-                Console.print(this.PgSqlObj.errorMessage());
-            } else if this.DbType == 0 {
+                this.pgsqlObj.connectDb();
+                this.pgsqlObj.exec(this.execString.buf);
+                Console.print(this.pgsqlObj.errorMessage());
+            } else if this.dbType == 0 {
                 Console.print("inside exec mysql:\n");
-                Console.print(this.ExecString.buf);
+                Console.print(this.execString.buf);
                 Console.print("\n");
-                if this.MySqlObj.Conn == null {
-                    Console.print("after conn %s \n", this.MySqlObj.errorMessage());
+                if this.mysqlObj.conn == null {
+                    Console.print("after conn %s \n", this.mysqlObj.errorMessage());
                 } else {
-                    this.MySqlObj.exec(this.ExecString.buf);
+                    this.mysqlObj.exec(this.execString.buf);
                 }
                 Console.print(" mysql: after exec\n");
-                Console.print(this.MySqlObj.errorMessage());
+                Console.print(this.mysqlObj.errorMessage());
                 Console.print("\n");
             }
         }

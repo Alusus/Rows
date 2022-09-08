@@ -11,7 +11,7 @@ mysql = DbCon.mySqlConBuilder();
 
 def table: Delete;
 table.setTableName(String("cars"));
-table.setMySqlObj(mysql);
+table.setMysqlObj(mysql);
 table.setWhereCond(String("id=900"));
 table.genareteExecString();
 Console.print(table.getExecString());

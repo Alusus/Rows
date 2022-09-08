@@ -8,7 +8,6 @@ use Core.Basic;
 use Core.Data;
 use Core.Data.Ast;
 use DbConBuilder;
-def TioSrdRef: alias SrdRef[Core.Basic.TiObject];
 
 class MyCars {
     @notnull

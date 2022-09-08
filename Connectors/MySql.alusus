@@ -9,254 +9,252 @@ import "libmysqlclient.so.21";
 
 @merge module Rows {
     module MySql {
-	    class MYSQL {}
-	    class MYSQL_RES {}
-	    def MYSQL_ROW: alias ptr[array[CharsPtr]];
+        class Connection {}
+        class Result {}
+        def Row: alias ptr[array[CharsPtr]];
 
-	    class MYSQL_FIELD {
-		    def name:CharsPtr;
-		    def org_name:CharsPtr;
-		    def table:CharsPtr;
-		    def org_table:CharsPtr;
-		    def db:CharsPtr;
-		    def catalog:CharsPtr;
-		    def define:CharsPtr;
-		    def length:ArchWord;
-		    def max_length:ArchWord;
-		    def name_length:Word;
-		    def org_name_length:Word;
-		    def table_length:Word;
-		    def org_table_length:Word;
-		    def db_length:Word;
-		    def catalog_length:Word;
-		    def def_length:Word;
-		    def flags:Word;
-		    def decimals:Word;
-		    def charsetnr:Word;
-		    def field_type:int;
-		    def extension:ptr;
-	    }
+        class Field {
+            def name: CharsPtr;
+            def orgName: CharsPtr;
+            def table: CharsPtr;
+            def orgTable: CharsPtr;
+            def db: CharsPtr;
+            def catalog: CharsPtr;
+            def define: CharsPtr;
+            def length: ArchWord;
+            def maxLength: ArchWord;
+            def nameLength: Word;
+            def orgNameLength: Word;
+            def tableLength: Word;
+            def orgTableLength: Word;
+            def dbLength: Word;
+            def catalogLength: Word;
+            def defLength: Word;
+            def flags: Word;
+            def decimals: Word;
+            def charsetnr: Word;
+            def fieldType: int;
+            def extension: ptr;
+        }
 
         class Db {
-            use Srl;
-            def Conn: ptr[MYSQL] ;
-            def Res: ptr[MYSQL_RES] ;
-	        def ResultState: int ;
-	        def Row: MYSQL_ROW;
-	        def Field: ptr[MYSQL_FIELD];
-	        def Host: String="";
-	        def User: String="";
-	        def Password: String="";
-	        def DbName: String="";
-	        def Port: int=0;
-	        def UnixSocket: String=null;
-	        def ClientFlag: int=0;
-	        def ConState: String="connected";
+            def conn: ptr[Connection];
+            def res: ptr[Result];
+            def resultState: int;
+            def row: Row;
+            def field: ptr[Field];
+            def host: String = "";
+            def user: String = "";
+            def password: String = "";
+            def dbName: String = "";
+            def port: int = 0;
+            def unixSocket: String = null;
+            def clientFlag: int = 0;
+            def conState: String = "connected";
 
             handler this~init(
-                Host: String, User: String, Password: String, DbName: String, Port :int, UnixSocket: String, ClientFlag :int
+                host: String, user: String, password: String, dbName: String, port :int, unixSocket: String, clientFlag :int
             ) {
-	            this.Host=Host;
-	            this.User=User;
-	            this.Password=Password;
-	            this.DbName=DbName;
-	            this.Port=Port;
-	            this.UnixSocket=null;
-	            this.ClientFlag=ClientFlag;
+                this.host = host;
+                this.user = user;
+                this.password = password;
+                this.dbName = dbName;
+                this.port = port;
+                this.unixSocket = null;
+                this.clientFlag = clientFlag;
                 this.connectDb();
             }
 
             handler this~init(ref[Db]) {
-                this.Res=value.Res;
-                this.Field=value.Field;
-                this.Row=value.Row;
-                this.Port=value.Port;
-	            this.Host=value.Host;
-	            this.User=value.User;
-	            this.Password=value.Password;
-	            this.DbName=value.DbName;
-	            this.Port=value.Port;
-	            this.UnixSocket=null;
-	            this.ClientFlag=value.ClientFlag;
-	            this.connectDb();
+                this.res = value.res;
+                this.field = value.field;
+                this.row = value.row;
+                this.port = value.port;
+                this.host = value.host;
+                this.user = value.user;
+                this.password = value.password;
+                this.dbName = value.dbName;
+                this.port = value.port;
+                this.unixSocket = null;
+                this.clientFlag = value.clientFlag;
+                this.connectDb();
             }
 
             handler this = ref[Db] {
-                this.Field=value.Field;
-                this.Row=value.Row;
-                this.Port=value.Port;
-	            this.Host=value.Host;
-	            this.User=value.User;
-	            this.Password=value.Password;
-	            this.DbName=value.DbName;
-	            this.Port=value.Port;
-	            this.UnixSocket=value.UnixSocket;
-	            this.ClientFlag=value.ClientFlag;
-	            this.connectDb();
+                this.field = value.field;
+                this.row = value.row;
+                this.host = value.host;
+                this.user = value.user;
+                this.password = value.password;
+                this.dbName = value.dbName;
+                this.port = value.port;
+                this.unixSocket = value.unixSocket;
+                this.clientFlag = value.clientFlag;
+                this.connectDb();
             }
 
             handler this~init() {
             }
 
-            handler this.setHost(Host: String) {
-	            this.Host=Host;
+            handler this.setHost(host: String) {
+                this.host=host;
             }
 
             handler this.getHost(): String {
-	            return this.Host;
+                return this.host;
             }
 
-            handler this.setUser(User: String) {
-	            this.User=User;
+            handler this.setUser(user: String) {
+                this.user=user;
             }
 
             handler this.getUser(): String {
-	            return this.User;
+                return this.user;
             }
 
-            handler this.setPassword(Password: String) {
-	            this.Password=Password;
+            handler this.setPassword(password: String) {
+                this.password = password;
             }
 
             handler this.getPassword(): String {
-	            return this.Password;
+                return this.password;
             }
 
-            handler this.setDbName(DbName: String) {
-	            this.DbName=DbName;
+            handler this.setDbName(dbName: String) {
+                this.dbName = dbName;
             }
 
             handler this.getDbName(): String {
-	            return this.DbName;
+                return this.dbName;
             }
 
-            handler this.setPort(Port: int) {
-	            this.Port=Port;
+            handler this.setPort(port: int) {
+                this.port = port;
             }
 
             handler this.getPort(): int {
-	            return this.Port;
+                return this.port;
             }
 
-            handler this.setUnixSocket(UnixSocket: String) {
-	            this.UnixSocket=UnixSocket;
+            handler this.setUnixSocket(unixSocket: String) {
+                this.unixSocket = unixSocket;
             }
 
             handler this.getUnixSocket(): String {
-	            return this.UnixSocket;
+                return this.unixSocket;
             }
 
-            handler this.setClientFlag(ClientFlag: int) {
-	            this.ClientFlag=ClientFlag;
+            handler this.setClientFlag(clientFlag: int) {
+                this.clientFlag = clientFlag;
             }
 
             handler this.getClientFlag(): int {
-	            return this.ClientFlag;
+                return this.clientFlag;
             }
 
             handler this.setConnPra(
-                Host: String, User: String, Password: String, DbName: String, Port :int, UnixSocket: String, ClientFlag :int
+                host: String, user: String, password: String, dbName: String, port :int, unixSocket: String, clientFlag :int
             ) {
-	            this.Host=Host;
-	            this.User=User;
-	            this.Password=Password;
-	            this.DbName=DbName;
-	            this.Port=Port;
-	            this.UnixSocket=UnixSocket;
-	            this.ClientFlag=ClientFlag;
-	            this.connectDb();
+                this.host = host;
+                this.user = user;
+                this.password = password;
+                this.dbName = dbName;
+                this.port = port;
+                this.unixSocket = unixSocket;
+                this.clientFlag = clientFlag;
+                this.connectDb();
             }
 
             handler this.connectDb() {
-                this.Conn=initl(null);
+                this.conn=initl(null);
 
-	            if connect(
-	                this.Conn, this.Host.buf, this.User.buf, this.Password.buf,
-	                this.DbName.buf, this.Port, null, this.ClientFlag
-	            ) == null {
-	                this.ConState = MySql.errorMessage(this.Conn);
-	            } else {
-	                this.ConState=="connected";
-	            }
+                if connect(
+                    this.conn, this.host.buf, this.user.buf, this.password.buf,
+                    this.dbName.buf, this.port, null, this.clientFlag
+                ) == null {
+                    this.conState = MySql.errorMessage(this.conn);
+                } else {
+                    this.conState = "connected";
+                }
             }
 
 
             handler this.exec(Sql: CharsPtr) {
-                this.ResultState= MySql.exec(this.Conn,Sql);
-                this.Res= MySql.storeRes(this.Conn);
+                this.resultState = MySql.exec(this.conn,Sql);
+                this.res = MySql.storeRes(this.conn);
             }
 
             handler this.storeRes() {
-                this.Res= MySql.storeRes(this.Conn);
+                this.res = MySql.storeRes(this.conn);
             }
 
             handler this.getFiledsNumber(): int {
-                return MySql.getFiledsNumber(this.Res);
+                return MySql.getFiledsNumber(this.res);
             }
 
             handler this.getRow() {
-                this.Row = MySql.getRow(this.Res);
+                this.row = MySql.getRow(this.res);
             }
 
             handler this.getCol() {
-                this.Field = MySql.getCol(this.Res);
+                this.field = MySql.getCol(this.res);
             }
 
             handler this.clearResult() {
-                 MySql.clearResult(this.Res);
+                 MySql.clearResult(this.res);
             }
 
             handler this.endConnection() {
-                 MySql.endConnection(this.Conn);
+                 MySql.endConnection(this.conn);
             }
 
             handler this.errorMessage(): CharsPtr {
-                 return MySql.errorMessage(this.Conn);
+                 return MySql.errorMessage(this.conn);
             }
 
             handler this.getNextResult(
                 Query : CharsPtr, NumberOfParam: int, ParamValues: ptr[array[CharsPtr]], DataType: int
             ): int {
-                this.ResultState= MySql.getNextResult(this.Conn );
-	            return this.ResultState;
+                this.resultState = MySql.getNextResult(this.conn );
+                return this.resultState;
             }
         }
 
         @expname[mysql_real_connect]
         func connect(
-            Conn :ptr[MYSQL], Host: CharsPtr, User: CharsPtr, Password: CharsPtr,
-            DbName: CharsPtr, Port :int, UnixSocket: CharsPtr, ClientFlag :int
-        ): ptr[MYSQL];
+            conn :ptr[Connection], host: CharsPtr, user: CharsPtr, password: CharsPtr,
+            dbName: CharsPtr, port :int, unixSocket: CharsPtr, clientFlag :int
+        ): ptr[Connection];
 
         @expname[mysql_query]
-        func exec(Conn: ptr[MYSQL] , Query: CharsPtr): int;
+        func exec(conn: ptr[Connection] , Query: CharsPtr): int;
 
         @expname[mysql_init]
-        func initl(Conn: ptr[MYSQL] ): ptr[MYSQL];
+        func initl(conn: ptr[Connection] ): ptr[Connection];
 
         @expname[mysql_store_result]
-        func storeRes(Conn: ptr[MYSQL] ): ptr[MYSQL_RES];
+        func storeRes(conn: ptr[Connection] ): ptr[Result];
 
         @expname[mysql_fetch_row]
-        func getRow(Res: ptr[MYSQL_RES]): MYSQL_ROW;
+        func getRow(res: ptr[Result]): Row;
 
         @expname[mysql_free_result]
-        func clearResult(Res: ptr[MYSQL_RES]);
+        func clearResult(res: ptr[Result]);
 
         @expname[mysql_close]
-        func endConnection(Conn: ptr[MYSQL]);
+        func endConnection(conn: ptr[Connection]);
 
         @expname[mysql_error]
-        func errorMessage(Conn: ptr[MYSQL]):CharsPtr;
+        func errorMessage(conn: ptr[Connection]):CharsPtr;
 
         @expname[mysql_num_fields]
-        func getFiledsNumber(Res: ptr[MYSQL_RES]):int;
+        func getFiledsNumber(res: ptr[Result]):int;
 
         @expname[mysql_fetch_field]
-        func getCol(Res: ptr[MYSQL_RES]):ptr[MYSQL_FIELD];
+        func getCol(res: ptr[Result]):ptr[Field];
 
         @expname[mysql_next_result]
-        func getNextResult(Conn: ptr[MYSQL]):int;
+        func getNextResult(conn: ptr[Connection]):int;
     }
 }
 
