@@ -1,0 +1,73 @@
+@merge module Rows {
+    class CreateTable {
+        def _name: String;
+        handler this.name = String {
+            this._name = value;
+            return this._name;
+        }
+
+        def _notExists: Bool = false;
+        handler this.notExists = Bool {
+            this._notExists = value;
+            return this._notExists;
+        }
+
+        def _columns: Map[String, SrdRef[Column]];
+        handler this.columns = Map[String, SrdRef[Column]] {
+            this._columns = value;
+            return this._columns;
+        }
+
+        def _primaryKey: Array[String];
+        handler this.primaryKey = Array[String] {
+            this._primaryKey = value;
+            return this._primaryKey;
+        }
+        handler this.primaryKey = String {
+            this._primaryKey = Array[String]({ value });
+            return this._primaryKey(0);
+        }
+
+        def _foreignKeys: Array[SrdRef[ForeignKey]];
+        handler this.foreignKeys = Array[SrdRef[ForeignKey]] {
+            this._foreignKeys = value;
+            return this._foreignKeys;
+        }
+
+        handler this.generateColumnsString(driver: ref[Driver]): String {
+            def sql: String;
+            def i: Int;
+            for i = 0, i < this._columns.keys.getLength(), ++i {
+                if i != 0 sql += ",\n";
+                sql += this._columns.keys(i) + " " + this._columns.values(i).generateSqlString(driver);
+            }
+            return sql;
+        }
+
+        handler this.generateConstraintsString(): String {
+            def sql: String;
+            if this._primaryKey.getLength() > 0 {
+                sql = String("PRIMARY KEY (") + String.merge(this._primaryKey, ", ") + ")";
+            }
+            def i: Int;
+            for i = 0, i < this._foreignKeys.getLength(), ++i {
+                if sql != "" sql += ",\n";
+                sql += String("FOREIGN KEY (") + this._foreignKeys(i).column
+                    + ") REFERENCES " + this._foreignKeys(i).referenceTable
+                    + "(" + this._foreignKeys(i).referenceColumn + ")";
+            }
+            return sql;
+        }
+
+        handler this.generateSqlString(driver: ref[Driver]): String {
+            def sql: String = "CREATE TABLE ";
+            if this._notExists sql += "IF NOT EXISTS ";
+            sql += this._name + "(\n" + this.generateColumnsString(driver);
+            def constraintsSql: String = this.generateConstraintsString();
+            if constraintsSql != "" sql += String(",\n") + constraintsSql;
+            sql += "\n);";
+            return sql;
+        }
+    }
+}
+

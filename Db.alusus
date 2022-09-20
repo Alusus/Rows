@@ -1,0 +1,91 @@
+@merge module Rows {
+    class Db {
+        def driver: SrdRef[Driver];
+        def logging: Bool = true;
+
+        handler this~init() {}
+        handler this~init(d: SrdRef[Driver]) {
+            this.driver = d;
+        }
+
+        handler this.init(d: SrdRef[Driver]) {
+            this.driver = d;
+        }
+
+        handler this.isConnected(): Bool {
+            return this.driver.obj~ptr != 0 && this.driver.isConnected();
+        }
+
+        handler this.getLastError(): String {
+            if this.driver.obj~ptr == 0 return String("Not initialized")
+            else return this.driver.getLastError();
+        }
+
+        handler this.exec(select: ref[Select], result: ref[Array[Array[String]]]): Bool {
+            if this.driver.obj~ptr == 0 {
+	            Console.print("Error: DB is not initialzied.\n");
+	            return false;
+            } else if !this.driver.isConnected() {
+	            Console.print("Error: DB is not connected.\n");
+	            return false;
+            } else {
+                def sql: String = select.generateSqlString();
+                if this.logging {
+                    Console.print(">> Executing SQL:\n%s\n", sql.buf);
+                }
+                if !this.driver.exec(sql) {
+	                Console.print("Select failed: %s\n", this.driver.getLastError().buf);
+	                return false;
+                } else {
+                    def numberOfFileds: int;
+                    numberOfFileds = this.driver.getColumnCount();
+                    while this.driver.fetchNextRow() {
+                        def row: Array[String];
+                        def i: int;
+                        for i = 0, i < numberOfFileds, i = i + 1 {
+                            row.add(this.driver.getValue(i));
+                        }
+                        result.add(row);
+                    }
+                    return true;
+                }
+            }
+        }
+
+        handler this.exec(update: ref[Update]): Bool {
+            return this._exec(update.generateSqlString(), "Update");
+        }
+
+        handler this.exec(insert: ref[Insert]): Bool {
+            return this._exec(insert.generateSqlString(), "Insert");
+        }
+
+        handler this.exec(delete: ref[Delete]): Bool {
+            return this._exec(delete.generateSqlString(), "Delete");
+        }
+
+        handler this.exec(createTable: ref[CreateTable]): Bool {
+            return this._exec(createTable.generateSqlString(this.driver), "Table creation");
+        }
+
+        handler this._exec(sql: String, operationName: CharsPtr): Bool {
+            if this.logging {
+                Console.print(">> Executing SQL:\n%s\n", sql.buf);
+            }
+            if this.driver.obj~ptr == 0 {
+	            Console.print("Error: DB is not initialzied.\n");
+	            return false;
+            } else if !this.driver.isConnected() {
+	            Console.print("Error: DB is not connected.\n");
+	            return false;
+            } else {
+                if !this.driver.exec(sql) {
+                    Console.print("%s failed: %s\n", operationName, this.driver.getLastError().buf);
+                    return false;
+                }
+                return true;
+            }
+        }
+    }
+}
+

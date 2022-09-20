@@ -6,42 +6,29 @@ use Rows;
 func main {
     use Srl;
 
-    def pgql: PostgreSql.Db(String("host=0.0.0.0 user=alusus password=alusus dbname=alusus"));
-    if pgql.connStatus() == PostgreSql.ConnectionStatus.BAD {
-        Console.print("%s\n", pgql.errorMessage());
-        pgql.endConnection();
-        return;
+    def pgsql: PostgresqlDriver(ConnectionParams().{
+        dbName = "alusus";
+        userName = "alusus";
+        password = "alusus";
+        host = "0.0.0.0";
+        port = 5432;
+    });
+    if !pgsql.isConnected() {
+        System.fail(1, String("Error connecting to DB: ") + pgsql.getLastError());
     }
 
-    pgql.exec("insert into cars (name, year) values ('Volkswagen', 2000)");
-    Console.print("conn status: %d\n", pgql.connStatus());
-    Console.print("res status: %d\n", pgql.resStatus());
-    Console.print("%s\n", pgql.errorMessage());
-    pgql.clearResult();
-
-    pgql.exec("select * from cars where id=5");
-    Console.print("res status: %d\n", pgql.resStatus());
-    Console.print("collomns count: %d\n", pgql.getCols());
-    Console.print("coll %s	%s %s\n", pgql.getColumnNames(0), pgql.getColumnNames(1), pgql.getColumnNames(2));
-    Console.print("Rows count: %d\n",pgql.getRows());
-    pgql.clearResult();
-    Console.print("\n");
-
-    pgql.exec("select * from cars");
-    Console.print("res status: %d\n", pgql.resStatus());
-    Console.print("Rows number: %d\n", pgql.getRows());
-    Console.print("%s\t%s\t%s\n", pgql.getColumnNames(0), pgql.getColumnNames(1), pgql.getColumnNames(2));
-    def i: Int;
-    for i = 0, i < pgql.getRows(), ++i {
-        Console.print ("%s\t%s\t%s\n", pgql.getValue(i, 0), pgql.getValue(i, 1), pgql.getValue(i, 2));
+    if !pgsql.exec("SELECT * FROM cars") {
+        System.fail(1, pgsql.getLastError());
     }
-    pgql.clearResult();
-    Console.print("\n");
-
-    def paramValues :array [CharsPtr , 1];
-    paramValues(0)="1";
-    pgql.execWithParams("select * from cars where id=$1",1,paramValues~ptr,0);
-    Console.print ("%s\t%s\t%s\n",pgql.getValue( 0, 0), pgql.getValue( 0, 1), pgql.getValue( 0, 2));
+    def fieldsCount: int = pgsql.getColumnCount();
+    def i: int;
+    while pgsql.fetchNextRow() {
+        for i = 0, i < fieldsCount, ++i {
+            def val: String = pgsql.getValue(i);
+            Console.print("%s\t", val.buf);
+        }
+        Console.print("\n");
+    }
 }
 main();
 

@@ -5,32 +5,27 @@ use Rows;
 
 func main {
     use Srl;
-    def mysql: MySql.Db(String("0.0.0.0"),String("alusus"), String("alusus"),String("alusus"),0,String(),0);
-    if mysql.conn == null {
-        Console.print("%s\n", mysql.conState);
-    } else {
-        mysql.exec("SELECT * FROM cars");
-        if mysql.resultState != 0 {
-            Console.print("%s\n", mysql.errorMessage() );
+    def mysql: MysqlDriver(ConnectionParams().{
+        dbName = "alusus";
+        userName = "alusus";
+        password = "alusus";
+        host = "0.0.0.0";
+    });
+    if !mysql.isConnected() {
+        System.fail(1, String("Error connecting to DB: ") + mysql.getLastError());
+    }
+
+    if !mysql.exec("SELECT * FROM users") {
+        Console.print("%s\n", mysql.getLastError() );
+    }
+    def fieldsCount: int = mysql.getColumnCount();
+    def i: int;
+    while mysql.fetchNextRow() {
+        for i = 0, i < fieldsCount, ++i {
+            def val: String = mysql.getValue(i);
+            Console.print("%s\t", val.buf);
         }
-        if mysql.res == null {
-            Console.print("%s\n", mysql.errorMessage());
-        } else {
-            def numberOfFileds: int;
-            numberOfFileds = mysql.getFiledsNumber();
-            mysql.getRow();
-            mysql.getCol();
-            def i: int;
-            def val: String;
-            while mysql.row != null {
-                for i = 0, i < numberOfFileds, i = i+1 {
-                    val = mysql.row~cnt(i);
-                    Console.print("%s\t", val.buf);
-                }
-                Console.print("\n");
-                mysql.getRow();
-            }
-        }
+        Console.print("\n");
     }
 }
 main();

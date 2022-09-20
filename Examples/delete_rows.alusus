@@ -1,0 +1,31 @@
+import "../Rows";
+use Srl;
+use Rows;
+
+def db: Db(MysqlDriver(ConnectionParams().{
+    dbName = "alusus";
+    userName = "alusus";
+    password = "alusus";
+    host = "0.0.0.0";
+}));
+if !db.driver.isConnected() {
+    System.fail(1, String("Error connecting to DB: ") + db.getLastError());
+}
+
+if !db.exec(Delete().{
+    table = String("roles");
+    condition = String("id=250");
+}) {
+    System.fail(1, String("Query failed: ") + db.getLastError());
+}
+
+def i: Int;
+for i = 0, i < 4, ++i {
+    if !db.exec(Delete().{
+        table = String("users");
+        condition = String("id=") + (150+i);
+    }) {
+        System.fail(1, String("Query failed: ") + db.getLastError());
+    }
+}
+

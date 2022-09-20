@@ -1,0 +1,24 @@
+@merge module Rows {
+    class ConnectionParams {
+        def dbName: String = "";
+        def userName: String = "";
+        def password: String = "";
+        def host: String = "";
+        def port: int = 0;
+
+        handler this~init() {}
+
+        handler this~init(ref[ConnectionParams]) {
+            this = value;
+        }
+
+        handler this = ref[ConnectionParams] {
+            this.dbName = value.dbName;
+            this.userName = value.userName;
+            this.password = value.password;
+            this.host = value.host;
+            this.port = value.port;
+        }
+    }
+}
+

@@ -1,0 +1,190 @@
+import "libmysqlclient.so.21";
+/*
+    Linux .so | .so.0
+    Mac OS .dylib
+    Windows .lib
+*/
+
+@merge module Rows {
+    class MysqlDriver {
+        @injection def driver: Driver;
+
+        def connectionParams: ConnectionParams;
+        def connection: ptr[Mysql.Connection] = 0;
+        def connectionState: String;
+        def result: ptr[Mysql.Result] = 0;
+        def row: Mysql.Row;
+        // def field: ptr[Field];
+
+        def CONNECTION_SUCCESSFUL: "connected";
+
+        handler this_type(params: ref[ConnectionParams]): SrdRef[Driver] {
+            def d: SrdRef[MysqlDriver];
+            d.construct();
+            d.connect(params);
+            return castSrdRef[d, Driver];
+        }
+
+        handler this~init() {
+        }
+
+        handler this~init(params: ref[ConnectionParams]) {
+            this.connect(params);
+        }
+
+        handler this~terminate() {
+            this.disconnect();
+        }
+
+        handler (this:Driver).connect(params: ref[ConnectionParams]): Bool set_ptr {
+            this.disconnect();
+
+            this.connectionParams = params;
+            this.connection = Mysql.init(null);
+            if Mysql.realConnect(
+                this.connection, this.connectionParams.host,
+                this.connectionParams.userName, this.connectionParams.password,
+                this.connectionParams.dbName, this.connectionParams.port,
+                null, 0
+            ) == null {
+                this.connectionState = Mysql.error(this.connection);
+                return false;
+            } else {
+                this.connectionState = CONNECTION_SUCCESSFUL;
+                return true;
+            }
+        }
+
+        handler (this:Driver).disconnect() set_ptr {
+            if this.connection == null return;
+            Mysql.close(this.connection);
+            this.connection = 0;
+        }
+
+        handler (this:Driver).getDriverName(): String set_ptr {
+            @shared def name: String("mysql");
+            return name;
+        }
+
+        handler (this:Driver).isConnected(): Bool set_ptr {
+            return this.connectionState == CONNECTION_SUCCESSFUL;
+        }
+
+        handler (this:Driver).exec(sql: CharsPtr): Bool set_ptr {
+            if Mysql.query(this.connection, sql) != 0 return false;
+            this.result = Mysql.useResult(this.connection);
+            return true;
+        }
+
+        handler (this:Driver).getColumnCount(): Int set_ptr {
+            return Mysql.numFields(this.result);
+        }
+
+        // TODO:
+        // handler this.getColumnName(i: Int): String as_ptr;
+
+        handler (this:Driver).fetchNextRow(): Bool set_ptr {
+            this.row = Mysql.fetchRow(this.result);
+            return this.row != null;
+        }
+
+        handler (this:Driver).getValue(i: Int): String set_ptr {
+            // this.field = mysqlFetchFieldDirect(this.result, i);
+            return String(this.row~cnt(i));
+        }
+
+        handler (this:Driver).releaseResult() set_ptr {
+             Mysql.freeResult(this.result);
+        }
+
+        handler (this:Driver).getLastError(): String set_ptr {
+             return String(Mysql.error(this.connection));
+        }
+
+        handler (this:Driver).mapDataType(dataType: String): String set_ptr {
+            return mysqlDataTypeMap(dataType);
+        }
+    }
+
+    def mysqlDataTypeMap: Map[String, String];
+    mysqlDataTypeMap.{
+        set(String("Integer"), String("INT"));
+        set(String("BigInteger"), String("BIGINT"));
+        set(String("SmallInteger"), String("SMALLINT"));
+        set(String("TinyInteger"), String("TINYINT"));
+        set(String("Real"), String("REAL"));
+        set(String("Float"), String("FLOAT"));
+        set(String("Decimal"), String("DECIMAL"));
+        set(String("Xml"), String("XML"));
+        set(String("VarChar"), String("VARCHAR"));
+        set(String("CharType"), String("CHAR"));
+        set(String("Text"), String("TEXT"));
+        set(String("Date"), String("Date"));
+    };
+
+    module Mysql {
+        // libmysqlclient Specific Definitions
+
+        class Connection {}
+        class Result {}
+        def Row: alias ptr[array[CharsPtr]];
+
+        /* class Field {
+            def name: CharsPtr;
+            def orgName: CharsPtr;
+            def table: CharsPtr;
+            def orgTable: CharsPtr;
+            def db: CharsPtr;
+            def catalog: CharsPtr;
+            def define: CharsPtr;
+            def length: ArchWord;
+            def maxLength: ArchWord;
+            def nameLength: Word;
+            def orgNameLength: Word;
+            def tableLength: Word;
+            def orgTableLength: Word;
+            def dbLength: Word;
+            def catalogLength: Word;
+            def defLength: Word;
+            def flags: Word;
+            def decimals: Word;
+            def charsetnr: Word;
+            def fieldType: int;
+            def extension: ptr;
+        } */
+
+        @expname[mysql_init]
+        func init(conn: ptr[Connection] ): ptr[Connection];
+
+        @expname[mysql_real_connect]
+        func realConnect(
+            conn :ptr[Connection], host: CharsPtr, user: CharsPtr, password: CharsPtr,
+            dbName: CharsPtr, port :int, unixSocket: CharsPtr, clientFlags: int
+        ): ptr[Connection];
+
+        @expname[mysql_close]
+        func close(conn: ptr[Connection]);
+
+        @expname[mysql_query]
+        func query(conn: ptr[Connection] , Query: CharsPtr): int;
+
+        @expname[mysql_use_result]
+        func useResult(conn: ptr[Connection] ): ptr[Result];
+
+        @expname[mysql_num_fields]
+        func numFields(res: ptr[Result]): int;
+
+        // @expname[mysql_fetch_field_direct]
+        // func fetchFieldDirect(res: ptr[Result], index: Word): ptr[Field];
+
+        @expname[mysql_fetch_row]
+        func fetchRow(res: ptr[Result]): Row;
+
+        @expname[mysql_free_result]
+        func freeResult(res: ptr[Result]);
+
+        @expname[mysql_error]
+        func error(conn: ptr[Connection]): CharsPtr;
+    }
+}
+

@@ -1,0 +1,17 @@
+@merge module Rows {
+    class ForeignKey {
+        def column: String;
+        def referenceTable: String;
+        def referenceColumn: String;
+
+        handler this_type(column: String, refTable: String, refColumn: String): SrdRef[ForeignKey] {
+            def fk: SrdRef[ForeignKey];
+            fk.construct();
+            fk.column = column;
+            fk.referenceColumn = refColumn;
+            fk.referenceTable = refTable;
+            return fk;
+        }
+    }
+}
+

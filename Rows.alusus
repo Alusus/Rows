@@ -8,19 +8,25 @@ import "Srl/String";
 import "Core/Data";
 import "Spp";
 
-import "Connectors/MySql";
-import "Connectors/PostgreSql";
+import "Drivers/ConnectionParams";
+import "Drivers/Driver";
+import "Drivers/Mysql";
+import "Drivers/Postgresql";
 
-import "Orm/AutoBuild";
-import "Orm/Constraints";
-import "Orm/Create";
-import "Orm/Data";
-import "Orm/DbConBuilder";
-import "Orm/Delete"
-import "Orm/Insert";
-import "Orm/Receive";
-import "Orm/TableBuilder";
-import "Orm/Update";
+import "Schema/data_types";
+import "Schema/Column";
+import "Schema/ForeignKey";
+
+import "Operations/Select";
+import "Operations/Insert";
+import "Operations/Update";
+import "Operations/Delete";
+import "Operations/CreateTable";
+
+import "Orm/object_mapping";
+import "Orm/table_generation";
+
+import "Db";
 
 @merge module Rows {
     use Srl;

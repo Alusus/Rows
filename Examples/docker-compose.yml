@@ -3,6 +3,7 @@ version: '3'
 services:
   mysql_db:
     image: mysql
+    container_name: alusus_rows_mysql
     environment:
       MYSQL_ROOT_PASSWORD: alusus
       MYSQL_USER: alusus
@@ -13,6 +14,7 @@ services:
 
   postgres_db:
     image: postgres:13-alpine
+    container_name: alusus_rows_postgres
     environment:
       POSTGRES_USER: alusus
       POSTGRES_PASSWORD: alusus

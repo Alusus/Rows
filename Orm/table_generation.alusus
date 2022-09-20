@@ -1,0 +1,326 @@
+import "Spp";
+import "Spp/Ast";
+
+@merge module Rows {
+    function generateAddingElementMods (
+        elements: Array[ref[Core.Basic.TiObject]] , var : Array[String]
+    ): Array[Array[String]] {
+        def i: Int;
+        def colsMod: Array[Array[String]];
+        def strArray: Array[String];
+        def modArray: Array[String];
+
+        for i = 0, i < elements.getLength(), ++i {
+            strArray=dumpModifiers(elements(i));
+            modArray.add(var(i))
+            colsMod.add(strArray);
+        }
+
+        return colsMod;
+    }
+
+    macro implementGetElementNames [condition, parent] {
+        Array[String]().{
+            preprocess {
+                def elements: Array[ref[Core.Basic.TiObject]];
+                elements = Spp.astMgr.findElements(
+                    ast { condition },
+                    parent,
+                    Spp.SeekerFlags.SKIP_OWNERS | Spp.SeekerFlags.SKIP_USES | Spp.SeekerFlags.SKIP_CHILDREN
+                );
+                generateAddingElementNames(String("this"), elements);
+            }
+        }
+    }
+
+    macro implementGetElementMods [condition, parent] {
+        def elements: Array[ref[Core.Basic.TiObject]];
+        def i: int = 0;
+        def j: int = 0;
+        elements = Spp.astMgr.findElements(
+            ast { condition },
+            parent,
+            Spp.SeekerFlags.SKIP_OWNERS | Spp.SeekerFlags.SKIP_USES | Spp.SeekerFlags.SKIP_CHILDREN
+        );
+        colsMod = generateAddingElementMods(elements, var);
+        def params: Array[String];
+        def cmpar: Array[Array[String]];
+
+        for i = 0, i < colsMod.getLength(), ++i {
+            cmpar.clear();
+            if colsMod(i).getLength() > 0 {
+                for j = 0, j < colsMod(i).getLength(), ++j {
+                    params = dumpElementModifierParams(elements(i), colsMod(i)(j).buf);
+                    cmpar.add(params);
+                }
+            } else {
+                def noParams: Array[String];
+                cmpar.add(noParams);
+            }
+            modsParams.add(cmpar);
+        }
+    }
+
+    macro implementGetElementTypes [condition, parent] {
+        Array[String]().{
+            preprocess {
+                def elements: Array[ref[Core.Basic.TiObject]];
+                elements = Spp.astMgr.findElements(
+                    ast { condition },
+                    parent,
+                    Spp.SeekerFlags.SKIP_OWNERS | Spp.SeekerFlags.SKIP_USES | Spp.SeekerFlags.SKIP_CHILDREN
+                );
+                generateAddingElementTypes(String("this"), elements);
+            }
+        }
+    }
+
+    function dumpModifiers (element: ref[Core.Basic.TiObject]): Array[String] {
+        def modifiers: ref[Core.Basic.Containing](Spp.astMgr.getModifiers(element));
+        def i: Int;
+        def strArray: Array[String] ;
+        if modifiers~ptr != 0 {
+            for i = 0, i < modifiers.getElementCount()~cast[Int], ++i {
+                strArray.add(Spp.astMgr.getModifierKeyword(modifiers.getElement(i)));
+            }
+        }
+        return strArray;
+    }
+
+    function dumpModifierParams (modifier: ref[Core.Basic.TiObject]): Array[String] {
+        def params: Srl.Array[Srl.String];
+        Spp.astMgr.getModifierStringParams(modifier, params);
+        return params;
+    }
+
+    function dumpElementModifierParams (element: ref[Core.Basic.TiObject], modName: ptr[array[Char]]): Array[String] {
+        def modifiers: ref[Core.Basic.Containing](Spp.astMgr.getModifiers(element));
+        def modifier: ref[Core.Basic.TiObject](Spp.astMgr.findModifier(modifiers, modName));
+        def params: Array[String];
+        params = dumpModifierParams(modifier);
+        return params;
+    }
+
+    function isDataType (varType : String): int {
+        @shared def dataTypeArray:Array[String]({
+            String("Integer"),
+            String("BigInteger"),
+            String("SmallInteger"),
+            String("TinyInteger"),
+            String("Real"),
+            String("Float"),
+            String("Decimal"),
+            String("Xml"),
+            String("VarChar"),
+            String("CharType"),
+            String("Text"),
+            String("Date")
+        });
+
+        def si : int ;
+        for si = 0, si < dataTypeArray.getLength(), ++si {
+            if dataTypeArray(si) == varType {
+                return si;
+            }
+        }
+        return -1;
+    }
+
+    func generateTable (
+        tableName: String, colsMod: Array[Array[String]], modsParams: Array[Array[Array[String]]],
+        var: Array[String], types: Array[String]
+    ): TioSrdRef {
+        use Core.Basic;
+        def result: TioSrdRef;
+        def columnResult: TioSrdRef;
+        def columnResults: Spp.Ast.Block;
+        def columnResultsContainer: DynContainerOf[columnResults];
+        def pkResults: Core.Data.Ast.List;
+        def pkResultsContainer: DynContainerOf[pkResults];
+        def fkResults: Spp.Ast.Block;
+        def fkResultsContainer: DynContainerOf[fkResults];
+
+        def i: int;
+        def j: int;
+
+        // TODO: Handle error cases related to incorrect modifier params.
+
+        for i = 0, i < var.getLength(), i += 1 {
+            def dataTypeName: String;
+            for j = 0, j < colsMod(i).getLength(), j += 1 {
+                if isDataType(colsMod(i)(j)) != -1 {
+                    dataTypeName = colsMod(i)(j);
+                    break;
+                }
+            }
+
+            if dataTypeName == "" continue;
+
+            if modsParams(i)(j).getLength() == 0 {
+                if !Spp.astMgr.buildAst(
+                    (ast dataType = Rows.dataTypeName()),
+                    Map[String, ref[TiObject]]().set(String("dataTypeName"), Core.Data.Ast.Identifier(dataTypeName)),
+                    columnResult
+                ) {
+                    System.fail(1, "generateTable/build Data Type var : error\n");
+                }
+            } else {
+                if !Spp.astMgr.buildAst(
+                    (ast dataType = Rows.dataTypeName(size)),
+                    Map[String, ref[TiObject]]()
+                        .set(String("dataTypeName"), Core.Data.Ast.Identifier(dataTypeName))
+                        .set(String("size"), Core.Data.Ast.IntegerLiteral(modsParams(i)(j)(0))),
+                    columnResult
+                ) {
+                    System.fail(1, "generateTable/build Data Type var : error\n");
+                }
+            }
+
+            for j = 0, j < colsMod(i).getLength(), j += 1 {
+                if colsMod(i)(j) == "notnull" {
+                    if !Spp.astMgr.buildAst(
+                        ast {
+                            prevResult;
+                            notNull = true;
+                        },
+                        Map[String, ref[TiObject]]().set(String("prevResult"), columnResult),
+                        result
+                    ) {
+                        System.fail(1, "generateTable/build Data Type var : error\n");
+                    }
+                    columnResult = result;
+                } else if colsMod(i)(j) == "unique" {
+                    if !Spp.astMgr.buildAst(
+                        ast {
+                            prevResult;
+                            unique = true;
+                        },
+                        Map[String, ref[TiObject]]().set(String("prevResult"), columnResult),
+                        result
+                    ) {
+                        System.fail(1, "generateTable/build Data Type var : error\n");
+                    }
+                    columnResult = result;
+                } else if colsMod(i)(j) == "pk" {
+                    if !Spp.astMgr.buildAst(
+                        (ast Srl.String("{{varname}}")),
+                        Map[String, ref[TiObject]]().set(String("varname"), Core.Data.Ast.Identifier(var(i))),
+                        result
+                    ) {
+                        System.fail(1, "generateTable/build Data Type var : error\n");
+                    }
+                    pkResultsContainer.addElement(result);
+                } else if colsMod(i)(j) == "defult" {
+                    if !Spp.astMgr.buildAst(
+                        ast {
+                            prevResult;
+                            default = Srl.String("{{param}}");
+                        },
+                        Map[String, ref[TiObject]]()
+                            .set(String("prevResult"), columnResult)
+                            .set(String("param"), Core.Data.Ast.Identifier(modsParams(i)(j)(0))),
+                        result
+                    ) {
+                        System.fail(1, "generateTable/build Data Type var : error\n");
+                    }
+                    columnResult = result;
+                } else if colsMod(i)(j) == "check" {
+                    if !Spp.astMgr.buildAst(
+                        ast {
+                            prevResult;
+                            check = Srl.String("{{param}}");
+                        },
+                        Map[String, ref[TiObject]]()
+                            .set(String("prevResult"), columnResult)
+                            .set(String("param"), Core.Data.Ast.Identifier(modsParams(i)(j)(0))),
+                        result
+                    ) {
+                        System.fail(1, "generateTable/build Data Type var : error\n");
+                    }
+                    columnResult = result;
+                } else if colsMod(i)(j) == "fk" {
+                    def fkResult: TioSrdRef;
+                    if !Spp.astMgr.buildAst(
+                        (ast Rows.ForeignKey(
+                            Srl.String("{{col}}"),
+                            Srl.String("{{refTbl}}"),
+                            Srl.String("{{refCol}}")
+                        )),
+                        Map[String, ref[TiObject]]()
+                            .set(String("col"), Core.Data.Ast.Identifier(var(i)))
+                            .set(String("refTbl"), Core.Data.Ast.Identifier(modsParams(i)(j)(0)))
+                            .set(String("refCol"), Core.Data.Ast.Identifier(modsParams(i)(j)(1))),
+                        fkResult
+                    ) {
+                        System.fail(1, "generateTable/build Data Type var : error\n");
+                    }
+                    fkResultsContainer.addElement(fkResult);
+                }
+            }
+
+            if !Spp.astMgr.buildAst(
+                (ast set(Srl.String("{{varName}}"), Rows.Column().{ columnDesc })),
+                Map[String, ref[TiObject]]()
+                    .set(String("varName"), TiStr(var(i)))
+                    .set(String("columnDesc"), columnResult),
+                result
+            ) {
+                System.fail(1, "generateTable/build Data Type var : error\n");
+            }
+            columnResultsContainer.addElement(result);
+        }
+
+        def tblResult: TioSrdRef;
+        if !Spp.astMgr.buildAst(
+            ast {
+                name = Srl.String("{{tableName}}");
+                notExists = true;
+                columns = Srl.Map[Srl.String, Srl.SrdRef[Rows.Column]]().columnDefs;
+                primaryKey = Srl.Array[Srl.String]({ pkColumns });
+                foreignKeys = Srl.Array[Srl.SrdRef[Rows.ForeignKey]](fkDefs);
+            },
+            Map[String, ref[TiObject]]()
+                .set(String("tableName"), Core.Data.Ast.Identifier(tableName))
+                .set(String("columnDefs"), columnResults)
+                .set(String("pkColumns"), pkResults)
+                .set(String("fkDefs"), fkResults),
+            result
+        ) {
+            System.fail(1, "generateTable/build Data Type var : error\n");
+        }
+        tblResult = result;
+
+        def fnResult: TioSrdRef;
+        if !Spp.astMgr.buildAst(
+            (ast function create(db: ref[Rows.Db]) {
+                if !db.exec(Rows.CreateTable().{ tableDef }) {
+                    Srl.System.fail(1, Srl.String("Table creation failed: ") + db.getLastError());
+                }
+            }),
+            Map[String, ref[TiObject]]().set(String("tableDef"), tblResult),
+            fnResult
+        ) {
+            System.fail(1, "generateTable/build Data Type var : error\n");
+        }
+        return fnResult;
+    }
+
+    macro autoCreate [parent, tableName] {
+        preprocess {
+            def colsMod: Array[Array[String]];
+            def modsParams: Array[ Array[Array[String]]];
+            def var: Array[String];
+            var = implementGetElementNames[elementType == "var", parent];
+            def types: Array[String];
+            types = implementGetElementTypes[elementType == "var", parent];
+            implementGetElementMods[elementType == "var", parent];
+
+            if !Spp.astMgr.insertAst(
+                generateTable(tableName, colsMod, modsParams, var, types).obj
+            ) {
+                System.fail(1, "Failed to insert statment.\n");
+            }
+        }
+    }
+}
+

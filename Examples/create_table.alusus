@@ -1,0 +1,65 @@
+import "../Rows";
+use Srl;
+use Rows;
+
+def db: Db(MysqlDriver(ConnectionParams().{
+    dbName = "alusus";
+    userName = "alusus";
+    password = "alusus";
+    host = "0.0.0.0";
+}));
+if !db.driver.isConnected() {
+    System.fail(1, String("Error connecting to DB: ") + db.getLastError());
+}
+
+if !db.exec(CreateTable().{
+    name = String("users");
+    notExists = true;
+    columns = Map[String, SrdRef[Column]]().{
+        set(String("id"), Column().{
+            dataType = Integer();
+            notNull = true;
+            unique = true;
+        });
+        set(String("name"), Column().{
+            dataType = VarChar(90);
+            notNull = true;
+            unique = true;
+            default = String("me");
+        });
+        set(String("address"), Column().{
+            dataType = VarChar(200);
+        });
+    };
+    primaryKey = String("id");
+}) {
+    System.fail(1, String("Query failed: ") + db.getLastError());
+}
+
+if !db.exec(CreateTable().{
+    name = String("roles");
+    notExists = true;
+    columns = Map[String, SrdRef[Column]]().{
+        set(String("id"), Column().{
+            dataType = Integer();
+            notNull = true;
+            unique = true;
+        });
+        set(String("name"), Column().{
+            dataType = VarChar(90);
+            notNull = true;
+            unique = true;
+            default = String("viewer");
+        });
+        set(String("userId"), Column().{
+            dataType = Integer();
+        });
+    };
+    primaryKey = String("id");
+    foreignKeys = Array[SrdRef[ForeignKey]]({
+        ForeignKey(String("userId"), String("users"), String("id"))
+    });
+}) {
+    System.fail(1, String("Query failed: ") + db.getLastError());
+}
+

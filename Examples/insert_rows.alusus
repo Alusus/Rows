@@ -1,0 +1,37 @@
+import "../Rows";
+use Srl;
+use Rows;
+
+def db: Db(MysqlDriver(ConnectionParams().{
+    dbName = "alusus";
+    userName = "alusus";
+    password = "alusus";
+    host = "0.0.0.0";
+}));
+if !db.driver.isConnected() {
+    System.fail(1, String("Error connecting to DB: ") + db.getLastError());
+}
+
+def names: Array[String]({ String("Sarmad"), String("Sleman"), String("Abdullah"), String("Salem") });
+def addresses: Array[String]({ String("Canada"), String("Syria"), String("KSA"), String("KSA") });
+
+def i: Int;
+
+for i = 0, i < names.getLength(), ++i {
+    if !db.exec(Insert().{
+        table = String("users");
+        columns = Array[String]({ String("id"), String("name"), String("address") });
+        data = Array[String]({ String("15") + i, names(i), addresses(i)  });
+    }) {
+        System.fail(1, String("Query failed: ") + db.getLastError());
+    }
+}
+
+if !db.exec(Insert().{
+    table = String("roles");
+    columns = Array[String]({ String("id"), String("name"), String("userId") });
+    data = Array[String]({ String("250"), String("admin"), String("150") });
+}) {
+    System.fail(1, String("Query failed: ") + db.getLastError());
+}
+

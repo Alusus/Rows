@@ -1,0 +1,24 @@
+@merge module Rows {
+    class Delete {
+        def _table: String;
+        handler this.table = String {
+            this._table = value;
+            return this._table;
+        }
+
+        def _condition: String;
+        handler this.condition = String {
+            this._condition = value;
+            return this._condition;
+        }
+
+        handler this.generateSqlString(): String {
+            def str: String = String("DELETE FROM ") + this._table;
+            if this._condition != "" {
+                str += String(" WHERE ") + this._condition + String(";");
+            }
+            return str;
+        }
+    }
+}
+

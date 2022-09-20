@@ -1,0 +1,42 @@
+import "../Rows";
+use Srl;
+use Rows;
+
+class Properties {
+    @defult["10"]
+    @notnull
+    @pk
+    @Integer
+    def id: int;
+
+    def i: String;
+
+    @Integer
+    @default["10"]
+    def ssd: int;
+
+    @VarChar
+    def ss: String;
+
+    @defult["Baghdad"]
+    @VarChar["250"]
+    def address: String;
+
+    @fk["users", "id"]
+    @Integer
+    def userId: int;
+}
+
+def db: Db(MysqlDriver(ConnectionParams().{
+    dbName = "alusus";
+    userName = "alusus";
+    password = "alusus";
+    host = "0.0.0.0";
+}));
+if !db.driver.isConnected() {
+    System.fail(1, String("Error connecting to DB: ") + db.getLastError());
+}
+
+Rows.autoCreate[Properties~ast , String("properties")];
+create(db);
+

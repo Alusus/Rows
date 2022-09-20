@@ -1,0 +1,176 @@
+import "Srl/Console.alusus";
+import "Srl/String";
+import "libpq.so.5";
+/*
+    Linux .so | .so.0
+    Mac OS .dylib
+    Windows .lib
+*/
+
+@merge module Rows {
+    class PostgresqlDriver {
+        @injection def driver: Driver;
+
+        def connectionParams: ConnectionParams;
+        def connection: ptr[Postgresql.Connection] = 0;
+        def connectionState: Int;
+        def result: ptr[Postgresql.Result] = 0;
+        def row: Int = -1;
+
+        handler this_type(params: ref[ConnectionParams]): SrdRef[Driver] {
+            def d: SrdRef[PostgresqlDriver];
+            d.construct();
+            d.connect(params);
+            return castSrdRef[d, Driver];
+        }
+
+        handler this~init() {
+        }
+
+        handler this~init(params: ref[ConnectionParams]) {
+            this.connect(params);
+        }
+
+        handler this~terminate() {
+            this.disconnect();
+        }
+
+        handler (this:Driver).connect(params: ref[ConnectionParams]): Bool set_ptr {
+            this.disconnect();
+
+            this.connectionParams = params;
+            this.connection = Postgresql.connectdb(
+                String.format("host=%s port=%i dbname=%s user=%s password=%s",
+                    params.host.buf,
+                    params.port,
+                    params.dbName.buf,
+                    params.userName.buf,
+                    params.password.buf
+                )
+            );
+            this.connectionState = Postgresql.status(this.connection);
+            return this.connectionState == Postgresql.ConnectionStatus.OK;
+        }
+
+        handler (this:Driver).disconnect() set_ptr {
+            if this.connection == null return;
+            Postgresql.finish(this.connection);
+            this.connection = null;
+        }
+
+        handler (this:Driver).getDriverName(): String set_ptr {
+            @shared def name: String("postgresql");
+            return name;
+        }
+
+        handler (this:Driver).isConnected(): Bool set_ptr {
+            return this.connectionState == Postgresql.ConnectionStatus.OK;
+        }
+
+        handler (this:Driver).exec(sql: CharsPtr): Bool set_ptr {
+            this.result = Postgresql.exec(this.connection, sql);
+            def status: Int = Postgresql.resultStatus(this.result);
+            this.row = -1;
+            return status == Postgresql.ResultStatus.COMMAND_OK or status == Postgresql.ResultStatus.TUPLES_OK;
+        }
+
+        handler (this:Driver).getColumnCount(): Int set_ptr {
+            return Postgresql.nfields(this.result);
+        }
+
+        // TODO:
+        // handler this.getColumnName(i: Int): String as_ptr;
+
+        handler (this:Driver).fetchNextRow(): Bool set_ptr {
+            ++this.row;
+            return this.row < Postgresql.ntuples(this.result);
+        }
+
+        handler (this:Driver).getValue(i: Int): String set_ptr {
+            return String(Postgresql.getvalue(this.result, this.row, i));
+        }
+
+        handler (this:Driver).releaseResult() set_ptr {
+            Postgresql.clear(this.result);
+            this.result = null;
+        }
+
+        handler (this:Driver).getLastError(): String set_ptr {
+            return String(Postgresql.errorMessage(this.connection));
+        }
+
+        handler (this:Driver).mapDataType(dataType: String): String set_ptr {
+            return postgresqlDataTypeMap(dataType);
+        }
+    }
+
+    def postgresqlDataTypeMap: Map[String, String];
+    postgresqlDataTypeMap.{
+        set(String("Integer"), String("integer"));
+        set(String("BigInteger"), String("bigint"));
+        set(String("SmallInteger"), String("smallint"));
+        set(String("TinyInteger"), String("smallint"));
+        set(String("Real"), String("real"));
+        set(String("Float"), String("double precision"));
+        set(String("Decimal"), String("double precision"));
+        set(String("Xml"), String("xml"));
+        set(String("VarChar"), String("varchar"));
+        set(String("CharType"), String("char"));
+        set(String("Text"), String("text"));
+        set(String("Date"), String("date"));
+    };
+
+    module Postgresql {
+        // libpq Specific Definitions
+
+        def ConnectionStatus: {
+            def OK: 0;
+            def BAD: 1;
+        }
+
+        def ResultStatus: {
+            def COMMAND_OK: 1;
+            def TUPLES_OK: 2;
+        }
+
+        class Connection {
+        }
+
+        class Result {
+        }
+
+        @expname[PQconnectdb]
+        func connectdb(connString: CharsPtr): ptr[Connection];
+
+        @expname[PQfinish]
+        func finish(conn: ptr[Connection]);
+
+        @expname[PQstatus]
+        func status(conn: ptr[Connection]): int;
+
+        @expname[PQexec]
+        func exec(conn: ptr[Connection], query: CharsPtr): ptr[Result];
+
+        @expname[PQresultStatus]
+        func resultStatus(res: ptr[Result]): int;
+
+        @expname[PQnfields]
+        func nfields(res: ptr[Result]): int;
+
+        @expname[PQfname]
+        func fname(res: ptr[Result], colNumber: int): CharsPtr;
+
+        @expname[PQntuples]
+        func ntuples(res: ptr[Result]): int;
+
+        @expname[PQgetvalue]
+        func getvalue(res: ptr[Result], row: int, collomn: int): CharsPtr;
+
+        @expname[PQclear]
+        func clear(res: ptr[Result]);
+
+        @expname[PQerrorMessage]
+        func errorMessage(conn: ptr[Connection]): CharsPtr;
+    }
+}
+

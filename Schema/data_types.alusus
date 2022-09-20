@@ -1,0 +1,223 @@
+@merge module Rows {
+    class DataType {
+        handler this.isString(): Bool as_ptr;
+        handler this.generateSqlString(driver: ref[Driver]): String as_ptr;
+    }
+
+    class Integer {
+        @injection def dataType: DataType;
+        handler (this:DataType).isString(): Bool set_ptr {
+            return false;
+        }
+        handler (this:DataType).generateSqlString(driver: ref[Driver]): String set_ptr {
+            return driver.mapDataType(String(1, "Integer"));
+        }
+        handler this_type(): SrdRef[DataType] {
+            def d: SrdRef[Integer];
+            d.construct();
+            return castSrdRef[d, DataType];
+        }
+    }
+
+    class BigInteger {
+        @injection def dataType: DataType;
+        handler (this:DataType).isString(): Bool set_ptr {
+            return false;
+        }
+        handler (this:DataType).generateSqlString(driver: ref[Driver]): String set_ptr {
+            return driver.mapDataType(String(1, "BigInteger"));
+        }
+        handler this_type(): SrdRef[DataType] {
+            def d: SrdRef[BigInteger];
+            d.construct();
+            return castSrdRef[d, DataType];
+        }
+    }
+
+    class SmallInteger {
+        @injection def dataType: DataType;
+        handler (this:DataType).isString(): Bool set_ptr {
+            return false;
+        }
+        handler (this:DataType).generateSqlString(driver: ref[Driver]): String set_ptr {
+            return driver.mapDataType(String(1, "SmallInteger"));
+        }
+        handler this_type(): SrdRef[DataType] {
+            def d: SrdRef[SmallInteger];
+            d.construct();
+            return castSrdRef[d, DataType];
+        }
+    }
+
+    class TinyInteger {
+        @injection def dataType: DataType;
+        handler (this:DataType).isString(): Bool set_ptr {
+            return false;
+        }
+        handler (this:DataType).generateSqlString(driver: ref[Driver]): String set_ptr {
+            return driver.mapDataType(String(1, "TinyInteger"));
+        }
+        handler this_type(): SrdRef[DataType] {
+            def d: SrdRef[TinyInteger];
+            d.construct();
+            return castSrdRef[d, DataType];
+        }
+    }
+
+    class Real {
+        @injection def dataType: DataType;
+        handler (this:DataType).isString(): Bool set_ptr {
+            return false;
+        }
+        handler (this:DataType).generateSqlString(driver: ref[Driver]): String set_ptr {
+            return driver.mapDataType(String(1, "Real"));
+        }
+        handler this_type(): SrdRef[DataType] {
+            def d: SrdRef[Real];
+            d.construct();
+            return castSrdRef[d, DataType];
+        }
+    }
+
+    class Float {
+        @injection def dataType: DataType;
+        handler (this:DataType).isString(): Bool set_ptr {
+            return false;
+        }
+        handler (this:DataType).generateSqlString(driver: ref[Driver]): String set_ptr {
+            return driver.mapDataType(String(1, "Float"));
+        }
+        handler this_type(): SrdRef[DataType] {
+            def d: SrdRef[Float];
+            d.construct();
+            return castSrdRef[d, DataType];
+        }
+    }
+
+    class Decimal {
+        @injection def dataType: DataType;
+        handler (this:DataType).isString(): Bool set_ptr {
+            return false;
+        }
+        handler (this:DataType).generateSqlString(driver: ref[Driver]): String set_ptr {
+            return driver.mapDataType(String(1, "Decimal"));
+        }
+        handler this_type(): SrdRef[DataType] {
+            def d: SrdRef[Decimal];
+            d.construct();
+            return castSrdRef[d, DataType];
+        }
+    }
+
+    class Xml {
+        @injection def dataType: DataType;
+        handler (this:DataType).isString(): Bool set_ptr {
+            return true;
+        }
+        handler (this:DataType).generateSqlString(driver: ref[Driver]): String set_ptr {
+            return driver.mapDataType(String(1, "Xml"));
+        }
+        handler this_type(): SrdRef[DataType] {
+            def d: SrdRef[Xml];
+            d.construct();
+            return castSrdRef[d, DataType];
+        }
+    }
+
+    class VarChar {
+        @injection def dataType: DataType;
+        def length: int = 50;
+
+        handler this~init() {}
+
+        handler this~init(length: int) {
+            this.length = length;
+        }
+
+        handler (this:DataType).isString(): Bool set_ptr {
+            return true;
+        }
+
+        handler (this:DataType).generateSqlString(driver: ref[Driver]): String set_ptr {
+            return driver.mapDataType(String(1, "VarChar")) + "(" + this.length + ")";
+        }
+
+        handler this_type(length: int): SrdRef[DataType] {
+            def d: SrdRef[VarChar];
+            d.construct();
+            d.length = length;
+            return castSrdRef[d, DataType];
+        }
+        handler this_type(): SrdRef[DataType] {
+            return VarChar(50);
+        }
+    }
+
+    class CharType {
+        @injection def dataType: DataType;
+        def length: int = 1;
+
+        handler this~init() {}
+
+        handler this~init(length: int) {
+            this.length = length;
+        }
+
+        handler (this:DataType).isString(): Bool set_ptr {
+            return true;
+        }
+
+        handler (this:DataType).generateSqlString(driver: ref[Driver]): String set_ptr {
+            return driver.mapDataType(String(1, "CharType")) + "(" + this.length + ")";
+        }
+
+        handler this_type(length: int): SrdRef[DataType] {
+            def d: SrdRef[CharType];
+            d.construct();
+            d.length = length;
+            return castSrdRef[d, DataType];
+        }
+    }
+
+    class Text {
+        @injection def dataType: DataType;
+        def length: int = 50;
+
+        handler this~init() {}
+
+        handler this~init(length: int) {
+            this.length = length;
+        }
+
+        handler (this:DataType).isString(): Bool set_ptr {
+            return true;
+        }
+
+        handler (this:DataType).generateSqlString(driver: ref[Driver]): String set_ptr {
+            return driver.mapDataType(String(1, "Text")) + "(" + this.length + ")";
+        }
+
+        handler this_type(length: int): SrdRef[DataType] {
+            def d: SrdRef[Text];
+            d.construct();
+            d.length = length;
+            return castSrdRef[d, DataType];
+        }
+    }
+
+    class Date {
+        @injection def dataType: DataType;
+        handler (this:DataType).isString(): Bool set_ptr {
+            return true;
+        }
+        handler (this:DataType).generateSqlString(driver: ref[Driver]): String set_ptr {
+            return driver.mapDataType(String(1, "Date"));
+        }
+        handler this_type(): SrdRef[DataType] {
+            def d: SrdRef[Date];
+            d.construct();
+            return castSrdRef[d, DataType];
+        }
+    }
+}
+

@@ -1,0 +1,59 @@
+@merge module Rows {
+    class Insert {
+        def _table: String;
+        handler this.table = String {
+            this._table = value;
+            return this._table;
+        }
+
+        def _data: Array[String];
+        handler this.data = Array[String] {
+            this._data = value;
+            return this._data;
+        }
+
+        def _columns: Array[String];
+        handler this.columns = Array[String] {
+            this._columns = value;
+            return this._columns;
+        }
+
+        handler this.generateColsString(): String {
+            def str: String = "(";
+
+            def size: int = 0;
+            if this._data.getLength() < this._columns.getLength() size = this._data.getLength()
+            else size = this._columns.getLength();
+
+            def i: int = 0;
+            for i = 0, i < size - 1, ++i {
+                str += this._columns(i) + ", ";
+            }
+            str += this._columns(size-1) + ")";
+
+            return str;
+        }
+
+        handler this.generateValsString(): String {
+            def str: String = "( ";
+
+            def size: int = 0;
+            if this._data.getLength() < this._columns.getLength() size = this._data.getLength()
+            else size = this._columns.getLength();
+
+            def i: int = 0;
+            for i = 0, i < size - 1, ++i {
+                str += String("'") + this._data(i) + "', ";
+            }
+            str += String("'") + this._data(size-1) + "')";
+
+            return str;
+        }
+
+        handler this.generateSqlString(): String {
+            return String("INSERT INTO ") + this._table + "\n" + this.generateColsString() + "\n"
+                + "VALUES " + this.generateValsString();
+        }
+    }
+}
+
