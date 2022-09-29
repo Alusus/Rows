@@ -1,22 +1,16 @@
 @merge module Rows {
-    def notFlag: bool = false;
-
-    // TODO: Move to a shared location.
-    function generateAddingElementNames (varName: String, elements: Array[ref[Core.Basic.TiObject]]) {
-        def i: Int;
-        for i = 0, i < elements.getLength(), ++i
-        {
-            def node: ref[Core.Data.Node](castRef[elements(i), Core.Data.Node]);
-            def d: ref[Core.Data.Ast.Definition](castRef[node.owner, Core.Data.Ast.Definition]);
-            def binding: ref[Core.Basic.Binding](Core.Basic.getInterface[d, Core.Basic.Binding]);
-            Spp.astMgr.insertAst(
-                ast { names.add(Srl.String("{{name}}")) },
-                Srl.Map[Srl.String, ref[Core.Basic.TiObject]]()
-                    .set(Srl.String("names"), Core.Data.Ast.Identifier(varName))
-                    .set(Srl.String("name"), binding.getMember("name"))
-            );
+    macro define_model_essentials {
+        def db: ref[Db];
+        db~ptr = 0;
+        handler this.save() {
+            if this.db~ptr != 0 Rows.Query[this_type](this.db).save(this);
+        }
+        handler this.delete() {
+            if this.db~ptr != 0 Rows.Query[this_type](this.db).delete(this);
         }
     }
+
+    def notFlag: bool = false;
 
     def infixOperators: Map[String, String];
     infixOperators.{
@@ -204,11 +198,11 @@
         return result;
     }
 
-    func generateUpdateData (obj: ref[TiObject]): TioSrdRef {
+    func generateUpdate (obj: ref[TiObject]): TioSrdRef {
         def result: TioSrdRef;
 
         if obj~ptr == 0 {
-            System.fail(1, "generateUpdateData: obj is null.\n");
+            System.fail(1, "generateUpdate: obj is null.\n");
         }
         if isDerivedFrom[obj, AssignmentOperator] {
             def binding: ref[Binding](getInterface[obj, Binding]);
@@ -226,527 +220,91 @@
                         .set(String("val"), mapContainer.getElement("second")),
                     result
                 ) {
-                    System.fail(1, "generateUpdateData error - building AssignmentOperator failed.\n");
+                    System.fail(1, "generateUpdate error - building AssignmentOperator failed.\n");
                 }
             } else {
-                System.fail(1, String("generateUpdateData error - Invalid AssignmentOperator type: ") + opType + "\n");
+                System.fail(1, String("generateUpdate error - Invalid AssignmentOperator type: ") + opType + "\n");
             }
         } else if isDerivedFrom[obj, Bracket] {
             def mapContainer: MapContainerOf[obj];
-            result = generateUpdateData(mapContainer.getElement("operand"));
+            result = generateUpdate(mapContainer.getElement("operand"));
         } else if isDerivedFrom[obj, Core.Data.Ast.List] {
             def container: ContainerOf[obj];
-            result = generateUpdateData(container.getElement(0));
+            result = generateUpdate(container.getElement(0));
             for i = 1, i < container.getElementCount()~cast[Int], ++i {
                 def combinedResult: TioSrdRef;
                 if !Spp.astMgr.buildAst(
                     ast { prevResult; result; },
                     Map[String, ref[TiObject]]()
                         .set(String("prevResult"), result)
-                        .set(String("result"), generateUpdateData(container.getElement(i))),
+                        .set(String("result"), generateUpdate(container.getElement(i))),
                     combinedResult
                 ) {
-                    System.fail(1, "generateUpdateData error - building List failed.\n");
+                    System.fail(1, "generateUpdate error - building List failed.\n");
                 }
                 result = combinedResult;
             }
         } else {
-            System.fail(1, "generateUpdateData error - unexpected AST object type.\n");
+            System.fail(1, "generateUpdate error - unexpected AST object type.\n");
         }
         return result;
     }
 
-    // TODO: Move to a shared location.
-    function generateAddingElementTypes (varName: String, elements: Array[ref[Core.Basic.TiObject]]) {
+    func generateParsing (varArray: Array[String], typeArray: Array[String]) {
         def i: Int;
-        for i = 0, i < elements.getLength(), ++i {
-            def node: ref[Core.Data.Node](castRef[elements(i), Core.Data.Node]);
-            def d: ref[Core.Data.Ast.Definition](castRef[node.owner, Core.Data.Ast.Definition]);
-            def containing: ref[Core.Basic.MapContaining](Core.Basic.getInterface[d, Core.Basic.MapContaining]);
-            Spp.astMgr.insertAst(
-                ast { names.add(Srl.String("{{name}}")) },
-                Srl.Map[Srl.String, ref[Core.Basic.TiObject]]()
-                    .set(Srl.String("names"), Core.Data.Ast.Identifier(varName))
-                    .set(Srl.String("name"), castRef[containing.getElement("target"), Core.Data.Ast.Identifier])
-            );
-        }
-    }
-
-    macro implementGetElementNames [condition, parent] {
-        Array[String]().{
-            preprocess {
-                def elements: Array[ref[Core.Basic.TiObject]];
-                elements = Spp.astMgr.findElements(
-                    ast { condition },
-                    parent,
-                    Spp.SeekerFlags.SKIP_OWNERS | Spp.SeekerFlags.SKIP_USES | Spp.SeekerFlags.SKIP_CHILDREN
-                );
-                generateAddingElementNames(String("this"), elements);
-            }
-        }
-    }
-
-    macro implementGetElementTypes [condition, parent] {
-        Array[String]().{
-            preprocess {
-                def elements: Array[ref[Core.Basic.TiObject]];
-                elements = Spp.astMgr.findElements(
-                    ast { condition },
-                    parent,
-                    Spp.SeekerFlags.SKIP_OWNERS | Spp.SeekerFlags.SKIP_USES | Spp.SeekerFlags.SKIP_CHILDREN
-                );
-                generateAddingElementTypes(String("this"), elements);
-            }
-        }
-    }
-
-    func generateDataType (
-        className: String, tableName: String, parent: ref[TiObject], varArray: Array[String], typeArray: Array[String]
-    ): TioSrdRef {
-        def result: TioSrdRef;
-        def list: SrdRef[Core.Data.Ast.Scope] = newSrdObj[Core.Data.Ast.Scope];
-        def listContainer: DynContainerOf[list.obj];
-        def resArray: Array[TioSrdRef];
-        def resArray2: Array[TioSrdRef];
-        def resArray3: Array[TioSrdRef];
-        def result2: TioSrdRef;
-        def result3: TioSrdRef;
-        def i: int = 0;
-        def iString: String;
-        iString="" + i;
-
-        if !Spp.astMgr.buildAst(
-            (ast def _where :String=""),
-            Map[String, ref[TiObject]](),
-            result
-        ) {
-            System.fail(1, "generateDataType/build Data Type var : error\n");
-        }
-        listContainer.addElement(result.obj);
-
-        // TODO: Do we need this?
-        if !Spp.astMgr.buildAst(
-            (ast def _update: String=""),
-            Map[String, ref[TiObject]](),
-            result
-        ) {
-            System.fail(1, "generateDataType/build Data Type var : error\n");
-        }
-        listContainer.addElement(result.obj);
-
-        // TODO: Change Db into Rows.Db
-        if !Spp.astMgr.buildAst(
-            (ast @shared def db: Db),
-            Map[String, ref[TiObject]](),
-            result
-        ) {
-            System.fail(1, "generateDataType/build Data Type var : error\n");
-        }
-        listContainer.addElement(result.obj);
-
-        if !Spp.astMgr.buildAst(
-            (ast def classData: className),
-            Map[String, ref[TiObject]]()
-                .set(String("className"), Core.Data.Ast.Identifier(className)),
-            result2
-        ) {
-            System.fail(1, "generateDataType/build Data Type var : error\n");
-        }
-        resArray.add(result2);
-
         for i = 0, i < typeArray.getLength(), i = i+1 {
-            iString = String("") + i;
-            if i == 0 {
-                if typeArray(i)=="String" && varArray(i) != "_where" && varArray(i) != "_update" {
-                    if !Spp.astMgr.buildAst(
-                        (ast classData.strVal=dataArray(i)(j)),
-                        Map[String, ref[TiObject]]()
-                            .set(String("j"), Core.Data.Ast.IntegerLiteral(iString))
-                            .set(String("strVal"), Core.Data.Ast.Identifier(varArray(i))),
-                        result3
-                    ) {
-                        System.fail(1, "generateDataType/build Data Type var : error\n");
-                    }
-                } else if typeArray(i) == "int" {
-                    if !Spp.astMgr.buildAst(
-                        (ast classData.intVal=parseInt(dataArray(i)(j).buf)),
-                        Map[String, ref[TiObject]]()
-                            .set(String("j"), Core.Data.Ast.IntegerLiteral(iString))
-                            .set(String("intVal"), Core.Data.Ast.Identifier(varArray(i))),
-                        result3
-                    ) {
-                        System.fail(1, "generateDataType/build Data Type var : error\n");
-                    }
-                } else if typeArray(i) == "float" {
-                    if !Spp.astMgr.buildAst(
-                        (ast classData.floatVal=getFloat(dataArray(i)(j).buf)),
-                        Map[String, ref[TiObject]]()
-                            .set(String("j"), Core.Data.Ast.IntegerLiteral(iString))
-                            .set(String("floatVal"), Core.Data.Ast.Identifier(varArray(i))),
-                        result3
-                    ) {
-                        System.fail(1, "generateDataType/build Data Type var : error\n");
-                    }
-                }
-
-                resArray.add(result3);
-            } else {
-                if typeArray(i)=="String" && varArray(i) != "_where" && varArray(i) != "_update" {
-                    if !Spp.astMgr.buildAst(
-                        (ast{ beforData; classData.strVal=dataArray(i)(j); }),
-                        Map[String, ref[TiObject]]()
-                            .set(String("j"), Core.Data.Ast.IntegerLiteral(iString))
-                            .set(String("beforData"), resArray(i))
-                            .set(String("strVal"), Core.Data.Ast.Identifier(varArray(i))),
-                        result3
-                    ) {
-                        System.fail(1, "generateDataType/build Data Type var : error\n");
-                    }
-                }
-                if typeArray(i) == "int" {
-                    if !Spp.astMgr.buildAst(
-                        ast { beforData; classData.intVal = Receive.getInt(dataArray(i)(j).buf); },
-                        Map[String, ref[TiObject]]()
-                            .set(String("j"), Core.Data.Ast.IntegerLiteral(iString))
-                            .set(String("beforData"), resArray(i))
-                            .set(String("intVal"), Core.Data.Ast.Identifier(varArray(i))),
-                        result3
-                    ) {
-                        System.fail(1, "generateDataType/build Data Type var : error\n");
-                    }
-                }
-                if typeArray(i) == "float" {
-                    if !Spp.astMgr.buildAst(
-                        ast { beforData; classData.floatVal = parseFloat(dataArray(i)(j).buf); },
-                        Map[String, ref[TiObject]]()
-                            .set(String("j"), Core.Data.Ast.IntegerLiteral(iString))
-                            .set(String("beforData"), resArray(i))
-                            .set(String("floatVal"), Core.Data.Ast.Identifier(varArray(i))),
-                        result3
-                    ) {
-                        System.fail(1, "generateDataType/build Data Type var : error\n");
-                    }
-                }
-                resArray.add(result3);
-            }
-        }
-
-        // transform data to string to add it to the database
-
-        resArray2.add(result2);
-        for i = 0, i < typeArray.getLength(), i = i+1 {
-            if (i==0) {
-                if typeArray(i)=="String" && varArray(i) != "_where" && varArray(i) != "_update" {
-                    if !Spp.astMgr.buildAst(
-                        ast { data.add(this.strVal); colname.add(String("{{strVal}}")); },
-                        Map[String, ref[TiObject]]().set(String("strVal"), Core.Data.Ast.Identifier(varArray(i))),
-                        result3
-                    ) {
-                        System.fail(1, "generateDataType/build Data Type var : error\n");
-                    }
-                }
-                if typeArray(i) == "int" {
-                    if !Spp.astMgr.buildAst(
-                        ast { data.add(String( String("") + this.intVal)); colname.add(String("{{intVal}}")); },
-                        Map[String, ref[TiObject]]().set(String("intVal"), Core.Data.Ast.Identifier(varArray(i))),
-                        result3
-                    ) {
-                        System.fail(1, "generateDataType/build Data Type var : error\n");
-                    }
-                }
-                if typeArray(i) == "float" {
-                    if !Spp.astMgr.buildAst(
-                        ast { data.add(String( String("") + this.floatVal)); colname.add(String("{{floatVal}}")); },
-                        Map[String, ref[TiObject]]().set(String("floatVal"), Core.Data.Ast.Identifier(varArray(i))),
-                        result3
-                    ) {
-                        System.fail(1, "generateDataType/build Data Type var : error\n");
-                    }
-                }
-                resArray2.add(result3);
-            } else {
-                if typeArray(i) == "String" && varArray(i) != "_where" && varArray(i) != "_update" {
-                    if !Spp.astMgr.buildAst(
-                        ast { beforData data.add(this.strVal); colname.add(String("{{strVal}}")); },
-                        Map[String, ref[TiObject]]()
-                            .set(String("beforData"), resArray2(i))
-                            .set(String("strVal"), Core.Data.Ast.Identifier(varArray(i))),
-                        result3
-                    ) {
-                        System.fail(1, "generateDataType/build Data Type var : error\n");
-                    }
-                }
-                if typeArray(i) == "int" {
-                    if !Spp.astMgr.buildAst(
-                        ast {
-                            beforData;
-                            data.add(String( String("") + this.intVal));
-                            colname.add(String("{{intVal}}"));
-                        },
-                        Map[String, ref[TiObject]]()
-                            .set(String("beforData"), resArray2(i))
-                            .set(String("intVal"), Core.Data.Ast.Identifier(varArray(i))),
-                        result3
-                    ) {
-                        System.fail(1, "generateDataType/build Data Type var : error\n");
-                    }
-                }
-                if typeArray(i) == "float" {
-                    if !Spp.astMgr.buildAst(
-                        ast {
-                            beforData;
-                            data.add(String("") + this.floatVal);
-                            colname.add(String("{{floatVal}}"));
-                        },
-                        Map[String, ref[TiObject]]()
-                            .set(String("beforData"), resArray2(i))
-                            .set(String("floatVal"), Core.Data.Ast.Identifier(varArray(i))),
-                        result3
-                    ) {
-                        System.fail(1, "generateDataType/build Data Type var : error\n");
-                    }
-                }
-                resArray2.add(result3);
-            }
-        }
-
-        //init ref and = inint
-
-        resArray3.add(result2);
-        for i = 0, i < typeArray.getLength(), i = i+1 {
-            if i == 0 && varArray(i) != "db" && varArray(i) != "_MyClass" {
-                if !Spp.astMgr.buildAst(
-                    (ast this.varItem=value.varItem),
-                    Map[String, ref[TiObject]]().set(String("varItem"), Core.Data.Ast.Identifier(varArray(i))),
-                    result3
-                ) {
-                    System.fail(1, "generateDataType/build Data Type var : error\n");
-                }
-                resArray3.add(result3);
-            } else if varArray(i) != "db" && varArray(i) != "_MyClass" {
-                if !Spp.astMgr.buildAst(
-                    ast { beforData; this.varItem = value.varItem; },
+            if typeArray(i)=="String" {
+                if !Spp.astMgr.insertAst(
+                    (ast model.strVal = data(j)),
                     Map[String, ref[TiObject]]()
-                        .set(String("beforData"), resArray3(i))
-                        .set(String("varItem"), Core.Data.Ast.Identifier(varArray(i))),
-                    result3
+                        .set(String("j"), Core.Data.Ast.IntegerLiteral(String("") + i))
+                        .set(String("strVal"), Core.Data.Ast.Identifier(varArray(i)))
                 ) {
-                    System.fail(1, "generateDataType/build Data Type var : error\n");
+                    System.fail(1, "generateParsing error: inserting AST failed.\n");
                 }
-                resArray3.add(result3);
+            } else if typeArray(i) == "int" {
+                if !Spp.astMgr.insertAst(
+                    (ast model.intVal = parseInt(data(j).buf)),
+                    Map[String, ref[TiObject]]()
+                        .set(String("j"), Core.Data.Ast.IntegerLiteral(String("") + i))
+                        .set(String("intVal"), Core.Data.Ast.Identifier(varArray(i)))
+                ) {
+                    System.fail(1, "generateParsing error: inserting AST failed.\n");
+                }
+            } else if typeArray(i) == "float" {
+                if !Spp.astMgr.insertAst(
+                    (ast model.floatVal = parseFloat(data(j).buf)),
+                    Map[String, ref[TiObject]]()
+                        .set(String("j"), Core.Data.Ast.IntegerLiteral(String("") + i))
+                        .set(String("floatVal"), Core.Data.Ast.Identifier(varArray(i)))
+                ) {
+                    System.fail(1, "generateParsing error: inserting AST failed.\n");
+                }
             }
         }
-        // TODO: Should we remove this?
-        if !Spp.astMgr.buildAst(
-            (ast handler this~init() { }),
-            Map[String, ref[TiObject]](),
-            result
-        ) {
-            System.fail(1, "generateDataType/build Data Type var : error\n");
-        }
-        listContainer.addElement(result.obj);
-
-        // TODO: Should we remove this?
-        if !Spp.astMgr.buildAst(
-            (ast handler this~init(ref[className]) {
-                initfunc
-            }),
-            Map[String, ref[TiObject]]()
-                .set(String("className"), Core.Data.Ast.Identifier(className))
-                .set(String("initfunc"), resArray3(resArray3.getLength()-1)),
-            result
-        ) {
-            System.fail(1, "generateDataType/build Data Type var : error\n");
-        }
-        listContainer.addElement(result.obj);
-
-        // TODO: Should we remove this?
-        if !Spp.astMgr.buildAst(
-            (ast handler this = ref[className] {
-                initfunc
-            }),
-            Map[String, ref[TiObject]]()
-                .set(String("className"), Core.Data.Ast.Identifier(className))
-                .set(String("initfunc"), resArray3(resArray3.getLength()-1)),
-            result
-        ) {
-            System.fail(1, "generateDataType/build Data Type var : error\n");
-        }
-        listContainer.addElement(result.obj);
-
-        if !Spp.astMgr.buildAst(
-            (ast handler this.getData() : Array[cn] {
-                def dataArray : Array[Array[String]];
-                if !db.exec(Select()~use_in(select) {
-                    table = String("{{tableName}}");
-                    condition = this._where;
-                }, dataArray) {
-                    // TODO: Handle error case.
-                }
-                def data : Array[cn];
-                def i: int =0;
-                for i = 0, i < dataArray.getLength(), i += 1 {
-                    def s: Array[String];
-                    buildclassData
-                    getclassData
-                    data.add(classData);
-                }
-                return data;
-            }),
-            Map[String, ref[TiObject]]()
-                .set(String("cn"), Core.Data.Ast.Identifier(className))
-                .set(String("tableName"), Core.Data.Ast.Identifier(tableName))
-                .set(String("buildclassData"), result2)
-                .set(String("getclassData"), resArray(resArray.getLength()-1)),
-            result
-        ) {
-            System.fail(1, "generateDataType/build Data Type var : error\n");
-        }
-        listContainer.addElement(result.obj);
-
-        if !Spp.astMgr.buildAst(
-            (ast handler this.saveData() {
-                def data: Array[String];
-                def colname: Array[String];
-                getclassData
-                if !db.exec(Insert()~use_in(insert) no_injection {
-                    insert.table = String("{{tableName}}");
-                    insert.data = data;
-                    insert.columns = colname;
-                }) {
-                    // TODO: Handle error case.
-                }
-            }),
-            Map[String, ref[TiObject]]()
-                .set(String("tableName"), Core.Data.Ast.Identifier(tableName))
-                .set(String("getclassData"), resArray2(resArray2.getLength()-1)),
-            result
-        ) {
-            System.fail(1, "generateDataType/build Data Type var : error\n");
-        }
-        listContainer.addElement(result.obj);
-
-        if !Spp.astMgr.buildAst(
-            (ast handler this.deleteRowData() {
-                if !db.exec(Delete()~use_in(delete) {
-                    table = String("{{tableName}}");
-                    condition = this._where;
-                }) {
-                    // TODO: Handle error case.
-                }
-            }),
-            Map[String, ref[TiObject]]()
-                .set(String("tableName"), Core.Data.Ast.Identifier(tableName)),
-            result
-        ) {
-            System.fail(1, "generateDataType/build Data Type var : error\n");
-        }
-        listContainer.addElement(result.obj);
-        // def arabicname : alias updateData;
-
-        if !Spp.astMgr.buildAst(
-            (ast handler this.updateData() {
-                def data: Array[String];
-                def colname: Array[String];
-                getclassData
-                if !db.exec(Update()~use_in(update) no_injection {
-                    update.table = String("{{tableName}}");
-                    update.columns = colname;
-                    update.data = data;
-                    update.condition = this._where;
-                }) {
-                    // TODO: Handle error case.
-                }
-            }),
-            Map[String, ref[TiObject]]()
-                .set(String("tableName"), Core.Data.Ast.Identifier(tableName))
-                .set(String("getclassData"), resArray2(resArray2.getLength()-1)),
-            result
-        ) {
-            System.fail(1, "generateDataType/build Data Type var : error\n");
-        }
-        listContainer.addElement(result.obj);
-
-        if !Spp.astMgr.buildAst(
-            (ast @shared def _MyClass: className),
-            Map[String, ref[TiObject]]()
-                .set(String("className"), Core.Data.Ast.Identifier(className)),
-            result
-        ) {
-            System.fail(1, "generateDataType/build Data Type var : error\n");
-        }
-        listContainer.addElement(result.obj);
-
-        if !Spp.astMgr.buildAst(
-            (ast macro where [condition] {
-                className._MyClass._where= preprocess {
-                    if !Spp.astMgr.insertAst(
-                        generateWhere(ast condition).obj
-                    ) {
-                        System.fail(1, "Failed to insert condition.\n");
-                    }
-                }
-                // className._MyClass._where=myq
-                    className._MyClass
-                }
-            ),
-            Map[String, ref[TiObject]]()
-                .set(String("className"), Core.Data.Ast.Identifier(className)),
-            result
-        ) {
-            System.fail(1, "generateDataType/build Data Type var : error\n");
-        }
-        listContainer.addElement(result.obj);
-
-        if !Spp.astMgr.buildAst(
-            (ast macro updateDataSet [dataSet] {
-                className._MyClass._update = preprocess {
-                    if !Spp.astMgr.insertAst(
-                        generateUpdateData(ast dataSet).obj
-                    ) {
-                        System.fail(1, "Failed to insert condition.\n");
-                    }
-                }
-                // className._MyClass._where=myq
-                className._MyClass
-            }),
-            Map[String, ref[TiObject]]()
-                .set(String("className"), Core.Data.Ast.Identifier(className)),
-            result
-        ) {
-            System.fail(1, "generateDataType/build Data Type var : error\n");
-        }
-        listContainer.addElement(result.obj);
-        return castSrdRef[list, TiObject];
     }
 
-    macro columnSelector elementType == "var" and modifier == "column";
-
-    macro getDataFunc [className, tableName, parent] {
-        def created: Bool = false;
-        @shared def db: Db;
-        /* preprocess {
-            def varArray: Array[String];
-            varArray = implementGetElementNames[columnSelector[], parent];
-            def typeArray: Array[String];
-            typeArray = implementGetElementTypes[columnSelector[], parent];
+    func generateGetData (varArray: Array[String]) {
+        def i: Int;
+        for i = 0, i < varArray.getLength(), i = i+1 {
             if !Spp.astMgr.insertAst(
-                generateDataType(className, tableName, parent, varArray, typeArray).obj
+                (ast data.add(String() + model.varName)),
+                Map[String, ref[TiObject]]().set(String("varName"), Core.Data.Ast.Identifier(varArray(i)))
             ) {
-                System.fail(1, "Failed to genrate data type.\n");
+                System.fail(1, "generateGetData error: inserting AST failed.\n");
             }
-        } */
+        }
     }
 
-    macro define_model_essentials {
-        def db: ref[Db];
-        db~ptr = 0;
-        handler this.save() {
-            if this.db~ptr != 0 Rows.Query[this_type](this.db).save(this);
+    func generateTableName (classAst: ref[Core.Basic.TiObject]) {
+        def params: Array[String] = dumpElementModifierParams(classAst, "model");
+        if params.getLength() != 1 {
+            System.fail(1, "generateTableName - Invalid model: Missing or invalid @model modifier.");
         }
-        handler this.delete() {
-            if this.db~ptr != 0 Rows.Query[this_type](this.db).delete(this);
-        }
+        Spp.astMgr.insertAst(
+            (ast Srl.String("{{className}}")),
+            Srl.Map[Srl.String, ref[Core.Basic.TiObject]]().set(Srl.String("className"), TiStr(params(0)))
+        );
     }
 }
 

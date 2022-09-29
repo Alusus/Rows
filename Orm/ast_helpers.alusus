@@ -1,0 +1,132 @@
+@merge module Rows {
+    macro implementGetElementNames [condition, parent] {
+        Array[String]().{
+            preprocess {
+                def elements: Array[ref[Core.Basic.TiObject]];
+                elements = Spp.astMgr.findElements(
+                    ast { condition },
+                    parent,
+                    Spp.SeekerFlags.SKIP_OWNERS | Spp.SeekerFlags.SKIP_USES | Spp.SeekerFlags.SKIP_CHILDREN
+                );
+                generateAddingElementNames(String("this"), elements);
+            }
+        }
+    }
+
+    function generateAddingElementNames (varName: String, elements: Array[ref[Core.Basic.TiObject]]) {
+        def i: Int;
+        for i = 0, i < elements.getLength(), ++i
+        {
+            def node: ref[Core.Data.Node](castRef[elements(i), Core.Data.Node]);
+            def d: ref[Core.Data.Ast.Definition](castRef[node.owner, Core.Data.Ast.Definition]);
+            def binding: ref[Core.Basic.Binding](Core.Basic.getInterface[d, Core.Basic.Binding]);
+            Spp.astMgr.insertAst(
+                ast { names.add(Srl.String("{{name}}")) },
+                Srl.Map[Srl.String, ref[Core.Basic.TiObject]]()
+                    .set(Srl.String("names"), Core.Data.Ast.Identifier(varName))
+                    .set(Srl.String("name"), binding.getMember("name"))
+            );
+        }
+    }
+
+    macro implementGetElementTypes [condition, parent] {
+        Array[String]().{
+            preprocess {
+                def elements: Array[ref[Core.Basic.TiObject]];
+                elements = Spp.astMgr.findElements(
+                    ast { condition },
+                    parent,
+                    Spp.SeekerFlags.SKIP_OWNERS | Spp.SeekerFlags.SKIP_USES | Spp.SeekerFlags.SKIP_CHILDREN
+                );
+                generateAddingElementTypes(String("this"), elements);
+            }
+        }
+    }
+
+    function generateAddingElementTypes (varName: String, elements: Array[ref[Core.Basic.TiObject]]) {
+        def i: Int;
+        for i = 0, i < elements.getLength(), ++i {
+            def node: ref[Core.Data.Node](castRef[elements(i), Core.Data.Node]);
+            def d: ref[Core.Data.Ast.Definition](castRef[node.owner, Core.Data.Ast.Definition]);
+            def containing: ref[Core.Basic.MapContaining](Core.Basic.getInterface[d, Core.Basic.MapContaining]);
+            Spp.astMgr.insertAst(
+                ast { names.add(Srl.String("{{name}}")) },
+                Srl.Map[Srl.String, ref[Core.Basic.TiObject]]()
+                    .set(Srl.String("names"), Core.Data.Ast.Identifier(varName))
+                    .set(Srl.String("name"), castRef[containing.getElement("target"), Core.Data.Ast.Identifier])
+            );
+        }
+    }
+
+    macro implementGetElementMods [condition, parent] {
+        def elements: Array[ref[Core.Basic.TiObject]];
+        def i: int = 0;
+        def j: int = 0;
+        elements = Spp.astMgr.findElements(
+            ast { condition },
+            parent,
+            Spp.SeekerFlags.SKIP_OWNERS | Spp.SeekerFlags.SKIP_USES | Spp.SeekerFlags.SKIP_CHILDREN
+        );
+        colsMod = generateAddingElementMods(elements, var);
+        def params: Array[String];
+        def cmpar: Array[Array[String]];
+
+        for i = 0, i < colsMod.getLength(), ++i {
+            cmpar.clear();
+            if colsMod(i).getLength() > 0 {
+                for j = 0, j < colsMod(i).getLength(), ++j {
+                    params = dumpElementModifierParams(elements(i), colsMod(i)(j).buf);
+                    cmpar.add(params);
+                }
+            } else {
+                def noParams: Array[String];
+                cmpar.add(noParams);
+            }
+            modsParams.add(cmpar);
+        }
+    }
+
+    function generateAddingElementMods (
+        elements: Array[ref[Core.Basic.TiObject]] , var : Array[String]
+    ): Array[Array[String]] {
+        def i: Int;
+        def colsMod: Array[Array[String]];
+        def strArray: Array[String];
+        def modArray: Array[String];
+
+        for i = 0, i < elements.getLength(), ++i {
+            strArray=dumpModifiers(elements(i));
+            modArray.add(var(i))
+            colsMod.add(strArray);
+        }
+
+        return colsMod;
+    }
+
+    function dumpModifiers (element: ref[Core.Basic.TiObject]): Array[String] {
+        def modifiers: ref[Core.Basic.Containing](Spp.astMgr.getModifiers(element));
+        def i: Int;
+        def strArray: Array[String] ;
+        if modifiers~ptr != 0 {
+            for i = 0, i < modifiers.getElementCount()~cast[Int], ++i {
+                strArray.add(Spp.astMgr.getModifierKeyword(modifiers.getElement(i)));
+            }
+        }
+        return strArray;
+    }
+
+    function dumpModifierParams (modifier: ref[Core.Basic.TiObject]): Array[String] {
+        def params: Srl.Array[Srl.String];
+        Spp.astMgr.getModifierStringParams(modifier, params);
+        return params;
+    }
+
+    function dumpElementModifierParams (element: ref[Core.Basic.TiObject], modName: ptr[array[Char]]): Array[String] {
+        def modifiers: ref[Core.Basic.Containing](Spp.astMgr.getModifiers(element));
+        def modifier: ref[Core.Basic.TiObject](Spp.astMgr.findModifier(modifiers, modName));
+        def params: Array[String];
+        params = dumpModifierParams(modifier);
+        return params;
+    }
+}
+

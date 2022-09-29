@@ -13,6 +13,8 @@
             this.where = value.where;
         }
 
+        macro columnSelector elementType == "var" and modifier == "column";
+
         func getColumnVarNames (): Array[String] {
             return implementGetElementNames[columnSelector[], Model~ast];
         }
@@ -29,39 +31,7 @@
             def model: SrdRef[Model];
             model.construct();
             preprocess {
-                def varArray: Array[String] = getColumnVarNames();
-                def typeArray: Array[String] = getColumnVarTypes();
-                def i: Int;
-                for i = 0, i < typeArray.getLength(), i = i+1 {
-                    if typeArray(i)=="String" {
-                        if !Spp.astMgr.insertAst(
-                            (ast model.strVal = data(j)),
-                            Map[String, ref[TiObject]]()
-                                .set(String("j"), Core.Data.Ast.IntegerLiteral(String("") + i))
-                                .set(String("strVal"), Core.Data.Ast.Identifier(varArray(i)))
-                        ) {
-                            System.fail(1, "generateDataType/build Data Type var : error\n");
-                        }
-                    } else if typeArray(i) == "int" {
-                        if !Spp.astMgr.insertAst(
-                            (ast model.intVal = parseInt(data(j).buf)),
-                            Map[String, ref[TiObject]]()
-                                .set(String("j"), Core.Data.Ast.IntegerLiteral(String("") + i))
-                                .set(String("intVal"), Core.Data.Ast.Identifier(varArray(i)))
-                        ) {
-                            System.fail(1, "generateDataType/build Data Type var : error\n");
-                        }
-                    } else if typeArray(i) == "float" {
-                        if !Spp.astMgr.insertAst(
-                            (ast model.floatVal = parseFloat(data(j).buf)),
-                            Map[String, ref[TiObject]]()
-                                .set(String("j"), Core.Data.Ast.IntegerLiteral(String("") + i))
-                                .set(String("floatVal"), Core.Data.Ast.Identifier(varArray(i)))
-                        ) {
-                            System.fail(1, "generateDataType/build Data Type var : error\n");
-                        }
-                    }
-                }
+                generateParsing(getColumnVarNames(), getColumnVarTypes());
             }
             return model;
         }
@@ -69,31 +39,13 @@
         func getRecordData [colummnNameGetter: function = getColumnVarNames] (model: ref[Model]): Array[String] {
             def data: Array[String];
             preprocess {
-                def varArray: Array[String] = colummnNameGetter();
-                def i: Int;
-                for i = 0, i < varArray.getLength(), i = i+1 {
-                    if !Spp.astMgr.insertAst(
-                        (ast data.add(String() + model.varName)),
-                        Map[String, ref[TiObject]]().set(String("varName"), Core.Data.Ast.Identifier(varArray(i)))
-                    ) {
-                        System.fail(1, "getRecordData error: inserting AST failed.\n");
-                    }
-                }
+                generateGetData(colummnNameGetter());
             }
             return data;
         }
 
         handler this.getTableName(): String {
-            return preprocess {
-                def params: Array[String] = dumpElementModifierParams(Model~ast, "model");
-                if params.getLength() != 1 {
-                    System.fail(1, "Invalid model: Missing or invalid @model modifier.");
-                }
-                Spp.astMgr.insertAst(
-                    (ast Srl.String("{{className}}")),
-                    Srl.Map[Srl.String, ref[Core.Basic.TiObject]]().set(Srl.String("className"), TiStr(params(0)))
-                );
-            }
+            return preprocess { generateTableName(Model~ast) };
         }
 
         handler this.setWhereForPrimaryKey(model: ref[Model]) {
@@ -125,7 +77,7 @@
                 def columns: Array[String];
                 preprocess {
                     if !Spp.astMgr.insertAst(
-                        generateUpdateData(ast expression).obj
+                        generateUpdate(ast expression).obj
                     ) {
                         System.fail(1, "Failed to insert update statements.\n");
                     }

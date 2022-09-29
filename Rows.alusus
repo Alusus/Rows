@@ -7,6 +7,7 @@ import "Srl/String";
 
 import "Core/Data";
 import "Spp";
+import "Spp/Ast";
 
 import "Drivers/ConnectionParams";
 import "Drivers/Driver";
@@ -23,6 +24,7 @@ import "Operations/Update";
 import "Operations/Delete";
 import "Operations/CreateTable";
 
+import "Orm/ast_helpers";
 import "Orm/object_mapping";
 import "Orm/table_generation";
 import "Orm/Query";
