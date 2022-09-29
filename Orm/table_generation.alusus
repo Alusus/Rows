@@ -93,6 +93,7 @@ import "Spp/Ast";
         return params;
     }
 
+    // TODO: Move this to shared location.
     function dumpElementModifierParams (element: ref[Core.Basic.TiObject], modName: ptr[array[Char]]): Array[String] {
         def modifiers: ref[Core.Basic.Containing](Spp.astMgr.getModifiers(element));
         def modifier: ref[Core.Basic.TiObject](Spp.astMgr.findModifier(modifiers, modName));

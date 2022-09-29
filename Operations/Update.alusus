@@ -24,22 +24,12 @@
             return this._condition;
         }
 
-        def _updateClause: String;
-        handler this.updateClause = String {
-            this._updateClause = value;
-            return this._updateClause;
-        }
-
         handler this.generateSqlString(): String {
             def sql: String = String("UPDATE ") + this._table + "\nSET ";
-            if this._updateClause == "" {
-                def i: int = 0;
-                for i = 0, i < this._data.getLength(), ++i {
-                    sql += this._columns(i) + String(" = '") + this._data(i) + "'";
-                    if i < this._data.getLength()-1 sql += ", " else sql += "\n";
-                }
-            } else {
-                sql += this._updateClause + String("\n");
+            def i: int = 0;
+            for i = 0, i < this._data.getLength(), ++i {
+                sql += this._columns(i) + String(" = '") + this._data(i) + "'";
+                if i < this._data.getLength()-1 sql += ", " else sql += "\n";
             }
             sql += String("WHERE ") + this._condition;
             return sql;

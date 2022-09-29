@@ -86,6 +86,14 @@
                 return true;
             }
         }
+
+        handler [Model: type] this.from: Query[Model] {
+            return Query[Model](this);
+        }
+
+        handler [Model: type] this.save(model: ref[Model]) {
+            Query[Model](this).save(model);
+        }
     }
 }
 

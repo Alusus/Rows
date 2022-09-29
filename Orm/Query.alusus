@@ -1,0 +1,204 @@
+@merge module Rows {
+    class Query [Model: type] {
+        def db: ref[Db];
+        def validationBuffer: Model;
+        def where: String;
+
+        handler this~init(db: ref[Db]) {
+            this.db~no_deref = db;
+        }
+
+        handler this~init(value: ref[this_type]) {
+            this.db~no_deref = value.db;
+            this.where = value.where;
+        }
+
+        func getColumnVarNames (): Array[String] {
+            return implementGetElementNames[columnSelector[], Model~ast];
+        }
+
+        func getPrimaryColumnVarNames (): Array[String] {
+            return implementGetElementNames[elementType == "var" and modifier == "pk", Model~ast];
+        }
+
+        func getColumnVarTypes (): Array[String] {
+            return implementGetElementTypes[columnSelector[], Model~ast];
+        }
+
+        func parseRecord (data: Array[String]): SrdRef[Model] {
+            def model: SrdRef[Model];
+            model.construct();
+            preprocess {
+                def varArray: Array[String] = getColumnVarNames();
+                def typeArray: Array[String] = getColumnVarTypes();
+                def i: Int;
+                for i = 0, i < typeArray.getLength(), i = i+1 {
+                    if typeArray(i)=="String" {
+                        if !Spp.astMgr.insertAst(
+                            (ast model.strVal = data(j)),
+                            Map[String, ref[TiObject]]()
+                                .set(String("j"), Core.Data.Ast.IntegerLiteral(String("") + i))
+                                .set(String("strVal"), Core.Data.Ast.Identifier(varArray(i)))
+                        ) {
+                            System.fail(1, "generateDataType/build Data Type var : error\n");
+                        }
+                    } else if typeArray(i) == "int" {
+                        if !Spp.astMgr.insertAst(
+                            (ast model.intVal = parseInt(data(j).buf)),
+                            Map[String, ref[TiObject]]()
+                                .set(String("j"), Core.Data.Ast.IntegerLiteral(String("") + i))
+                                .set(String("intVal"), Core.Data.Ast.Identifier(varArray(i)))
+                        ) {
+                            System.fail(1, "generateDataType/build Data Type var : error\n");
+                        }
+                    } else if typeArray(i) == "float" {
+                        if !Spp.astMgr.insertAst(
+                            (ast model.floatVal = parseFloat(data(j).buf)),
+                            Map[String, ref[TiObject]]()
+                                .set(String("j"), Core.Data.Ast.IntegerLiteral(String("") + i))
+                                .set(String("floatVal"), Core.Data.Ast.Identifier(varArray(i)))
+                        ) {
+                            System.fail(1, "generateDataType/build Data Type var : error\n");
+                        }
+                    }
+                }
+            }
+            return model;
+        }
+
+        func getRecordData [colummnNameGetter: function = getColumnVarNames] (model: ref[Model]): Array[String] {
+            def data: Array[String];
+            preprocess {
+                def varArray: Array[String] = colummnNameGetter();
+                def i: Int;
+                for i = 0, i < varArray.getLength(), i = i+1 {
+                    if !Spp.astMgr.insertAst(
+                        (ast data.add(String() + model.varName)),
+                        Map[String, ref[TiObject]]().set(String("varName"), Core.Data.Ast.Identifier(varArray(i)))
+                    ) {
+                        System.fail(1, "getRecordData error: inserting AST failed.\n");
+                    }
+                }
+            }
+            return data;
+        }
+
+        handler this.getTableName(): String {
+            return preprocess {
+                def params: Array[String] = dumpElementModifierParams(Model~ast, "model");
+                if params.getLength() != 1 {
+                    System.fail(1, "Invalid model: Missing or invalid @model modifier.");
+                }
+                Spp.astMgr.insertAst(
+                    (ast Srl.String("{{className}}")),
+                    Srl.Map[Srl.String, ref[Core.Basic.TiObject]]().set(Srl.String("className"), TiStr(params(0)))
+                );
+            }
+        }
+
+        handler this.setWhereForPrimaryKey(model: ref[Model]) {
+            def columns: Array[String] = getPrimaryColumnVarNames();
+            def data: Array[String] = getRecordData[getPrimaryColumnVarNames](model);
+            this.where = columns(0) + " = '" + data(0) + "'";
+            def i: Int;
+            for i = 0, i < columns.getLength(), ++i {
+                this.where += " AND ";
+                this.where = columns(i) + " = '" + data(i) + "'";
+            }
+        }
+
+        @member macro where [this, condition] {
+            this~use_in(_this) no_injection {
+                _this.where = preprocess {
+                    if !Spp.astMgr.insertAst(
+                        generateWhere(ast condition).obj
+                    ) {
+                        System.fail(1, "Failed to insert condition.\n");
+                    }
+                }
+            }
+        }
+
+        @member macro update [this, expression] {
+            this~use_in(_this) no_injection {
+                def data: Array[String];
+                def columns: Array[String];
+                preprocess {
+                    if !Spp.astMgr.insertAst(
+                        generateUpdateData(ast expression).obj
+                    ) {
+                        System.fail(1, "Failed to insert update statements.\n");
+                    }
+                }
+                if !_this.db.exec(Update()~use_in(update) no_injection {
+                    update.table = _this.getTableName();
+                    update.columns = columns;
+                    update.data = data;
+                    update.condition = this.where;
+                }) {
+                    // TODO: Handle error case.
+                }
+            }
+        }
+
+        handler this.select(): Array[SrdRef[Model]] {
+            def data : Array[Array[String]];
+            if !this.db.exec(Select()~use_in(select) {
+                table = this.getTableName();
+                fields = getColumnVarNames();
+                condition = this.where;
+            }, data) {
+                // TODO: Handle error case.
+            }
+            def models: Array[SrdRef[Model]];
+            def i: int =0;
+            for i = 0, i < data.getLength(), ++i {
+                def model: SrdRef[Model] = parseRecord(data(i));
+                model.db~no_deref = this.db;
+                models.add(model);
+            }
+            return models;
+        }
+
+        handler this.save(model: ref[Model]) {
+            if model.db~ptr == this.db~ptr {
+                // Update an existing record.
+                this.setWhereForPrimaryKey(model);
+                if !this.db.exec(Update()~use_in(update) no_injection {
+                    update.table = this.getTableName();
+                    update.columns = getColumnVarNames();
+                    update.data = getRecordData(model);
+                    update.condition = this.where;
+                }) {
+                    // TODO: Handle error case.
+                }
+            } else {
+                // Create a new record.
+                if !this.db.exec(Insert()~use_in(insert) no_injection {
+                    insert.table = this.getTableName();
+                    insert.columns = getColumnVarNames();
+                    insert.data = getRecordData(model);
+                }) {
+                    // TODO: Handle error case.
+                }
+                model.db~no_deref = this.db;
+            }
+        }
+
+        handler this.delete(model: ref[Model]) {
+            this.setWhereForPrimaryKey(model);
+            this.delete();
+            model.db~ptr = 0;
+        }
+
+        handler this.delete() {
+            if !this.db.exec(Delete()~use_in(delete) {
+                delete.table = this.getTableName();
+                delete.condition = this.where;
+            }) {
+                // TODO: Handle error case.
+            }
+        }
+    }
+}
+

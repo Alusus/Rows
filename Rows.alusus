@@ -25,6 +25,7 @@ import "Operations/CreateTable";
 
 import "Orm/object_mapping";
 import "Orm/table_generation";
+import "Orm/Query";
 
 import "Db";
 
