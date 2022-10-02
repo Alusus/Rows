@@ -13,18 +13,24 @@
             this.where = value.where;
         }
 
-        macro columnSelector elementType == "var" and modifier == "column";
+        macro columnSelector (ast elementType == "var" and modifier == "column");
 
         func getColumnVarNames (): Array[String] {
-            return implementGetElementNames[columnSelector[], Model~ast];
+            return Array[String]({
+                preprocess { generateElementNames(columnSelector[], Model~ast) }
+            });
         }
 
         func getPrimaryColumnVarNames (): Array[String] {
-            return implementGetElementNames[elementType == "var" and modifier == "pk", Model~ast];
+            return Array[String]({
+                preprocess { generateElementNames((ast elementType == "var" and modifier == "pk"), Model~ast) }
+            });
         }
 
         func getColumnVarTypes (): Array[String] {
-            return implementGetElementTypes[columnSelector[], Model~ast];
+            return Array[String]({
+                preprocess { generateElementTypes(columnSelector[], Model~ast) }
+            });
         }
 
         func parseRecord (data: Array[String]): SrdRef[Model] {

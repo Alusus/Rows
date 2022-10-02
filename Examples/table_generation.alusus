@@ -2,7 +2,8 @@ import "../Rows";
 use Srl;
 use Rows;
 
-class Properties {
+@model["properties"]
+class Property {
     @defult["10"]
     @notnull
     @pk
@@ -37,6 +38,5 @@ if !db.driver.isConnected() {
     System.fail(1, String("Error connecting to DB: ") + db.getLastError());
 }
 
-Rows.autoCreate[Properties~ast , String("properties")];
-create(db);
+db.schemaBuilder[Property].create();
 

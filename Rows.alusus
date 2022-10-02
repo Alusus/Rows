@@ -26,8 +26,9 @@ import "Operations/CreateTable";
 
 import "Orm/ast_helpers";
 import "Orm/object_mapping";
-import "Orm/table_generation";
+import "Orm/schema_generation";
 import "Orm/Query";
+import "Orm/SchemaBuilder";
 
 import "Db";
 

@@ -297,7 +297,7 @@
     }
 
     func generateTableName (classAst: ref[Core.Basic.TiObject]) {
-        def params: Array[String] = dumpElementModifierParams(classAst, "model");
+        def params: Array[String] = getElementModifierParams(classAst, "model");
         if params.getLength() != 1 {
             System.fail(1, "generateTableName - Invalid model: Missing or invalid @model modifier.");
         }

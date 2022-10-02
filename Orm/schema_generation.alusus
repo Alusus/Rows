@@ -2,26 +2,8 @@ import "Spp";
 import "Spp/Ast";
 
 @merge module Rows {
-    macro autoCreate [parent, tableName] {
-        preprocess {
-            def colsMod: Array[Array[String]];
-            def modsParams: Array[ Array[Array[String]]];
-            def var: Array[String];
-            var = implementGetElementNames[elementType == "var", parent];
-            def types: Array[String];
-            types = implementGetElementTypes[elementType == "var", parent];
-            implementGetElementMods[elementType == "var", parent];
-
-            if !Spp.astMgr.insertAst(
-                generateTable(tableName, colsMod, modsParams, var, types).obj
-            ) {
-                System.fail(1, "Failed to insert statment.\n");
-            }
-        }
-    }
-
     func generateTable (
-        tableName: String, colsMod: Array[Array[String]], modsParams: Array[Array[Array[String]]],
+        tableName: String, modsKeywords: Array[Array[String]], modsParams: Array[Array[Array[String]]],
         var: Array[String], types: Array[String]
     ): TioSrdRef {
         use Core.Basic;
@@ -41,9 +23,9 @@ import "Spp/Ast";
 
         for i = 0, i < var.getLength(), i += 1 {
             def dataTypeName: String;
-            for j = 0, j < colsMod(i).getLength(), j += 1 {
-                if isDataType(colsMod(i)(j)) != -1 {
-                    dataTypeName = colsMod(i)(j);
+            for j = 0, j < modsKeywords(i).getLength(), j += 1 {
+                if isDataType(modsKeywords(i)(j)) != -1 {
+                    dataTypeName = modsKeywords(i)(j);
                     break;
                 }
             }
@@ -70,8 +52,8 @@ import "Spp/Ast";
                 }
             }
 
-            for j = 0, j < colsMod(i).getLength(), j += 1 {
-                if colsMod(i)(j) == "notnull" {
+            for j = 0, j < modsKeywords(i).getLength(), j += 1 {
+                if modsKeywords(i)(j) == "notnull" {
                     if !Spp.astMgr.buildAst(
                         ast {
                             prevResult;
@@ -83,7 +65,7 @@ import "Spp/Ast";
                         System.fail(1, "generateTable/build Data Type var : error\n");
                     }
                     columnResult = result;
-                } else if colsMod(i)(j) == "unique" {
+                } else if modsKeywords(i)(j) == "unique" {
                     if !Spp.astMgr.buildAst(
                         ast {
                             prevResult;
@@ -95,7 +77,7 @@ import "Spp/Ast";
                         System.fail(1, "generateTable/build Data Type var : error\n");
                     }
                     columnResult = result;
-                } else if colsMod(i)(j) == "pk" {
+                } else if modsKeywords(i)(j) == "pk" {
                     if !Spp.astMgr.buildAst(
                         (ast Srl.String("{{varname}}")),
                         Map[String, ref[TiObject]]().set(String("varname"), Core.Data.Ast.Identifier(var(i))),
@@ -104,7 +86,7 @@ import "Spp/Ast";
                         System.fail(1, "generateTable/build Data Type var : error\n");
                     }
                     pkResultsContainer.addElement(result);
-                } else if colsMod(i)(j) == "defult" {
+                } else if modsKeywords(i)(j) == "defult" {
                     if !Spp.astMgr.buildAst(
                         ast {
                             prevResult;
@@ -118,7 +100,7 @@ import "Spp/Ast";
                         System.fail(1, "generateTable/build Data Type var : error\n");
                     }
                     columnResult = result;
-                } else if colsMod(i)(j) == "check" {
+                } else if modsKeywords(i)(j) == "check" {
                     if !Spp.astMgr.buildAst(
                         ast {
                             prevResult;
@@ -132,7 +114,7 @@ import "Spp/Ast";
                         System.fail(1, "generateTable/build Data Type var : error\n");
                     }
                     columnResult = result;
-                } else if colsMod(i)(j) == "fk" {
+                } else if modsKeywords(i)(j) == "fk" {
                     def fkResult: TioSrdRef;
                     if !Spp.astMgr.buildAst(
                         (ast Rows.ForeignKey(
@@ -186,10 +168,8 @@ import "Spp/Ast";
 
         def fnResult: TioSrdRef;
         if !Spp.astMgr.buildAst(
-            (ast function create(db: ref[Rows.Db]) {
-                if !db.exec(Rows.CreateTable().{ tableDef }) {
-                    Srl.System.fail(1, Srl.String("Table creation failed: ") + db.getLastError());
-                }
+            (ast if !this.db.exec(Rows.CreateTable().{ tableDef }) {
+                Srl.System.fail(1, Srl.String("Table creation failed: ") + this.db.getLastError());
             }),
             Map[String, ref[TiObject]]().set(String("tableDef"), tblResult),
             fnResult

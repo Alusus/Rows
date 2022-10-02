@@ -94,6 +94,10 @@
         handler [Model: type] this.save(model: ref[Model]) {
             Query[Model](this).save(model);
         }
+
+        handler [Model: type] this.schemaBuilder: SchemaBuilder[Model] {
+            return SchemaBuilder[Model](this);
+        }
     }
 }
 

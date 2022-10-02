@@ -1,0 +1,39 @@
+@merge module Rows {
+    class SchemaBuilder [Model: type] {
+        def db: ref[Db];
+
+        handler this~init(db: ref[Db]) {
+            this.db~no_deref = db;
+        }
+
+        handler this~init(value: ref[this_type]) {
+            this.db~no_deref = value.db;
+        }
+
+        function getTableName(): String {
+            return preprocess { generateTableName(Model~ast) };
+        }
+
+        handler this.create() {
+            preprocess {
+                // Pre-generate classes to avoid circular dependencies during code generation.
+                ref[Core.Data.Ast.Identifier]();
+                ref[Core.Data.Ast.Definition]();
+
+                def var: Array[String] = getElementNames((ast elementType == "var"), Model~ast);
+                def types: Array[String] = getElementTypes((ast elementType == "var"), Model~ast);
+
+                def modsKeywords: Array[Array[String]];
+                def modsParams: Array[ Array[Array[String]]];
+                getElementModifiers((ast elementType == "var"), Model~ast, modsKeywords, modsParams);
+
+                if !Spp.astMgr.insertAst(
+                    generateTable(getTableName(), modsKeywords, modsParams, var, types).obj
+                ) {
+                    System.fail(1, "Failed to insert statment.\n");
+                }
+            }
+        }
+    }
+}
+
