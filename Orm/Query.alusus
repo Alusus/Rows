@@ -13,23 +13,36 @@
             this.where = value.where;
         }
 
-        macro columnSelector (ast elementType == "var" and modifier == "column");
+        func getColumnNames (): Array[String] {
+            @shared def names: Array[String]({
+                preprocess { generateColumnNames(Model~ast, "column") }
+            });
+            return names;
+        }
 
         func getColumnVarNames (): Array[String] {
+            @shared def names: Array[String]({
+                preprocess { generateVarNames(Model~ast, "column") }
+            });
+            return names;
+        }
+
+        handler this.getColumnNameForVar(varName: String): String {
+            def map: Map[String, String];
+            map.keys = getColumnVarNames();
+            map.values = getColumnNames();
+            return map(varName);
+        }
+
+        func getPrimaryColumnNames (): Array[String] {
             return Array[String]({
-                preprocess { generateElementNames(columnSelector[], Model~ast) }
+                preprocess { generateColumnNames(Model~ast, "primaryKey") }
             });
         }
 
         func getPrimaryColumnVarNames (): Array[String] {
             return Array[String]({
-                preprocess { generateElementNames((ast elementType == "var" and modifier == "pk"), Model~ast) }
-            });
-        }
-
-        func getColumnVarTypes (): Array[String] {
-            return Array[String]({
-                preprocess { generateElementTypes(columnSelector[], Model~ast) }
+                preprocess { generateVarNames(Model~ast, "primaryKey") }
             });
         }
 
@@ -37,7 +50,10 @@
             def model: SrdRef[Model];
             model.construct();
             preprocess {
-                generateParsing(getColumnVarNames(), getColumnVarTypes());
+                generateParsing(
+                    getColumnVarNames(),
+                    getVarTypes(Model~ast, "column")
+                );
             }
             return model;
         }
@@ -55,7 +71,7 @@
         }
 
         handler this.setWhereForPrimaryKey(model: ref[Model]) {
-            def columns: Array[String] = getPrimaryColumnVarNames();
+            def columns: Array[String] = getPrimaryColumnNames();
             def data: Array[String] = getRecordData[getPrimaryColumnVarNames](model);
             this.where = columns(0) + " = '" + data(0) + "'";
             def i: Int;
@@ -103,7 +119,7 @@
             def data : Array[Array[String]];
             if !this.db.exec(Select()~use_in(select) {
                 table = this.getTableName();
-                fields = getColumnVarNames();
+                fields = getColumnNames();
                 condition = this.where;
             }, data) {
                 // TODO: Handle error case.
@@ -124,7 +140,7 @@
                 this.setWhereForPrimaryKey(model);
                 if !this.db.exec(Update()~use_in(update) no_injection {
                     update.table = this.getTableName();
-                    update.columns = getColumnVarNames();
+                    update.columns = getColumnNames();
                     update.data = getRecordData(model);
                     update.condition = this.where;
                 }) {
@@ -134,7 +150,7 @@
                 // Create a new record.
                 if !this.db.exec(Insert()~use_in(insert) no_injection {
                     insert.table = this.getTableName();
-                    insert.columns = getColumnVarNames();
+                    insert.columns = getColumnNames();
                     insert.data = getRecordData(model);
                 }) {
                     // TODO: Handle error case.

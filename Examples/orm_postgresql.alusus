@@ -1,4 +1,5 @@
-import "../Rows";
+import "Apm";
+Apm.importFile("Alusus/Rows");
 use Srl;
 use Rows;
 
@@ -6,8 +7,8 @@ use Rows;
 class Car {
     define_model_essentials[];
 
-    @notnull
-    @pk
+    @notNull
+    @primaryKey
     @Integer
     @column
     def id: int;
@@ -18,8 +19,12 @@ class Car {
     def name: String;
 
     @Float
+    @column["the_price"]
+    def price: Float;
+
+    @VarChar["50"]
     @column
-    def price: float;
+    def fullName: String;
 }
 
 def db: Db(PostgresqlDriver(ConnectionParams().{
@@ -65,11 +70,12 @@ d(1).name = String("Car 4 updated");
 d(1).price = 805;
 d(1).save();
 
+db.from[Car].where[id == 19].update[{ fullName="BMW X5" }];
 db.from[Car].where[id == 20].update[{ price=90, name="BMW" }];
 
 db.from[Car].where[id > 23 and id <= 28].delete();
 
-d = db.from[Car].select();
+d = db.from[Car].where[fullName != "BMW X5"].select();
 
 for k=0, k < d.getLength(), k=k+1 {
     Console.print(d(k).id);

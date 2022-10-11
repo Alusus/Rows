@@ -1,4 +1,5 @@
-import "../Rows";
+import "Apm";
+Apm.importFile("Alusus/Rows");
 use Srl;
 use Rows;
 
@@ -6,11 +7,11 @@ use Rows;
 class Car {
     define_model_essentials[];
 
-    @notnull
-    @pk
+    @notNull
+    @primaryKey
     @Integer
     @column
-    def id: int;
+    def id: Int;
 
     @VarChar["50"]
     @defult["My Car"]
@@ -19,7 +20,7 @@ class Car {
 
     @Float
     @column
-    def price: float;
+    def price: Float;
 }
 
 def db: Db(MysqlDriver(ConnectionParams().{

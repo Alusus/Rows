@@ -58,7 +58,12 @@
                 operator = infixOperators(operator);
             }
             if !Spp.astMgr.buildAst(
-                ast { String("{{name}}") + String(" {{op}} '") + _this.validationBuffer.name~use_in(_buffer) no_injection { _buffer = val }  + String("'") },
+                ast {
+                    String("\"") + _this.getColumnNameForVar(String("{{name}}")) + "\"" +
+                    String(" {{op}} '") +
+                    _this.validationBuffer.name~use_in(_buffer) no_injection { _buffer = val } +
+                    String("'")
+                },
                 Map[String, ref[TiObject]]()
                     .set(String("name"), mapContaining.getElement("first"))
                     .set(String("op"), TiStr(operator))
@@ -98,7 +103,10 @@
             def i: int =0;
             if (notFlag==false) {
                 if !Spp.astMgr.buildAst(
-                    ast { String("{{name}}") + String(" in (") + String(" ")  },
+                    ast {
+                        String("\"") + _this.getColumnNameForVar(String("{{name}}")) + "\"" +
+                        String(" in ( ")
+                    },
                     Map[String, ref[TiObject]]().set(String("name"),mapContaining.getElement("first")),
                     result2
                 ) {
@@ -107,7 +115,10 @@
             } else {
                 mapContaining.getElement(0)
                 if !Spp.astMgr.buildAst(
-                    ast { String("{{name}}") + String(" NOT  in (") + String(" ")  },
+                    ast {
+                        String("\"") + _this.getColumnNameForVar(String("{{name}}")) + "\"" +
+                        String(" NOT  in ( ")
+                    },
                     Map[String, ref[TiObject]]().set(String("name"),mapContaining.getElement("first")),
                     result2
                 ) {
@@ -147,7 +158,10 @@
             def i: int = 0;
             if (notFlag==false) {
                 if !Spp.astMgr.buildAst(
-                    ast { String("{{name}}") + String(" BETWEEN ") + String(" ")  },
+                    ast {
+                        String("\"") + _this.getColumnNameForVar(String("{{name}}")) + "\"" +
+                        String(" BETWEEN ")
+                    },
                     Map[String, ref[TiObject]]().set(String("name"),mapContaining.getElement("first")),
                     result2
                 ) {
@@ -155,7 +169,10 @@
                 }
             } else {
                 if !Spp.astMgr.buildAst(
-                    ast { String("{{name}}") + String(" NOT  BETWEEN ") + String(" ")  },
+                    ast {
+                        String("\"") + _this.getColumnNameForVar(String("{{name}}")) + "\"" +
+                        String(" NOT  BETWEEN ")
+                    },
                     Map[String, ref[TiObject]]().set(String("name"),mapContaining.getElement("first")),
                     result2
                 ) {
@@ -211,7 +228,7 @@
                 def mapContainer: MapContainerOf[obj];
                 if !Spp.astMgr.buildAst(
                     ast {
-                        columns.add(String("{{name}}"));
+                        columns.add(_this.getColumnNameForVar(String("{{name}}")));
                         _this.validationBuffer.name = val;
                         data.add(String() + _this.validationBuffer.name);
                     },
@@ -231,6 +248,7 @@
         } else if isDerivedFrom[obj, Core.Data.Ast.List] {
             def container: ContainerOf[obj];
             result = generateUpdate(container.getElement(0));
+            def i: Int;
             for i = 1, i < container.getElementCount()~cast[Int], ++i {
                 def combinedResult: TioSrdRef;
                 if !Spp.astMgr.buildAst(
@@ -250,10 +268,11 @@
         return result;
     }
 
-    func generateParsing (varArray: Array[String], typeArray: Array[String]) {
+    func generateParsing (varArray: Array[String], typeArray: Array[ref[Spp.Ast.Type]]) {
+        @shared def strType: ref[Spp.Ast.Type](Spp.astMgr.traceType(ast Root.Srl.String));
         def i: Int;
         for i = 0, i < typeArray.getLength(), i = i+1 {
-            if typeArray(i)=="String" {
+            if typeArray(i)~ptr == strType~ptr {
                 if !Spp.astMgr.insertAst(
                     (ast model.strVal = data(j)),
                     Map[String, ref[TiObject]]()
@@ -262,7 +281,7 @@
                 ) {
                     System.fail(1, "generateParsing error: inserting AST failed.\n");
                 }
-            } else if typeArray(i) == "int" {
+            } else if typeArray(i).getMyTypeInfo().typeName == "IntegerType" {
                 if !Spp.astMgr.insertAst(
                     (ast model.intVal = parseInt(data(j).buf)),
                     Map[String, ref[TiObject]]()
@@ -271,7 +290,7 @@
                 ) {
                     System.fail(1, "generateParsing error: inserting AST failed.\n");
                 }
-            } else if typeArray(i) == "float" {
+            } else if typeArray(i).getMyTypeInfo().typeName == "FloatType" {
                 if !Spp.astMgr.insertAst(
                     (ast model.floatVal = parseFloat(data(j).buf)),
                     Map[String, ref[TiObject]]()

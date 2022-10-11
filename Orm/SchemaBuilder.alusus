@@ -20,15 +20,14 @@
                 ref[Core.Data.Ast.Identifier]();
                 ref[Core.Data.Ast.Definition]();
 
-                def var: Array[String] = getElementNames((ast elementType == "var"), Model~ast);
-                def types: Array[String] = getElementTypes((ast elementType == "var"), Model~ast);
+                def var: Array[String] = getColumnNames(Model~ast, 0);
 
                 def modsKeywords: Array[Array[String]];
                 def modsParams: Array[ Array[Array[String]]];
-                getElementModifiers((ast elementType == "var"), Model~ast, modsKeywords, modsParams);
+                getVarModifiers(Model~ast, modsKeywords, modsParams);
 
                 if !Spp.astMgr.insertAst(
-                    generateTable(getTableName(), modsKeywords, modsParams, var, types).obj
+                    generateTable(getTableName(), modsKeywords, modsParams, var).obj
                 ) {
                     System.fail(1, "Failed to insert statment.\n");
                 }

@@ -1,22 +1,20 @@
 @merge module Rows {
-    function generateElementNames (condition: ref[Core.Basic.TiObject], parent: ref[Core.Basic.TiObject]) {
-        generateStrings(getElementNames(condition, parent));
+    def modifierKeywordTranslations: Map[String, String];
+
+    function generateVarNames (parent: ref[Core.Basic.TiObject], modifierKwd: CharsPtr) {
+        generateStrings(getVarNames(parent, modifierKwd));
     }
 
-    function getElementNames (
-        condition: ref[Core.Basic.TiObject],
-        parent: ref[Core.Basic.TiObject]
-    ): Array[String] {
-        def elements: Array[ref[Core.Basic.TiObject]];
-        elements = Spp.astMgr.findElements(
-            condition,
+    function getVarNames (parent: ref[Core.Basic.TiObject], modifierKwd: CharsPtr): Array[String] {
+        def elements: Array[ref[Core.Basic.TiObject]] = Spp.astMgr.findElements(
+            (ast elementType == "var"),
             parent,
             Spp.SeekerFlags.SKIP_OWNERS | Spp.SeekerFlags.SKIP_USES | Spp.SeekerFlags.SKIP_CHILDREN
         );
         def result: Array[String];
         def i: Int;
-        for i = 0, i < elements.getLength(), ++i
-        {
+        for i = 0, i < elements.getLength(), ++i {
+            if modifierKwd != 0 and findElementModifier(elements(i), modifierKwd)~ptr == 0 continue;
             def node: ref[Core.Data.Node](castRef[elements(i), Core.Data.Node]);
             def d: ref[Core.Data.Ast.Definition](castRef[node.owner, Core.Data.Ast.Definition]);
             def binding: ref[Core.Basic.Binding](Core.Basic.getInterface[d, Core.Basic.Binding]);
@@ -25,31 +23,49 @@
         return result;
     }
 
-    function generateElementTypes (condition: ref[Core.Basic.TiObject], parent: ref[Core.Basic.TiObject]) {
-        generateStrings(getElementTypes(condition, parent));
+    function generateColumnNames (parent: ref[Core.Basic.TiObject], modifierKwd: CharsPtr) {
+        generateStrings(getColumnNames(parent, modifierKwd));
     }
 
-    function getElementTypes (
-        condition: ref[Core.Basic.TiObject],
-        parent: ref[Core.Basic.TiObject]
-    ): Array[String] {
-        def elements: Array[ref[Core.Basic.TiObject]];
-        elements = Spp.astMgr.findElements(
-            condition,
+    function getColumnNames (parent: ref[Core.Basic.TiObject], modifierKwd: CharsPtr): Array[String] {
+        def elements: Array[ref[Core.Basic.TiObject]] = Spp.astMgr.findElements(
+            (ast elementType == "var"),
             parent,
             Spp.SeekerFlags.SKIP_OWNERS | Spp.SeekerFlags.SKIP_USES | Spp.SeekerFlags.SKIP_CHILDREN
         );
         def result: Array[String];
         def i: Int;
-        for i = 0, i < elements.getLength(), ++i
-        {
-            // TODO: Trace the actual type rather than looking at the identifier.
-            dynCastRef[elements(i), Core.Data.Ast.Identifier].{
-                if this~ptr == 0 {
-                    System.fail(1, "getElementTypes error: Invalid element type.");
-                }
-                result.add(this.value.value);
+        for i = 0, i < elements.getLength(), ++i {
+            if modifierKwd != 0 and findElementModifier(elements(i), modifierKwd)~ptr == 0 continue;
+            def modifier: ref[Core.Basic.TiObject](findElementModifier(elements(i), "column"));
+            if modifier~ptr == 0 {
+                result.add(String());
+                continue;
             }
+            def params: Array[String] = getModifierParams(modifier);
+            if params.getLength() > 0 {
+                result.add(params(0));
+            } else {
+                def node: ref[Core.Data.Node](castRef[elements(i), Core.Data.Node]);
+                def d: ref[Core.Data.Ast.Definition](castRef[node.owner, Core.Data.Ast.Definition]);
+                def binding: ref[Core.Basic.Binding](Core.Basic.getInterface[d, Core.Basic.Binding]);
+                result.add(castRef[binding.getMember("name"), TiStr].value);
+            }
+        }
+        return result;
+    }
+
+    function getVarTypes (parent: ref[Core.Basic.TiObject], modifierKwd: CharsPtr): Array[ref[Spp.Ast.Type]] {
+        def elements: Array[ref[Core.Basic.TiObject]] = Spp.astMgr.findElements(
+            (ast elementType == "var"),
+            parent,
+            Spp.SeekerFlags.SKIP_OWNERS | Spp.SeekerFlags.SKIP_USES | Spp.SeekerFlags.SKIP_CHILDREN
+        );
+        def result: Array[ref[Spp.Ast.Type]];
+        def i: Int;
+        for i = 0, i < elements.getLength(), ++i {
+            if modifierKwd != 0 and findElementModifier(elements(i), modifierKwd)~ptr == 0 continue;
+            result.add(Spp.astMgr.traceType(elements(i)));
         }
         return result;
     }
@@ -64,8 +80,7 @@
         }
     }
 
-    function getElementModifiers (
-        condition: ref[Core.Basic.TiObject],
+    function getVarModifiers (
         parent: ref[Core.Basic.TiObject],
         modsKeywords: ref[Array[Array[String]]],
         modsParams: ref[Array[Array[Array[String]]]]
@@ -74,7 +89,7 @@
         def i: int = 0;
         def j: int = 0;
         elements = Spp.astMgr.findElements(
-            condition,
+            (ast elementType == "var"),
             parent,
             Spp.SeekerFlags.SKIP_OWNERS | Spp.SeekerFlags.SKIP_USES | Spp.SeekerFlags.SKIP_CHILDREN
         );
@@ -101,21 +116,37 @@
     function getElementModifierKeywords (element: ref[Core.Basic.TiObject]): Array[String] {
         def modifiers: ref[Core.Basic.Containing](Spp.astMgr.getModifiers(element));
         def i: Int;
-        def strArray: Array[String] ;
+        def results: Array[String];
         if modifiers~ptr != 0 {
             for i = 0, i < modifiers.getElementCount()~cast[Int], ++i {
-                strArray.add(Spp.astMgr.getModifierKeyword(modifiers.getElement(i)));
+                def kwd: String = Spp.astMgr.getModifierKeyword(modifiers.getElement(i));
+                def translatedKwd: String = modifierKeywordTranslations(kwd);
+                if translatedKwd == "" translatedKwd = kwd;
+                results.add(translatedKwd);
             }
         }
-        return strArray;
+        return results;
     }
 
-    function getElementModifierParams (element: ref[Core.Basic.TiObject], modName: ptr[array[Char]]): Array[String] {
+    function getElementModifierParams (element: ref[Core.Basic.TiObject], modName: CharsPtr): Array[String] {
+        def modifier: ref[Core.Basic.TiObject](findElementModifier(element, modName));
+        if modifier~ptr != 0 return getModifierParams(modifier)
+        else return Array[String]();
+    }
+
+    function findElementModifier (element: ref[Core.Basic.TiObject], modName: CharsPtr): ref[Core.Basic.TiObject] {
         def modifiers: ref[Core.Basic.Containing](Spp.astMgr.getModifiers(element));
-        def modifier: ref[Core.Basic.TiObject](Spp.astMgr.findModifier(modifiers, modName));
-        def params: Array[String];
-        if modifier~ptr != 0 params = getModifierParams(modifier);
-        return params;
+        if modifiers~ptr == 0 return nullRef[Core.Basic.TiObject];
+        def i: Int;
+        for i = 0, i < modifiers->getElementCount()~cast[Int], ++i {
+            def modifier: ref[Core.Basic.TiObject](modifiers.getElement(i));
+            if modifier~ptr == 0 continue;
+            def kwd: String = Spp.astMgr.getModifierKeyword(modifier);
+            def translatedKwd: String = modifierKeywordTranslations(kwd);
+            if translatedKwd == "" translatedKwd = kwd;
+            if translatedKwd == modName return modifier;
+        }
+        return nullRef[Core.Basic.TiObject];
     }
 
     function getModifierParams (modifier: ref[Core.Basic.TiObject]): Array[String] {

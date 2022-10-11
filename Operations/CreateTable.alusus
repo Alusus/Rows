@@ -39,7 +39,7 @@
             def i: Int;
             for i = 0, i < this._columns.keys.getLength(), ++i {
                 if i != 0 sql += ",\n";
-                sql += this._columns.keys(i) + " " + this._columns.values(i).generateSqlString(driver);
+                sql += String("\"") + this._columns.keys(i) + "\" " + this._columns.values(i).generateSqlString(driver);
             }
             return sql;
         }
@@ -47,22 +47,22 @@
         handler this.generateConstraintsString(): String {
             def sql: String;
             if this._primaryKey.getLength() > 0 {
-                sql = String("PRIMARY KEY (") + String.merge(this._primaryKey, ", ") + ")";
+                sql = String("PRIMARY KEY (\"") + String.merge(this._primaryKey, "\", \"") + "\")";
             }
             def i: Int;
             for i = 0, i < this._foreignKeys.getLength(), ++i {
                 if sql != "" sql += ",\n";
-                sql += String("FOREIGN KEY (") + this._foreignKeys(i).column
-                    + ") REFERENCES " + this._foreignKeys(i).referenceTable
-                    + "(" + this._foreignKeys(i).referenceColumn + ")";
+                sql += String("FOREIGN KEY (\"") + this._foreignKeys(i).column
+                    + "\") REFERENCES \"" + this._foreignKeys(i).referenceTable
+                    + "\"(\"" + this._foreignKeys(i).referenceColumn + "\")";
             }
             return sql;
         }
 
         handler this.generateSqlString(driver: ref[Driver]): String {
             def sql: String = "CREATE TABLE ";
-            if this._notExists sql += "IF NOT EXISTS ";
-            sql += this._name + "(\n" + this.generateColumnsString(driver);
+            if this._notExists sql += "IF NOT EXISTS \"";
+            sql += this._name + "\"(\n" + this.generateColumnsString(driver);
             def constraintsSql: String = this.generateConstraintsString();
             if constraintsSql != "" sql += String(",\n") + constraintsSql;
             sql += "\n);";

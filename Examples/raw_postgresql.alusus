@@ -1,5 +1,6 @@
 import "Srl/Console";
-import "../Rows";
+import "Apm";
+Apm.importFile("Alusus/Rows");
 
 use Rows;
 

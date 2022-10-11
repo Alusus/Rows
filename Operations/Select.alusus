@@ -26,10 +26,10 @@
             if value.getLength() == 0 {
                 this._fields = "*";
             } else {
-                this._fields = value(0);
+                this._fields = String("\"") + value(0) + "\"";
                 def i: int;
                 for i = 1, i < value.getLength(), i = i + 1 {
-                    this._fields += String(", ") + value(i);
+                    this._fields += String(", \"") + value(i) + "\"";
                 }
             }
             return value;

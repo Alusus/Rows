@@ -1,30 +1,36 @@
-import "../Rows";
+import "Apm";
+Apm.importFile("Alusus/Rows");
 use Srl;
 use Rows;
 
 @model["properties"]
 class Property {
     @defult["10"]
-    @notnull
-    @pk
+    @notNull
+    @primaryKey
     @Integer
+    @column
     def id: int;
 
     def i: String;
 
     @Integer
     @default["10"]
+    @column
     def ssd: int;
 
     @VarChar
+    @column
     def ss: String;
 
     @defult["Baghdad"]
     @VarChar["250"]
+    @column
     def address: String;
 
-    @fk["users", "id"]
+    @foreignKey["users", "id"]
     @Integer
+    @column
     def userId: int;
 }
 

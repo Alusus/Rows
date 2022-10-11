@@ -50,6 +50,7 @@ import "libmysqlclient.so.21";
                 this.connectionState = Mysql.error(this.connection);
                 return false;
             } else {
+                this.exec("SET SQL_MODE=ANSI_QUOTES;");
                 this.connectionState = CONNECTION_SUCCESSFUL;
                 return true;
             }
