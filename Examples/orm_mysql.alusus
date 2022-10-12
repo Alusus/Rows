@@ -45,18 +45,21 @@ for i = 1, i < 30, i = i+1 {
 }
 Console.print("\n");
 
+func printRows (r: Array[SrdRef[Car]]) {
+    def k: int=0;
+    for k = 0, k < r.getLength(), k = k+1 {
+        Console.print(r(k).id);
+        Console.print("  ");
+        Console.print(r(k).name);
+        Console.print("  ");
+        Console.print(r(k).price);
+        Console.print("\n");
+    }
+}
+
 def d: Array[SrdRef[Car]];
 d = db.from[Car].where[(price < 1000 or price > 5000) and id > 2].select();
-
-def k: int=0;
-for k = 0, k < d.getLength(), k = k+1 {
-    Console.print(d(k).id);
-    Console.print("  ");
-    Console.print(d(k).name);
-    Console.print("  ");
-    Console.print(d(k).price);
-    Console.print("\n");
-}
+printRows(d);
 Console.print("\n");
 
 d(0).delete();
@@ -70,13 +73,13 @@ db.from[Car].where[id == 20].update[{ price=90, name="BMW" }];
 db.from[Car].where[id > 23 and id <= 28].delete();
 
 d = db.from[Car].select();
+printRows(d);
+Console.print("\n");
 
-for k=0, k < d.getLength(), k=k+1 {
-    Console.print(d(k).id);
-    Console.print("  ");
-    Console.print(d(k).name);
-    Console.print("  ");
-    Console.print(d(k).price);
-    Console.print("\n");
-}
+d = db.from[Car].where[not (id > 10)].select();
+printRows(d);
+Console.print("\n");
+
+d = db.from[Car].where[!(id in (1, 5, 7, 2))].select();
+printRows(d);
 

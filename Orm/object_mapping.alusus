@@ -10,8 +10,6 @@
         }
     }
 
-    def notFlag: bool = false;
-
     def infixOperators: Map[String, String];
     infixOperators.{
         this(String("==")) = "=";
@@ -36,13 +34,16 @@
         }
 
         if isDerivedFrom[obj, PrefixOperator] {
-            notFlag=true;
+            def binding: ref[Binding](getInterface[obj, Binding]);
+            def operator: String = castRef[binding.getMember("type"), TiStr].value;
+            if operator != "not" and operator != "!" {
+                System.fail(1, String("generateWhere error: Invalid PrefixOperator ") + operator + "\n");
+            }
             def mapContaining: ref[MapContaining](getInterface[obj, MapContaining]);
-
             if !Spp.astMgr.buildAst(
-                ast { String("") + name },
+                ast { String("NOT ") + (cond) },
                 Map[String, ref[TiObject]]()
-                    .set(String("name"), generateWhere(mapContaining.getElement(0)).obj),
+                    .set(String("cond"), generateWhere(mapContaining.getElement(0)).obj),
                 result2
             ) {
                 System.fail(1, "generateWhere/Bracket: error\n");
@@ -101,91 +102,31 @@
             def mapContaining2: ref[MapContaining](getInterface[mapContaining.getElement("second"), MapContaining]);
             def containing: ref[Containing](getInterface[mapContaining2.getElement("operand"), Containing]);
             def i: int =0;
-            if (notFlag==false) {
-                if !Spp.astMgr.buildAst(
-                    ast {
-                        String("\"") + _this.getColumnNameForVar(String("{{name}}")) + "\"" +
-                        String(" in ( ")
-                    },
-                    Map[String, ref[TiObject]]().set(String("name"),mapContaining.getElement("first")),
-                    result2
-                ) {
-                    System.fail(1, "generateWhere/Bracket: error\n");
-                }
-            } else {
-                mapContaining.getElement(0)
-                if !Spp.astMgr.buildAst(
-                    ast {
-                        String("\"") + _this.getColumnNameForVar(String("{{name}}")) + "\"" +
-                        String(" NOT  in ( ")
-                    },
-                    Map[String, ref[TiObject]]().set(String("name"),mapContaining.getElement("first")),
-                    result2
-                ) {
-                    System.fail(1, "generateWhere/Bracket: error\n");
-                }
-                notFlag=false;
-            }
 
-            resultArray.add(result2);
-            for i=0 , i < containing.getElementCount()~cast[Int]-1 , i = i+1 {
-                if !Spp.astMgr.buildAst(
-                    ast {result + String("'" )+ name + String("' , ")   },
-                    Map[String, ref[TiObject]]()
-                        .set(String("name"), containing.getElement(i))
-                        .set(String("result"), resultArray(i)),
-                    result2
-                ) {
-                    System.fail(1, "generateWhere/Bracket: error\n");
-                }
-                resultArray.add(result2);
-            }
             if !Spp.astMgr.buildAst(
-                ast {result + String("'" )+ name + String("' ) ")   },
-                Map[String, ref[TiObject]]()
-                    .set(String("name"), containing.getElement(containing.getElementCount()~cast[Int]-1))
-                    .set(String("result"), resultArray(resultArray.getLength()-1)),
-                result
+                ast {
+                    String("\"") + _this.getColumnNameForVar(String("{{name}}")) + "\"" +
+                    String(" in ( ")
+                },
+                Map[String, ref[TiObject]]().set(String("name"),mapContaining.getElement("first")),
+                result2
             ) {
                 System.fail(1, "generateWhere/Bracket: error\n");
             }
-        } else if isDerivedFrom[obj, BitwiseOperator] {
-            def mapContaining: ref[MapContaining](getInterface[obj, MapContaining]);
-            def binding: ref[Binding](getInterface[obj, Binding]);
-            def mapContaining2: ref[MapContaining](getInterface[mapContaining.getElement("second"), MapContaining]);
-            def containing: ref[Containing](getInterface[mapContaining2.getElement("operand"), Containing]);
 
-            def i: int = 0;
-            if (notFlag==false) {
-                if !Spp.astMgr.buildAst(
-                    ast {
-                        String("\"") + _this.getColumnNameForVar(String("{{name}}")) + "\"" +
-                        String(" BETWEEN ")
-                    },
-                    Map[String, ref[TiObject]]().set(String("name"),mapContaining.getElement("first")),
-                    result2
-                ) {
-                    System.fail(1, "generateWhere/Bracket: error\n");
-                }
-            } else {
-                if !Spp.astMgr.buildAst(
-                    ast {
-                        String("\"") + _this.getColumnNameForVar(String("{{name}}")) + "\"" +
-                        String(" NOT  BETWEEN ")
-                    },
-                    Map[String, ref[TiObject]]().set(String("name"),mapContaining.getElement("first")),
-                    result2
-                ) {
-                    System.fail(1, "generateWhere/Bracket: error\n");
-                }
-                notFlag=false;
-            }
             resultArray.add(result2);
             for i=0 , i < containing.getElementCount()~cast[Int]-1 , i = i+1 {
                 if !Spp.astMgr.buildAst(
-                    ast {result + String("'" )+ name + String("' ")   },
+                    ast {
+                        result + (
+                            String("'" ) +
+                            _this.validationBuffer.name~use_in(_buffer) no_injection { _buffer = val } +
+                            String("' , ")
+                        )
+                    },
                     Map[String, ref[TiObject]]()
-                        .set(String("name"), containing.getElement(i))
+                        .set(String("name"), mapContaining.getElement("first"))
+                        .set(String("val"), containing.getElement(i))
                         .set(String("result"), resultArray(i)),
                     result2
                 ) {
@@ -194,9 +135,16 @@
                 resultArray.add(result2);
             }
             if !Spp.astMgr.buildAst(
-                ast {result + String("and '" )+ name + String("'")   },
+                ast {
+                    result + (
+                        String("'" ) +
+                        _this.validationBuffer.name~use_in(_buffer) no_injection { _buffer = val } +
+                        String("' ) ")
+                    )
+                },
                 Map[String, ref[TiObject]]()
-                    .set(String("name"), containing.getElement(containing.getElementCount()~cast[Int]-1))
+                    .set(String("name"), mapContaining.getElement("first"))
+                    .set(String("val"), containing.getElement(containing.getElementCount()~cast[Int]-1))
                     .set(String("result"), resultArray(resultArray.getLength()-1)),
                 result
             ) {
