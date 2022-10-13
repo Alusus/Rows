@@ -163,6 +163,70 @@
         return result;
     }
 
+    func generateOrder (obj: ref[TiObject]): TioSrdRef {
+        def result: TioSrdRef;
+
+        if obj~ptr == 0 {
+            System.fail(1, "generateOrder: obj is null.\n");
+        }
+        if isDerivedFrom[obj, Identifier] {
+            if !Spp.astMgr.buildAst(
+                ast {
+                    this.ordering.add(this.getColumnNameForVar(String("{{column}}")));
+                    this.validationBuffer.column;
+                },
+                Map[String, ref[TiObject]]().set(String("column"), obj),
+                result
+            ) {
+                System.fail(1, "generateOrder error - building Identifier failed.\n");
+            }
+        } else if isDerivedFrom[obj, PrefixOperator] {
+            def binding: ref[Binding](getInterface[obj, Binding]);
+            def operator: String = castRef[binding.getMember("type"), TiStr].value;
+            if operator != "-" {
+                System.fail(1, String("generateOrder error: Invalid PrefixOperator ") + operator + "\n");
+            }
+            def mapContaining: ref[MapContaining](getInterface[obj, MapContaining]);
+            obj~no_deref = mapContaining.getElement(0);
+            if !isDerivedFrom[obj, Identifier] {
+                System.fail(1, String("generateOrder error: Invalid PrefixOperator operand type,\n"));
+            }
+            if !Spp.astMgr.buildAst(
+                ast {
+                    this.ordering.add(String("-") + this.getColumnNameForVar(String("{{column}}")));
+                    this.validationBuffer.column;
+                },
+                Map[String, ref[TiObject]]().set(String("column"), obj),
+                result
+            ) {
+                System.fail(1, "generateOrder error - building Identifier failed.\n");
+            }
+        } else if isDerivedFrom[obj, Bracket] {
+            def mapContainer: MapContainerOf[obj];
+            result = generateOrder(mapContainer.getElement("operand"));
+        } else if isDerivedFrom[obj, Core.Data.Ast.List] {
+            def container: ContainerOf[obj];
+            result = generateOrder(container.getElement(0));
+            def i: Int;
+            for i = 1, i < container.getElementCount()~cast[Int], ++i {
+                def combinedResult: TioSrdRef;
+                if !Spp.astMgr.buildAst(
+                    ast { prevResult; result; },
+                    Map[String, ref[TiObject]]()
+                        .set(String("prevResult"), result)
+                        .set(String("result"), generateOrder(container.getElement(i))),
+                    combinedResult
+                ) {
+                    System.fail(1, "generateOrder error - building List failed.\n");
+                }
+                result = combinedResult;
+            }
+        } else {
+            System.fail(1, "generateOrder error - unexpected AST object type.\n");
+        }
+        return result;
+    }
+
     func generateUpdate (obj: ref[TiObject]): TioSrdRef {
         def result: TioSrdRef;
 

@@ -49,9 +49,9 @@ func printRows (r: Array[SrdRef[Car]]) {
     def k: int=0;
     for k = 0, k < r.getLength(), k = k+1 {
         Console.print(r(k).id);
-        Console.print("  ");
+        Console.print("\t\t");
         Console.print(r(k).name);
-        Console.print("  ");
+        Console.print("\t\t");
         Console.print(r(k).price);
         Console.print("\n");
     }
@@ -64,8 +64,8 @@ Console.print("\n");
 
 d(0).delete();
 
-d(1).name = String("Car 4 updated");
-d(1).price = 805;
+d(1).name = String("Car 4u");
+d(1).price = 400;
 d(1).save();
 
 db.from[Car].where[id == 20].update[{ price=90, name="BMW" }];
@@ -81,5 +81,13 @@ printRows(d);
 Console.print("\n");
 
 d = db.from[Car].where[!(id in (1, 5, 7, 2))].select();
+printRows(d);
+Console.print("\n");
+
+d = db.from[Car].where[id in (1, 2, 4, 5, 7)].order[(-price, id)].select();
+printRows(d);
+Console.print("\n");
+
+d = db.from[Car].where[id in (1, 2, 4, 5, 7)].order[(-price, -id)].select();
 printRows(d);
 

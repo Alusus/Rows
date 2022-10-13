@@ -50,25 +50,34 @@
             if value.getLength() == 0 {
                 this._orderBy = "";
             } else if value.getLength() == 1 {
-                this._orderBy = value(0);
+                this._orderBy = String("ORDER BY ") + getOrderColumnEntry(value(0));
             } else {
-                this._orderBy = String("(") + value(0);
+                this._orderBy = String("ORDER BY ") + getOrderColumnEntry(value(0));
                 def i: int;
                 for i = 1, i < value.getLength(), i = i + 1 {
-                    this._orderBy += String(", ") + value(i);
+                    this._orderBy += String(", ") + getOrderColumnEntry(value(i));
                 }
-                this._orderBy += ")";
+            }
+            return value;
+        }
+        handler this.orderBy = String {
+            if value == 0 {
+                this._orderBy = "";
+            } else {
+                this._orderBy = String("ORDER BY ") + value;
             }
             return this._orderBy;
         }
-        handler this.orderBy = String {
-            this._orderBy = value;
-            return this._orderBy;
+
+        func getOrderColumnEntry (s: String): String {
+            if s == "" return String();
+            if s(0) == '-' return String("\"") + (s.buf + 1) + String("\" DESC")
+            else return String("\"") + s + String("\"");
         }
 
         def _having: String;
         handler this.having = String {
-            if cond.getLength() == 0 {
+            if value == "" {
                 this._having = "";
             } else {
                 this._having = String("HAVING (") + value + ")";

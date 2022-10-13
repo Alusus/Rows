@@ -3,6 +3,7 @@
         def db: ref[Db];
         def validationBuffer: Model;
         def where: String;
+        def ordering: Array[String];
 
         handler this~init(db: ref[Db]) {
             this.db~no_deref = db;
@@ -81,6 +82,17 @@
             }
         }
 
+        handler [exp: ast] this.order:ref[this_type] {
+            preprocess {
+                if !Spp.astMgr.insertAst(
+                    generateOrder(exp~ast).obj
+                ) {
+                    System.fail(1, "Failed to insert order list.\n");
+                }
+            }
+            return this;
+        }
+
         @member macro where [this, condition] {
             this~use_in(_this) no_injection {
                 _this.where = preprocess {
@@ -121,6 +133,7 @@
                 table = this.getTableName();
                 fields = getColumnNames();
                 condition = this.where;
+                orderBy = this.ordering;
             }, data) {
                 // TODO: Handle error case.
             }
