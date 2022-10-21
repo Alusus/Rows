@@ -1,0 +1,90 @@
+import "Apm";
+Apm.importFile("Alusus/Rows");
+use Srl;
+use Rows;
+
+@model["cars"]
+class Car {
+    define_model_essentials[];
+
+    @notNull
+    @primaryKey
+    @Integer
+    @column
+    def id: Int;
+
+    @VarChar["50"]
+    @defult["My Car"]
+    @column
+    def name: String;
+
+    @Float
+    @column
+    def price: Float;
+}
+
+def db: Db(SqliteDriver(ConnectionParams().{
+    dbName = "mydb.db";
+}));
+if !db.isConnected() {
+    System.fail(1, String("Error connecting to DB: ") + db.getLastError());
+}
+
+db.schemaBuilder[Car].create();
+
+def i: int=1
+for i = 1, i < 30, i = i+1 {
+    def c: Car;
+    c.id = i
+    c.name = String("Car ") + i;
+    c.price = 200.0 * i
+    db.save[Car](c);
+}
+Console.print("\n");
+
+func printRows (r: Array[SrdRef[Car]]) {
+    def k: int=0;
+    for k = 0, k < r.getLength(), k = k+1 {
+        Console.print(r(k).id);
+        Console.print("\t\t");
+        Console.print(r(k).name);
+        Console.print("\t\t");
+        Console.print(r(k).price);
+        Console.print("\n");
+    }
+}
+
+def d: Array[SrdRef[Car]];
+d = db.from[Car].where[(price < 1000 or price > 5000) and id > 2].select();
+printRows(d);
+Console.print("\n");
+
+d(0).delete();
+
+d(1).name = String("Car 4u");
+d(1).price = 400;
+d(1).save();
+
+db.from[Car].where[id == 20].update[{ price=90, name="BMW" }];
+
+db.from[Car].where[id > 23 and id <= 28].delete();
+
+d = db.from[Car].select();
+printRows(d);
+Console.print("\n");
+
+d = db.from[Car].where[not (id > 10)].select();
+printRows(d);
+Console.print("\n");
+
+d = db.from[Car].where[!(id in (1, 5, 7, 2))].select();
+printRows(d);
+Console.print("\n");
+
+d = db.from[Car].where[id in (1, 2, 4, 5, 7)].order[(-price, id)].select();
+printRows(d);
+Console.print("\n");
+
+d = db.from[Car].where[id in (1, 2, 4, 5, 7)].order[(-price, -id)].select();
+printRows(d);
+

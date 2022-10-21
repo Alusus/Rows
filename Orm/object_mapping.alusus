@@ -106,7 +106,7 @@
             if !Spp.astMgr.buildAst(
                 ast {
                     String("\"") + _this.getColumnNameForVar(String("{{name}}")) + "\"" +
-                    String(" in ( ")
+                    String(" in (")
                 },
                 Map[String, ref[TiObject]]().set(String("name"),mapContaining.getElement("first")),
                 result2
@@ -139,7 +139,7 @@
                     result + (
                         String("'" ) +
                         _this.validationBuffer.name~use_in(_buffer) no_injection { _buffer = val } +
-                        String("' ) ")
+                        String("')")
                     )
                 },
                 Map[String, ref[TiObject]]()

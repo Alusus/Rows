@@ -16,7 +16,7 @@ func main {
         System.fail(1, String("Error connecting to DB: ") + mysql.getLastError());
     }
 
-    if !mysql.exec("SELECT * FROM users") {
+    if !mysql.exec("SELECT * FROM users", true) {
         Console.print("%s\n", mysql.getLastError() );
     }
     def fieldsCount: int = mysql.getColumnCount();

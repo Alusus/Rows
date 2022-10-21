@@ -67,7 +67,7 @@ import "libpq.so.5";
             return this.connectionState == Postgresql.ConnectionStatus.OK;
         }
 
-        handler (this:Driver).exec(sql: CharsPtr): Bool set_ptr {
+        handler (this:Driver).exec(sql: CharsPtr, forSelect: Bool): Bool set_ptr {
             this.result = Postgresql.exec(this.connection, sql);
             def status: Int = Postgresql.resultStatus(this.result);
             this.row = -1;

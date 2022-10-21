@@ -1,0 +1,170 @@
+import "libsqlite3.so.0";
+/*
+    Linux .so | .so.0
+    Mac OS .dylib
+    Windows .lib
+*/
+
+@merge module Rows {
+    class SqliteDriver {
+        @injection def driver: Driver;
+
+        def connectionParams: ConnectionParams;
+        def connectionState: String;
+        def connection: Sqlite.DbHandle = 0;
+        def stmt: Sqlite.StmtHandle = 0;
+
+        def CONNECTION_SUCCESSFUL: "connected";
+
+        handler this_type(params: ref[ConnectionParams]): SrdRef[Driver] {
+            def d: SrdRef[SqliteDriver];
+            d.construct();
+            d.connect(params);
+            return castSrdRef[d, Driver];
+        }
+
+        handler this~init() {
+        }
+
+        handler this~init(params: ref[ConnectionParams]) {
+            this.connect(params);
+        }
+
+        handler this~terminate() {
+            this.disconnect();
+        }
+
+        handler (this:Driver).connect(params: ref[ConnectionParams]): Bool set_ptr {
+            this.disconnect();
+
+            if Sqlite.open(params.dbName, this.connection) == Sqlite.Result.OK {
+                this.connectionParams = params;
+                this.connectionState = CONNECTION_SUCCESSFUL;
+                return true;
+            } else {
+                this.connectionState = Sqlite.errmsg(this.connection);
+                Sqlite.close(this.connection);
+                this.connection = 0;
+                return false;
+            }
+        }
+
+        handler (this:Driver).disconnect() set_ptr {
+            if this.connection == null return;
+            Sqlite.close(this.connection);
+            this.connection = 0;
+            this.connectionState = "";
+        }
+
+        handler (this:Driver).getDriverName(): String set_ptr {
+            @shared def name: String("sqlite");
+            return name;
+        }
+
+        handler (this:Driver).isConnected(): Bool set_ptr {
+            return this.connectionState == CONNECTION_SUCCESSFUL;
+        }
+
+        handler (this:Driver).exec(sql: CharsPtr, forSelect: Bool): Bool set_ptr {
+            if forSelect {
+                return Sqlite.prepare_v3(this.connection, sql, -1, 0, this.stmt, 0) == Sqlite.Result.OK;
+            } else {
+                return Sqlite.exec(this.connection, sql, 0, 0, 0) == Sqlite.Result.OK;
+            }
+        }
+
+        handler (this:Driver).getColumnCount(): Int set_ptr {
+            return Sqlite.column_count(this.stmt);
+        }
+
+        handler (this:Driver).fetchNextRow(): Bool set_ptr {
+            return Sqlite.step(this.stmt) == Sqlite.Result.ROW;
+        }
+
+        handler (this:Driver).getValue(i: Int): String set_ptr {
+            return String(Sqlite.column_text(this.stmt, i));
+        }
+
+        handler (this:Driver).releaseResult() set_ptr {
+             Sqlite.finalize(this.stmt);
+        }
+
+        handler (this:Driver).getLastError(): String set_ptr {
+             return String(Sqlite.errmsg(this.connection));
+        }
+
+        handler (this:Driver).mapDataType(dataType: String): String set_ptr {
+            return sqliteDataTypeMap(dataType);
+        }
+    }
+
+    def sqliteDataTypeMap: Map[String, String];
+    sqliteDataTypeMap.{
+        set(String("Integer"), String("INTEGER"));
+        set(String("BigInteger"), String("INTEGER"));
+        set(String("SmallInteger"), String("INTEGER"));
+        set(String("TinyInteger"), String("INTEGER"));
+        set(String("Real"), String("REAL"));
+        set(String("Float"), String("REAL"));
+        set(String("Decimal"), String("REAL"));
+        set(String("Xml"), String("TEXT"));
+        set(String("VarChar"), String("TEXT"));
+        set(String("CharType"), String("TEXT"));
+        set(String("Text"), String("TEXT"));
+        set(String("Date"), String("TEXT"));
+    };
+
+    module Sqlite {
+        // libsqlite3 Specific Definitions
+
+        class Db {}
+        def DbHandle: alias ptr[Db];
+
+        class Stmt {}
+        def StmtHandle: alias ptr[Stmt];
+
+        def Result: {
+            def OK: 0;
+            def ERROR: 1;
+            def ROW: 100;
+        }
+
+        @expname[sqlite3_open]
+        func open(filename: CharsPtr, dbh: ref[DbHandle]): Int;
+
+        @expname[sqlite3_prepare_v3]
+        func prepare_v3 (
+            db: DbHandle, sql: CharsPtr, sqlSize: Int, flags: Word, stmt: ref[StmtHandle], sqlTail: ptr[CharsPtr]
+        ): Int;
+
+        @expname[sqlite3_step]
+        func step (stmt: StmtHandle): Int;
+
+        @expname[sqlite3_finalize]
+        func finalize (stmt: StmtHandle): Int;
+
+        @expname[sqlite3_column_count]
+        func column_count (stmt: StmtHandle): Int;
+
+        @expname[sqlite3_column_text]
+        func column_text (stmt: StmtHandle, icol: Int): CharsPtr;
+
+        @expname[sqlite3_close]
+        func close(db: DbHandle): Int;
+
+        @expname[sqlite3_libversion]
+        func version(): CharsPtr;
+
+        @expname[sqlite3_errmsg]
+        func errmsg (db: DbHandle): CharsPtr;
+
+        @expname[sqlite3_exec]
+        func exec (
+            db: DbHandle, sql: CharsPtr,
+            cb: ptr[func(data: ptr, argc: Int, argv: ptr[array[CharsPtr]], azColName: ptr[array[CharsPtr]]): Int],
+            data: ptr,
+            errmsg: ptr[CharsPtr]
+        ): Int;
+    }
+}
+

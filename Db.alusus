@@ -33,7 +33,7 @@
                 if this.logging {
                     Console.print(">> Executing SQL:\n%s\n", sql.buf);
                 }
-                if !this.driver.exec(sql) {
+                if !this.driver.exec(sql, true) {
 	                Console.print("Select failed: %s\n", this.driver.getLastError().buf);
 	                return false;
                 } else {
@@ -79,7 +79,7 @@
 	            Console.print("Error: DB is not connected.\n");
 	            return false;
             } else {
-                if !this.driver.exec(sql) {
+                if !this.driver.exec(sql, false) {
                     Console.print("%s failed: %s\n", operationName, this.driver.getLastError().buf);
                     return false;
                 }

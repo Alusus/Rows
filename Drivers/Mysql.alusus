@@ -50,7 +50,7 @@ import "libmysqlclient.so.21";
                 this.connectionState = Mysql.error(this.connection);
                 return false;
             } else {
-                this.exec("SET SQL_MODE=ANSI_QUOTES;");
+                this.exec("SET SQL_MODE=ANSI_QUOTES;", false);
                 this.connectionState = CONNECTION_SUCCESSFUL;
                 return true;
             }
@@ -71,7 +71,7 @@ import "libmysqlclient.so.21";
             return this.connectionState == CONNECTION_SUCCESSFUL;
         }
 
-        handler (this:Driver).exec(sql: CharsPtr): Bool set_ptr {
+        handler (this:Driver).exec(sql: CharsPtr, forSelect: Bool): Bool set_ptr {
             if Mysql.query(this.connection, sql) != 0 return false;
             this.result = Mysql.useResult(this.connection);
             return true;
