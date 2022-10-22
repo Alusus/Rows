@@ -11,9 +11,6 @@ import "Spp/Ast";
 
 import "Drivers/ConnectionParams";
 import "Drivers/Driver";
-import "Drivers/Mysql";
-import "Drivers/Sqlite";
-import "Drivers/Postgresql";
 
 import "Schema/data_types";
 import "Schema/Column";

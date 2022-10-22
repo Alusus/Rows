@@ -1,6 +1,6 @@
 import "Srl/Console";
 import "Apm";
-Apm.importFile("Alusus/Rows");
+Apm.importFile("Alusus/Rows", { "Rows.alusus", "Drivers/Postgresql.alusus" });
 
 use Rows;
 

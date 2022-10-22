@@ -1,0 +1,6 @@
+اشمل "../Drivers/Postgresql"؛
+
+@دمج وحدة صـفوف {
+    عرف مـشغل_بوستغرس: لقب PostgresqlDriver؛
+}
+
