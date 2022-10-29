@@ -13,6 +13,9 @@ if !db.driver.isConnected() {
     System.fail(1, String("Error connecting to DB: ") + db.getLastError());
 }
 
+db.exec("delete from roles");
+db.exec("delete from users");
+
 def names: Array[String]({ String("Sarmad"), String("Sleman"), String("Abdullah"), String("Salem") });
 def addresses: Array[String]({ String("Canada"), String("Syria"), String("KSA"), String("KSA") });
 

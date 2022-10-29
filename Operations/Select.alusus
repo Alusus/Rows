@@ -5,19 +5,19 @@
             if value.getLength() == 0 {
                 this._table = "";
             } else if value.getLength() == 1 {
-                this._table = value(0);
+                this._table = escapeString(value(0));
             } else {
-                this._table = String("(") + value(0);
+                this._table = String("(") + escapeString(value(0));
                 def i: int;
                 for i = 1, i < value.getLength(), i = i + 1 {
-                    this._table += String(", ") + value(i);
+                    this._table += String(", ") + escapeString(value(i));
                 }
                 this._table += ")";
             }
             return this._table;
         }
         handler this.table = String {
-            this._table = value;
+            this._table = escapeString(value);
             return this._table;
         }
 
@@ -26,33 +26,27 @@
             if value.getLength() == 0 {
                 this._fields = "*";
             } else {
-                this._fields = String("\"") + value(0) + "\"";
+                this._fields = String("\"") + escapeString(value(0)) + "\"";
                 def i: int;
                 for i = 1, i < value.getLength(), i = i + 1 {
-                    this._fields += String(", \"") + value(i) + "\"";
+                    this._fields += String(", \"") + escapeString(value(i)) + "\"";
                 }
             }
             return value;
         }
 
         def _condition: String;
-        handler this.condition = String {
-            if value == "" {
-                this._condition = "";
-            } else {
-                this._condition = String("WHERE ") + value;
-            }
-            return this._condition;
+        handler this.condition(statement: CharsPtr, args: ...any) {
+            this._condition = "";
+            prepareStatement[this._condition, statement, args];
         }
 
         def _orderBy: String;
         handler this.orderBy = Array[String] {
             if value.getLength() == 0 {
                 this._orderBy = "";
-            } else if value.getLength() == 1 {
-                this._orderBy = String("ORDER BY ") + getOrderColumnEntry(value(0));
             } else {
-                this._orderBy = String("ORDER BY ") + getOrderColumnEntry(value(0));
+                this._orderBy = getOrderColumnEntry(value(0));
                 def i: int;
                 for i = 1, i < value.getLength(), i = i + 1 {
                     this._orderBy += String(", ") + getOrderColumnEntry(value(i));
@@ -61,40 +55,32 @@
             return value;
         }
         handler this.orderBy = String {
-            if value == 0 {
-                this._orderBy = "";
-            } else {
-                this._orderBy = String("ORDER BY ") + value;
-            }
+            this._orderBy = getOrderColumnEntry(value);
             return this._orderBy;
         }
 
         func getOrderColumnEntry (s: String): String {
             if s == "" return String();
-            if s(0) == '-' return String("\"") + (s.buf + 1) + String("\" DESC")
-            else return String("\"") + s + String("\"");
+            if s(0) == '-' return String("\"") + escapeString(s.buf + 1) + String("\" DESC")
+            else return String("\"") + escapeString(s) + String("\"");
         }
 
         def _having: String;
-        handler this.having = String {
-            if value == "" {
-                this._having = "";
-            } else {
-                this._having = String("HAVING (") + value + ")";
-            }
-            return this._having;
+        handler this.having(statement: CharsPtr, args: ...any) {
+            this._having = "";
+            prepareStatement[this._having, statement, args];
         }
 
         handler this.generateSqlString(): String {
             def sql: String = String("SELECT ") + this._fields + "\n" + "FROM " + this._table;
             if this._condition != "" {
-                sql += String("\n") + this._condition;
+                sql += String("\nWHERE ") + this._condition;
             }
             if this._orderBy != "" {
-                sql += String("\n") + this._orderBy;
+                sql += String("\nORDER BY ") + this._orderBy;
             }
             if this._having != "" {
-                sql += String("\n") + this._having;
+                sql += String("\nHAVING ") + this._having;
             }
             return sql;
         }

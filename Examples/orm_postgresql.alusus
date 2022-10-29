@@ -40,6 +40,8 @@ if !db.isConnected() {
 
 db.schemaBuilder[Car].create();
 
+db.from[Car].delete();
+
 def i: int=1
 for i = 1, i < 30, i = i+1 {
     def c: Car;

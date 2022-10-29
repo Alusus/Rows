@@ -28,6 +28,8 @@ import "Orm/schema_generation";
 import "Orm/Query";
 import "Orm/SchemaBuilder";
 
+import "Utils/escaping";
+
 import "Db";
 
 @merge module Rows {

@@ -1,4 +1,3 @@
-import "Srl/Math";
 import "Srl/Time";
 import "Apm";
 Apm.importFile("Alusus/Rows", { "Rows.alusus", "Drivers/Mysql.alusus" });
@@ -15,15 +14,11 @@ if !db.driver.isConnected() {
     System.fail(1, String("Error connecting to DB: ") + db.getLastError());
 }
 
-Math.seedRandom(Time.getTimestamp(0));
-def newName: String = String("Sarmad ") + (Math.random() % 20);
-def newAddress: String = String() + (Math.random() % 1000) + ", Surrey";
-
 if !db.exec(Update().{
     table = String("users");
     columns = Array[String]({ String("name"), String("address") });
-    data = Array[String]({ newName, newAddress });
-    condition = String("id=150");
+    data = Array[String]({ String("Sarmad 1"), String("211, Surrey") });
+    condition("id=%i", 150);
 }) {
     System.fail(1, String("Query failed: ") + db.getLastError());
 }

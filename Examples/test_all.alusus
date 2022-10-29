@@ -1,0 +1,56 @@
+import "Srl/System";
+import "Srl/Fs";
+import "Srl/Console";
+import "Srl/Array";
+import "Srl/String";
+
+use Srl;
+
+def files: Array[String]({
+    String("create_table.alusus"),
+    String("insert_rows.alusus"),
+    String("select_rows.alusus"),
+    String("update_row.alusus"),
+    String("select_rows.alusus"),
+    String("raw_mysql.alusus"),
+    String("delete_rows.alusus"),
+    String("prepared_statement.alusus"),
+    String("table_generation.alusus"),
+    String("sql_injection.alusus"),
+    String("orm_mysql.alusus"),
+    String("orm_postgresql.alusus"),
+    String("orm_sqlite.alusus"),
+    String("raw_postgresql.alusus"),
+    String("إنشاء_جدول.أسس"),
+    String("إدخال_صفوف.أسس"),
+    String("جلب_صفوف.أسس"),
+    String("تحديث_صفوف.أسس"),
+    String("جلب_صفوف.أسس"),
+    String("حذف_صفوف.أسس"),
+    String("توليد_تلقائي_لجدول.أسس"),
+    String("مطابقة_مايسكويل.أسس"),
+    String("مطابقة_بوستغرس.أسس"),
+    String("مطابقة_سكويلايت.أسس"),
+});
+
+def i: Int;
+for i = 0, i < files.getLength(), ++i {
+    Console.print("Running: %s\n", files(i).buf);
+    if i == 0 {
+        System.exec(String("echo \">>>>>> ") + files(i) + "\\n\" > result.output");
+    } else {
+        System.exec(String("echo \">>>>>> ") + files(i) + "\\n\" >> result.output");
+    }
+    System.exec(String("alusus ") + files(i) + String(" >> result.output"));
+    System.exec("echo \"\\n\\n\" >> result.output");
+}
+
+def received: String = Fs.readFile("result.output");
+def expected: String = Fs.readFile("expected_result.output");
+
+if received == expected {
+    Console.print("Test successful,\n");
+} else {
+    Console.print("Test failed,\n");
+}
+

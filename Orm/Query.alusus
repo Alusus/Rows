@@ -12,6 +12,7 @@
         handler this~init(value: ref[this_type]) {
             this.db~no_deref = value.db;
             this.where = value.where;
+            this.ordering = value.ordering;
         }
 
         func getColumnNames (): Array[String] {
@@ -74,11 +75,11 @@
         handler this.setWhereForPrimaryKey(model: ref[Model]) {
             def columns: Array[String] = getPrimaryColumnNames();
             def data: Array[String] = getRecordData[getPrimaryColumnVarNames](model);
-            this.where = columns(0) + " = '" + data(0) + "'";
+            this.where = String("\"") + escapeString(columns(0)) + "\" = '" + escapeString(data(0)) + "'";
             def i: Int;
-            for i = 0, i < columns.getLength(), ++i {
-                this.where += " AND ";
-                this.where = columns(i) + " = '" + data(i) + "'";
+            for i = 1, i < columns.getLength(), ++i {
+                this.where += " AND \"";
+                this.where += escapeString(columns(i)) + "\" = '" + escapeString(data(i)) + "'";
             }
         }
 
@@ -120,7 +121,7 @@
                     update.table = _this.getTableName();
                     update.columns = columns;
                     update.data = data;
-                    update.condition = this.where;
+                    update._condition = this.where;
                 }) {
                     // TODO: Handle error case.
                 }
@@ -132,7 +133,7 @@
             if !this.db.exec(Select()~use_in(select) {
                 table = this.getTableName();
                 fields = getColumnNames();
-                condition = this.where;
+                _condition = this.where;
                 orderBy = this.ordering;
             }, data) {
                 // TODO: Handle error case.
@@ -155,7 +156,7 @@
                     update.table = this.getTableName();
                     update.columns = getColumnNames();
                     update.data = getRecordData(model);
-                    update.condition = this.where;
+                    update._condition = this.where;
                 }) {
                     // TODO: Handle error case.
                 }
@@ -181,7 +182,7 @@
         handler this.delete() {
             if !this.db.exec(Delete()~use_in(delete) {
                 delete.table = this.getTableName();
-                delete.condition = this.where;
+                delete._condition = this.where;
             }) {
                 // TODO: Handle error case.
             }

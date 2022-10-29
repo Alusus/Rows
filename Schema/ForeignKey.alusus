@@ -7,9 +7,9 @@
         handler this_type(column: String, refTable: String, refColumn: String): SrdRef[ForeignKey] {
             def fk: SrdRef[ForeignKey];
             fk.construct();
-            fk.column = column;
-            fk.referenceColumn = refColumn;
-            fk.referenceTable = refTable;
+            fk.column = escapeString(column);
+            fk.referenceColumn = escapeString(refColumn);
+            fk.referenceTable = escapeString(refTable);
             return fk;
         }
     }

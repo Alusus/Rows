@@ -60,9 +60,9 @@
             }
             if !Spp.astMgr.buildAst(
                 ast {
-                    String("\"") + _this.getColumnNameForVar(String("{{name}}")) + "\"" +
+                    String("\"") + escapeString(_this.getColumnNameForVar(String("{{name}}"))) + "\"" +
                     String(" {{op}} '") +
-                    _this.validationBuffer.name~use_in(_buffer) no_injection { _buffer = val } +
+                    escapeString(_this.validationBuffer.name~use_in(_buffer) no_injection { _buffer = val }) +
                     String("'")
                 },
                 Map[String, ref[TiObject]]()
@@ -105,7 +105,7 @@
 
             if !Spp.astMgr.buildAst(
                 ast {
-                    String("\"") + _this.getColumnNameForVar(String("{{name}}")) + "\"" +
+                    String("\"") + escapeString(_this.getColumnNameForVar(String("{{name}}"))) + "\"" +
                     String(" in (")
                 },
                 Map[String, ref[TiObject]]().set(String("name"),mapContaining.getElement("first")),
@@ -120,7 +120,7 @@
                     ast {
                         result + (
                             String("'" ) +
-                            _this.validationBuffer.name~use_in(_buffer) no_injection { _buffer = val } +
+                            escapeString(_this.validationBuffer.name~use_in(_buffer) no_injection { _buffer = val }) +
                             String("' , ")
                         )
                     },
@@ -138,7 +138,7 @@
                 ast {
                     result + (
                         String("'" ) +
-                        _this.validationBuffer.name~use_in(_buffer) no_injection { _buffer = val } +
+                        escapeString(_this.validationBuffer.name~use_in(_buffer) no_injection { _buffer = val }) +
                         String("')")
                     )
                 },

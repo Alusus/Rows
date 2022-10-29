@@ -2,7 +2,7 @@
     class CreateTable {
         def _name: String;
         handler this.name = String {
-            this._name = value;
+            this._name = escapeString(value);
             return this._name;
         }
 
@@ -14,13 +14,21 @@
 
         def _columns: Map[String, SrdRef[Column]];
         handler this.columns = Map[String, SrdRef[Column]] {
-            this._columns = value;
+            this._columns.clear();
+            def i: Int;
+            for i = 0, i < value.keys.getLength(), ++i {
+                this._columns.set(escapeString(value.keys(i)), value.values(i));
+            }
             return this._columns;
         }
 
         def _primaryKey: Array[String];
         handler this.primaryKey = Array[String] {
-            this._primaryKey = value;
+            this._primaryKey.clear();
+            def i: Int;
+            for i = 0, i < value.getLength(), ++i {
+                this._primaryKey.add(escapeString(value(i)));
+            }
             return this._primaryKey;
         }
         handler this.primaryKey = String {

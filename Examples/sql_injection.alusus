@@ -1,0 +1,67 @@
+import "Apm";
+Apm.importFile("Alusus/Rows", { "Rows.alusus", "Drivers/Mysql.alusus" });
+use Srl;
+use Rows;
+
+@model["books"]
+class Book {
+    define_model_essentials[];
+
+    @notNull
+    @primaryKey
+    @Integer
+    @column
+    def id: Int;
+
+    @VarChar["50"]
+    @column
+    def name: String;
+}
+
+def db: Db(MysqlDriver(ConnectionParams().{
+    dbName = "alusus";
+    userName = "alusus";
+    password = "alusus";
+    host = "0.0.0.0";
+}));
+if !db.isConnected() {
+    System.fail(1, String("Error connecting to DB: ") + db.getLastError());
+}
+
+db.schemaBuilder[Book].create();
+
+db.from[Book].delete();
+
+def c: Book;
+c.id = 1
+c.name = String("Book 1'), (2, 'Book 2");
+db.save[Book](c);
+
+Console.print("\n");
+
+func printRows (r: Array[SrdRef[Book]]) {
+    def k: int=0;
+    for k = 0, k < r.getLength(), k = k+1 {
+        Console.print(r(k).id);
+        Console.print("\t\t");
+        Console.print(r(k).name);
+        Console.print("\n");
+    }
+}
+
+def d: Array[SrdRef[Book]];
+d = db.from[Book].select();
+printRows(d);
+Console.print("\n");
+
+d = db.from[Book].where[name == "Book 1' or name = 'Book 2"].select();
+printRows(d);
+Console.print("\n");
+
+d = db.from[Book].where[id == 1].select();
+d(0).name = String("Book 2u', id='3");
+d(0).save();
+d = db.from[Book].select();
+printRows(d);
+Console.print("\n");
+

@@ -1,0 +1,42 @@
+import "Apm";
+Apm.importFile("Alusus/Rows", { "Rows.alusus", "Drivers/Mysql.alusus" });
+use Srl;
+use Rows;
+
+def db: Db(MysqlDriver(ConnectionParams().{
+    dbName = "alusus";
+    userName = "alusus";
+    password = "alusus";
+    host = "0.0.0.0";
+}));
+if !db.driver.isConnected() {
+    System.fail(1, String("Error connecting to DB: ") + db.getLastError());
+}
+
+Console.print("Connection established\n");
+db.exec("delete from users where id = %i or id = %i", 20, 21);
+db.exec("insert into users(id, name) values (20, %p)", "sarmad");
+db.exec("insert into users(id, name) values (21, %p)", "abdullah");
+def result: Array[Array[String]];
+db.exec(result, "select * from users where id in (%ai)", Array[Int]({ 20, 21, 200 }));
+
+def i: Int;
+for i = 0, i < result.getLength(), ++i {
+    def j: Int;
+    for j = 0, j < result(i).getLength(), ++j {
+        Console.print("%s\t", result(i)(j).buf);
+    }
+    Console.print("\n");
+}
+
+result.clear();
+db.exec(result, "select * from users where name in (%ap)", Array[CharsPtr]({ "sarmad", "abdullah" }));
+
+for i = 0, i < result.getLength(), ++i {
+    def j: Int;
+    for j = 0, j < result(i).getLength(), ++j {
+        Console.print("%s\t", result(i)(j).buf);
+    }
+    Console.print("\n");
+}
+

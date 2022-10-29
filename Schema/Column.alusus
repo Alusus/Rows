@@ -26,14 +26,14 @@
 
         def _default: String;
         handler this.default = String {
-            this._default = value;
+            this._default = escapeString(value);
             return this._default;
         }
 
         def _check: String;
-        handler this.check = String {
-            this._check = value;
-            return this._check;
+        handler this.check(statement: CharsPtr, args: ...any) {
+            this._check = "";
+            prepareStatement[this._check, statement, args];
         }
 
         handler this.generateSqlString(driver: ref[Driver]): String {

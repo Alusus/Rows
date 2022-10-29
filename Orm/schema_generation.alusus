@@ -104,7 +104,7 @@ import "Spp/Ast";
                     if !Spp.astMgr.buildAst(
                         ast {
                             prevResult;
-                            check = Srl.String("{{param}}");
+                            _check = Srl.String("{{param}}");
                         },
                         Map[String, ref[TiObject]]()
                             .set(String("prevResult"), columnResult)

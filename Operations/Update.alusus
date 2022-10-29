@@ -2,26 +2,34 @@
     class Update {
         def _table: String;
         handler this.table = String {
-            this._table = value;
+            this._table = escapeString(value);
             return this._table;
         }
 
         def _data: Array[String];
         handler this.data = Array[String] {
-            this._data = value;
+            this._data.clear();
+            def i: Int;
+            for i = 0, i < value.getLength(), ++i {
+                this._data.add(escapeString(value(i)));
+            }
             return this._data;
         }
 
         def _columns: Array[String];
         handler this.columns = Array[String] {
-            this._columns = value;
+            this._columns.clear();
+            def i: Int;
+            for i = 0, i < value.getLength(), ++i {
+                this._columns.add(escapeString(value(i)));
+            }
             return this._columns;
         }
 
         def _condition: String;
-        handler this.condition = String {
-            this._condition = value;
-            return this._condition;
+        handler this.condition(statement: CharsPtr, args: ...any) {
+            this._condition = "";
+            prepareStatement[this._condition, statement, args];
         }
 
         handler this.generateSqlString(): String {
