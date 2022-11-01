@@ -118,6 +118,7 @@ import "libpq.so.5";
         set(String("CharType"), String("char"));
         set(String("Text"), String("text"));
         set(String("Date"), String("date"));
+        set(String("Uuid"), String("uuid"));
     };
 
     module Postgresql {

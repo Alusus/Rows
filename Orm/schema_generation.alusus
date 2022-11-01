@@ -192,7 +192,8 @@ import "Spp/Ast";
             String("VarChar"),
             String("CharType"),
             String("Text"),
-            String("Date")
+            String("Date"),
+	    String("Uuid")
         });
 
         def si : int ;
