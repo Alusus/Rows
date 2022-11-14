@@ -54,7 +54,7 @@
             preprocess {
                 generateParsing(
                     getColumnVarNames(),
-                    getVarTypes(Model~ast, "column")
+                    getVars(Model~ast, "column")
                 );
             }
             return model;
@@ -107,36 +107,37 @@
         }
 
         @member macro update [this, expression] {
-            this~use_in(_this) no_injection {
-                def data: Array[String];
-                def columns: Array[String];
-                preprocess {
-                    if !Spp.astMgr.insertAst(
-                        generateUpdate(ast expression).obj
-                    ) {
-                        System.fail(1, "Failed to insert update statements.\n");
+            Result()~use_in(_result) no_injection {
+                this~use_in(_this) no_injection {
+                    def data: Array[String];
+                    def columns: Array[String];
+                    preprocess {
+                        if !Spp.astMgr.insertAst(
+                            generateUpdate(ast expression).obj
+                        ) {
+                            System.fail(1, "Failed to insert update statements.\n");
+                        }
                     }
-                }
-                if !_this.db.exec(Update()~use_in(update) no_injection {
-                    update.table = _this.getTableName();
-                    update.columns = columns;
-                    update.data = data;
-                    update._condition = this.where;
-                }) {
-                    // TODO: Handle error case.
+                    _result = _this.db.exec(Update()~use_in(update) no_injection {
+                        update.table = _this.getTableName();
+                        update.columns = columns;
+                        update.data = data;
+                        update._condition = _this.where;
+                    });
                 }
             }
         }
 
-        handler this.select(): Array[SrdRef[Model]] {
+        handler this.select(): Result[Array[SrdRef[Model]]] {
             def data : Array[Array[String]];
-            if !this.db.exec(Select()~use_in(select) {
+            this.db.exec(Select()~use_in(select) {
                 table = this.getTableName();
                 fields = getColumnNames();
                 _condition = this.where;
                 orderBy = this.ordering;
-            }, data) {
-                // TODO: Handle error case.
+            })~use_in (res) no_injection {
+                if !!res return Result[Array[SrdRef[Model]]].failure(res.error);
+                data = res;
             }
             def models: Array[SrdRef[Model]];
             def i: int =0;
@@ -145,47 +146,43 @@
                 model.db~no_deref = this.db;
                 models.add(model);
             }
-            return models;
+            return Result[Array[SrdRef[Model]]].success(models);
         }
 
-        handler this.save(model: ref[Model]) {
+        handler this.save(model: ref[Model]): Result {
             if model.db~ptr == this.db~ptr {
                 // Update an existing record.
                 this.setWhereForPrimaryKey(model);
-                if !this.db.exec(Update()~use_in(update) no_injection {
+                return this.db.exec(Update()~use_in(update) no_injection {
                     update.table = this.getTableName();
                     update.columns = getColumnNames();
                     update.data = getRecordData(model);
                     update._condition = this.where;
-                }) {
-                    // TODO: Handle error case.
-                }
+                });
             } else {
                 // Create a new record.
-                if !this.db.exec(Insert()~use_in(insert) no_injection {
+                def res: Result = this.db.exec(Insert()~use_in(insert) no_injection {
                     insert.table = this.getTableName();
                     insert.columns = getColumnNames();
                     insert.data = getRecordData(model);
-                }) {
-                    // TODO: Handle error case.
-                }
-                model.db~no_deref = this.db;
+                });
+                if res model.db~no_deref = this.db;
+                return res;
             }
         }
 
-        handler this.delete(model: ref[Model]) {
+        handler this.delete(model: ref[Model]): Result {
             this.setWhereForPrimaryKey(model);
-            this.delete();
-            model.db~ptr = 0;
+            def res: Result = this.delete();
+            if res model.db~ptr = 0;
+            return res;
         }
 
-        handler this.delete() {
-            if !this.db.exec(Delete()~use_in(delete) {
+        handler this.delete(): Result {
+            return this.db.exec(Delete()~use_in(delete) {
                 delete.table = this.getTableName();
                 delete._condition = this.where;
-            }) {
-                // TODO: Handle error case.
-            }
+            });
         }
     }
 }

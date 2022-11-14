@@ -21,55 +21,57 @@
             else return this.driver.getLastError();
         }
 
-        handler this.exec(select: ref[Select], result: ref[Array[Array[String]]]): Bool {
-            return this._exec(select.generateSqlString(), "Select", result);
+        handler this.exec(select: ref[Select]): Result[Array[Array[String]]] {
+            return this._execSelect(select.generateSqlString(), "Select");
         }
 
-        handler this.exec(update: ref[Update]): Bool {
+        handler this.exec(update: ref[Update]): Result {
             return this._exec(update.generateSqlString(), "Update");
         }
 
-        handler this.exec(insert: ref[Insert]): Bool {
+        handler this.exec(insert: ref[Insert]): Result {
             return this._exec(insert.generateSqlString(), "Insert");
         }
 
-        handler this.exec(delete: ref[Delete]): Bool {
+        handler this.exec(delete: ref[Delete]): Result {
             return this._exec(delete.generateSqlString(), "Delete");
         }
 
-        handler this.exec(createTable: ref[CreateTable]): Bool {
+        handler this.exec(createTable: ref[CreateTable]): Result {
             return this._exec(createTable.generateSqlString(this.driver), "Table creation");
         }
 
-        handler this.exec(result: ref[Array[Array[String]]], statement: CharsPtr, args: ...any): Bool {
+        handler this.execSelect(statement: CharsPtr, args: ...any): Result[Array[Array[String]]] {
             def sql: String;
             prepareStatement[sql, statement, args];
-            return this._exec(sql, "Raw query", result);
+            return this._execSelect(sql, "Raw query");
         }
 
-        handler this.exec(statement: CharsPtr, args: ...any): Bool {
+        handler this.exec(statement: CharsPtr, args: ...any): Result {
             def sql: String;
             prepareStatement[sql, statement, args];
             return this._exec(sql, "Raw query");
         }
 
-        handler this._exec(sql: String, operationName: CharsPtr, result: ref[Array[Array[String]]]): Bool {
+        handler this._execSelect(sql: String, operationName: CharsPtr): Result[Array[Array[String]]] {
             if this.driver.obj~ptr == 0 {
-	            Console.print("Error: DB is not initialzied.\n");
-	            return false;
+                return Result[Array[Array[String]]].failure(String("Error: DB is not initialzied."));
             } else if !this.driver.isConnected() {
-	            Console.print("Error: DB is not connected.\n");
-	            return false;
+                return Result[Array[Array[String]]].failure(String("Error: DB is not connected."));
             } else {
                 if this.logging {
-                    Console.print(">> Executing SQL:\n%s\n", sql.buf);
+                    Console.print("%s>> Executing SQL:%s\n%s\n", Console.Style.FG_GREEN, Console.Style.RESET, sql.buf);
                 }
                 if !this.driver.exec(sql, true) {
-                    Console.print("%s failed: %s\n", operationName, this.driver.getLastError().buf);
-	                return false;
+                    def err: String = this.driver.getLastError();
+                    if this.logging {
+                        Console.print("%s>> SQL Error:%s\n%s\n", Console.Style.FG_RED, Console.Style.RESET, err.buf);
+                    }
+                    return Result[Array[Array[String]]].failure(err);
                 } else {
                     def numberOfFileds: int;
                     numberOfFileds = this.driver.getColumnCount();
+                    def result: Array[Array[String]];
                     while this.driver.fetchNextRow() {
                         def row: Array[String];
                         def i: int;
@@ -78,27 +80,28 @@
                         }
                         result.add(row);
                     }
-                    return true;
+                    return Result[Array[Array[String]]].success(result);
                 }
             }
         }
 
-        handler this._exec(sql: String, operationName: CharsPtr): Bool {
+        handler this._exec(sql: String, operationName: CharsPtr): Result {
             if this.logging {
-                Console.print(">> Executing SQL:\n%s\n", sql.buf);
+                Console.print("%s>> Executing SQL:%s\n%s\n", Console.Style.FG_GREEN, Console.Style.RESET, sql.buf);
             }
             if this.driver.obj~ptr == 0 {
-	            Console.print("Error: DB is not initialzied.\n");
-	            return false;
+	            return Result.failure(String("Error: DB is not initialzied."));
             } else if !this.driver.isConnected() {
-	            Console.print("Error: DB is not connected.\n");
-	            return false;
+	            return Result.failure(String("Error: DB is not connected."));
             } else {
                 if !this.driver.exec(sql, false) {
-                    Console.print("%s failed: %s\n", operationName, this.driver.getLastError().buf);
-                    return false;
+                    def err: String = this.driver.getLastError();
+                    if this.logging {
+                        Console.print("%s>> SQL Error:%s\n%s\n", Console.Style.FG_RED, Console.Style.RESET, err.buf);
+                    }
+                    return Result.failure(err);
                 }
-                return true;
+                return Result.success();
             }
         }
 

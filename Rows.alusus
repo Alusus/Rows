@@ -9,6 +9,18 @@ import "Core/Data";
 import "Spp";
 import "Spp/Ast";
 
+@merge module Rows {
+    use Srl;
+    use Core.Basic;
+    use Core.Data;
+    use Core.Data.Ast;
+
+    def TioSrdRef: alias SrdRef[Core.Basic.TiObject];
+
+    @expname[atof] func parseFloat(CharsPtr): Float[64];
+    @expname[atoi] func parseInt(CharsPtr): int;
+}
+
 import "Drivers/ConnectionParams";
 import "Drivers/Driver";
 
@@ -28,19 +40,9 @@ import "Orm/schema_generation";
 import "Orm/Query";
 import "Orm/SchemaBuilder";
 
+import "Utils/Result";
 import "Utils/escaping";
 
+import "l18n";
 import "Db";
-
-@merge module Rows {
-    use Srl;
-    use Core.Basic;
-    use Core.Data;
-    use Core.Data.Ast;
-
-    def TioSrdRef: alias SrdRef[Core.Basic.TiObject];
-
-    @expname[atof] func parseFloat(CharsPtr): Float[64];
-    @expname[atoi] func parseInt(CharsPtr): int;
-}
 

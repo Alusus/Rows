@@ -1,2 +1,2 @@
 # DbEngine
-An ORM for Alsusu Language.
+An ORM for Alusus Language.

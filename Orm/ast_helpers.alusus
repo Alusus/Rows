@@ -15,12 +15,16 @@
         def i: Int;
         for i = 0, i < elements.getLength(), ++i {
             if modifierKwd != 0 and findElementModifier(elements(i), modifierKwd)~ptr == 0 continue;
-            def node: ref[Core.Data.Node](castRef[elements(i), Core.Data.Node]);
-            def d: ref[Core.Data.Ast.Definition](castRef[node.owner, Core.Data.Ast.Definition]);
-            def binding: ref[Core.Basic.Binding](Core.Basic.getInterface[d, Core.Basic.Binding]);
-            result.add(castRef[binding.getMember("name"), TiStr].value);
+            result.add(getVarName(elements(i)));
         }
         return result;
+    }
+
+    function getVarName (var: ref[Core.Basic.TiObject]): String {
+        def node: ref[Core.Data.Node](castRef[var, Core.Data.Node]);
+        def d: ref[Core.Data.Ast.Definition](castRef[node.owner, Core.Data.Ast.Definition]);
+        def binding: ref[Core.Basic.Binding](Core.Basic.getInterface[d, Core.Basic.Binding]);
+        return castRef[binding.getMember("name"), TiStr].value;
     }
 
     function generateColumnNames (parent: ref[Core.Basic.TiObject], modifierKwd: CharsPtr) {
@@ -37,35 +41,33 @@
         def i: Int;
         for i = 0, i < elements.getLength(), ++i {
             if modifierKwd != 0 and findElementModifier(elements(i), modifierKwd)~ptr == 0 continue;
-            def modifier: ref[Core.Basic.TiObject](findElementModifier(elements(i), "column"));
-            if modifier~ptr == 0 {
-                result.add(String());
-                continue;
-            }
-            def params: Array[String] = getModifierParams(modifier);
-            if params.getLength() > 0 {
-                result.add(params(0));
-            } else {
-                def node: ref[Core.Data.Node](castRef[elements(i), Core.Data.Node]);
-                def d: ref[Core.Data.Ast.Definition](castRef[node.owner, Core.Data.Ast.Definition]);
-                def binding: ref[Core.Basic.Binding](Core.Basic.getInterface[d, Core.Basic.Binding]);
-                result.add(castRef[binding.getMember("name"), TiStr].value);
-            }
+            result.add(getColumnName(elements(i)));
         }
         return result;
     }
 
-    function getVarTypes (parent: ref[Core.Basic.TiObject], modifierKwd: CharsPtr): Array[ref[Spp.Ast.Type]] {
+    function getColumnName (var: ref[Core.Basic.TiObject]): String {
+        def modifier: ref[Core.Basic.TiObject](findElementModifier(var, "column"));
+        if modifier~ptr == 0 return getVarName(var);
+        def params: Array[String] = getModifierParams(modifier);
+        if params.getLength() > 0 {
+            return params(0);
+        } else {
+            return getVarName(var);
+        }
+    }
+
+    function getVars (parent: ref[Core.Basic.TiObject], modifierKwd: CharsPtr): Array[ref[Core.Basic.TiObject]] {
         def elements: Array[ref[Core.Basic.TiObject]] = Spp.astMgr.findElements(
             (ast elementType == "var"),
             parent,
             Spp.SeekerFlags.SKIP_OWNERS | Spp.SeekerFlags.SKIP_USES | Spp.SeekerFlags.SKIP_CHILDREN
         );
-        def result: Array[ref[Spp.Ast.Type]];
+        def result: Array[ref[Core.Basic.TiObject]];
         def i: Int;
         for i = 0, i < elements.getLength(), ++i {
             if modifierKwd != 0 and findElementModifier(elements(i), modifierKwd)~ptr == 0 continue;
-            result.add(Spp.astMgr.traceType(elements(i)));
+            result.add(elements(i));
         }
         return result;
     }
@@ -81,36 +83,16 @@
     }
 
     function getVarModifiers (
-        parent: ref[Core.Basic.TiObject],
-        modsKeywords: ref[Array[Array[String]]],
-        modsParams: ref[Array[Array[Array[String]]]]
+        var: ref[Core.Basic.TiObject],
+        modsKeywords: ref[Array[String]],
+        modsParams: ref[Array[Array[String]]]
     ) {
-        def elements: Array[ref[Core.Basic.TiObject]];
-        def i: int = 0;
-        def j: int = 0;
-        elements = Spp.astMgr.findElements(
-            (ast elementType == "var"),
-            parent,
-            Spp.SeekerFlags.SKIP_OWNERS | Spp.SeekerFlags.SKIP_USES | Spp.SeekerFlags.SKIP_CHILDREN
-        );
-        modsKeywords = getElementsModifierKeywords(elements);
+        modsKeywords = getElementModifierKeywords(var);
 
-        for i = 0, i < modsKeywords.getLength(), ++i {
-            def params: Array[Array[String]];
-            for j = 0, j < modsKeywords(i).getLength(), ++j {
-                params.add(getElementModifierParams(elements(i), modsKeywords(i)(j)));
-            }
-            modsParams.add(params);
+        def j: Int;
+        for j = 0, j < modsKeywords.getLength(), ++j {
+            modsParams.add(getElementModifierParams(var, modsKeywords(j)));
         }
-    }
-
-    function getElementsModifierKeywords (elements: Array[ref[Core.Basic.TiObject]]): Array[Array[String]] {
-        def modsKeywords: Array[Array[String]];
-        def i: Int;
-        for i = 0, i < elements.getLength(), ++i {
-            modsKeywords.add(getElementModifierKeywords(elements(i)));
-        }
-        return modsKeywords;
     }
 
     function getElementModifierKeywords (element: ref[Core.Basic.TiObject]): Array[String] {
@@ -153,6 +135,15 @@
         def params: Srl.Array[Srl.String];
         Spp.astMgr.getModifierStringParams(modifier, params);
         return params;
+    }
+
+    func getTableName (classAst: ref[Core.Basic.TiObject]): String {
+        def params: Array[String] = getElementModifierParams(classAst, "model");
+        if params.getLength() != 1 {
+            Spp.buildMgr.raiseBuildNotice("ROWS1001", 1, classAst);
+            params.add(String("MISSING_TABLE_NAME"));
+        }
+        return params(0);
     }
 }
 

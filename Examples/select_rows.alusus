@@ -14,11 +14,14 @@ if !db.driver.isConnected() {
 }
 
 def data: Array[Array[String]];
-if !db.exec(Select().{
+def res: Result[Array[Array[String]]];
+res = db.exec(Select().{
     table = String("users");
-}, data) {
-    System.fail(1, String("Query failed: ") + db.getLastError());
+});
+if !!res {
+    System.fail(1, String("Query failed: ") + res.error);
 }
+data = res;
 
 def i: int = 0;
 def j: int = 0;
@@ -28,5 +31,12 @@ for i = 0, i < data.getLength(), i = i + 1 {
         Console.print("    ");
     }
     Console.print("\n");
+}
+
+res = db.exec(Select().{
+    table = String("unknown_table");
+});
+if !!res {
+    System.fail(1, String("Query failed: ") + res.error);
 }
 

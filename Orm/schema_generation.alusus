@@ -1,11 +1,5 @@
-import "Spp";
-import "Spp/Ast";
-
 @merge module Rows {
-    func generateTable (
-        tableName: String, modsKeywords: Array[Array[String]], modsParams: Array[Array[Array[String]]],
-        var: Array[String]
-    ): TioSrdRef {
+    func generateTable (classAst: ref[Core.Basic.TiObject]): TioSrdRef {
         use Core.Basic;
         def result: TioSrdRef;
         def columnResult: TioSrdRef;
@@ -16,44 +10,50 @@ import "Spp/Ast";
         def fkResults: Spp.Ast.Block;
         def fkResultsContainer: DynContainerOf[fkResults];
 
+        def vars: Array[ref[Core.Basic.TiObject]] = getVars(classAst, 0);
+
         def i: int;
         def j: int;
 
-        // TODO: Handle error cases related to incorrect modifier params.
+        for i = 0, i < vars.getLength(), i += 1 {
+            def modsKeywords: Array[String];
+            def modsParams: Array[Array[String]];
+            getVarModifiers(vars(i), modsKeywords, modsParams);
 
-        for i = 0, i < var.getLength(), i += 1 {
             def dataTypeName: String;
-            for j = 0, j < modsKeywords(i).getLength(), j += 1 {
-                if isDataType(modsKeywords(i)(j)) != -1 {
-                    dataTypeName = modsKeywords(i)(j);
+            for j = 0, j < modsKeywords.getLength(), j += 1 {
+                if isDataType(modsKeywords(j)) != -1 {
+                    dataTypeName = modsKeywords(j);
                     break;
                 }
             }
 
             if dataTypeName == "" continue;
 
-            if modsParams(i)(j).getLength() == 0 {
+            def columnName: String = getColumnName(vars(i));
+
+            if modsParams(j).getLength() == 0 {
                 if !Spp.astMgr.buildAst(
                     (ast dataType = Rows.dataTypeName()),
                     Map[String, ref[TiObject]]().set(String("dataTypeName"), Core.Data.Ast.Identifier(dataTypeName)),
                     columnResult
                 ) {
-                    System.fail(1, "generateTable/build Data Type var : error\n");
+                    System.fail(1, "Unexpected error while processing data type in generateTable.\n");
                 }
             } else {
                 if !Spp.astMgr.buildAst(
                     (ast dataType = Rows.dataTypeName(size)),
                     Map[String, ref[TiObject]]()
                         .set(String("dataTypeName"), Core.Data.Ast.Identifier(dataTypeName))
-                        .set(String("size"), Core.Data.Ast.IntegerLiteral(modsParams(i)(j)(0))),
+                        .set(String("size"), Core.Data.Ast.IntegerLiteral(modsParams(j)(0))),
                     columnResult
                 ) {
-                    System.fail(1, "generateTable/build Data Type var : error\n");
+                    System.fail(1, "Unexpected error while processing data type in generateTable.\n");
                 }
             }
 
-            for j = 0, j < modsKeywords(i).getLength(), j += 1 {
-                if modsKeywords(i)(j) == "notNull" {
+            for j = 0, j < modsKeywords.getLength(), j += 1 {
+                if modsKeywords(j) == "notNull" {
                     if !Spp.astMgr.buildAst(
                         ast {
                             prevResult;
@@ -62,10 +62,10 @@ import "Spp/Ast";
                         Map[String, ref[TiObject]]().set(String("prevResult"), columnResult),
                         result
                     ) {
-                        System.fail(1, "generateTable/build Data Type var : error\n");
+                        System.fail(1, "Unexpected error while processing not-null in generateTable.\n");
                     }
                     columnResult = result;
-                } else if modsKeywords(i)(j) == "unique" {
+                } else if modsKeywords(j) == "unique" {
                     if !Spp.astMgr.buildAst(
                         ast {
                             prevResult;
@@ -74,19 +74,23 @@ import "Spp/Ast";
                         Map[String, ref[TiObject]]().set(String("prevResult"), columnResult),
                         result
                     ) {
-                        System.fail(1, "generateTable/build Data Type var : error\n");
+                        System.fail(1, "Unexpected error while processing unique in generateTable.\n");
                     }
                     columnResult = result;
-                } else if modsKeywords(i)(j) == "primaryKey" {
+                } else if modsKeywords(j) == "primaryKey" {
                     if !Spp.astMgr.buildAst(
                         (ast Srl.String("{{varname}}")),
-                        Map[String, ref[TiObject]]().set(String("varname"), Core.Data.Ast.Identifier(var(i))),
+                        Map[String, ref[TiObject]]().set(String("varname"), Core.Data.Ast.Identifier(columnName)),
                         result
                     ) {
-                        System.fail(1, "generateTable/build Data Type var : error\n");
+                        System.fail(1, "Unexpected error while processing primary-key in generateTable.\n");
                     }
                     pkResultsContainer.addElement(result);
-                } else if modsKeywords(i)(j) == "defult" {
+                } else if modsKeywords(j) == "defult" {
+                    if modsParams(j).getLength() == 0 {
+                        Spp.buildMgr.raiseBuildNotice("ROWS1003", 1, vars(i));
+                        continue;
+                    }
                     if !Spp.astMgr.buildAst(
                         ast {
                             prevResult;
@@ -94,13 +98,17 @@ import "Spp/Ast";
                         },
                         Map[String, ref[TiObject]]()
                             .set(String("prevResult"), columnResult)
-                            .set(String("param"), Core.Data.Ast.Identifier(modsParams(i)(j)(0))),
+                            .set(String("param"), Core.Data.Ast.Identifier(modsParams(j)(0))),
                         result
                     ) {
-                        System.fail(1, "generateTable/build Data Type var : error\n");
+                        System.fail(1, "Unexpected error while processing default in generateTable.\n");
                     }
                     columnResult = result;
-                } else if modsKeywords(i)(j) == "check" {
+                } else if modsKeywords(j) == "check" {
+                    if modsParams(j).getLength() == 0 {
+                        Spp.buildMgr.raiseBuildNotice("ROWS1004", 1, vars(i));
+                        continue;
+                    }
                     if !Spp.astMgr.buildAst(
                         ast {
                             prevResult;
@@ -108,13 +116,17 @@ import "Spp/Ast";
                         },
                         Map[String, ref[TiObject]]()
                             .set(String("prevResult"), columnResult)
-                            .set(String("param"), Core.Data.Ast.Identifier(modsParams(i)(j)(0))),
+                            .set(String("param"), Core.Data.Ast.Identifier(modsParams(j)(0))),
                         result
                     ) {
-                        System.fail(1, "generateTable/build Data Type var : error\n");
+                        System.fail(1, "Unexpected error while processing check in generateTable.\n");
                     }
                     columnResult = result;
-                } else if modsKeywords(i)(j) == "foreignKey" {
+                } else if modsKeywords(j) == "foreignKey" {
+                    if modsParams(j).getLength() < 2 {
+                        Spp.buildMgr.raiseBuildNotice("ROWS1005", 1, vars(i));
+                        continue;
+                    }
                     def fkResult: TioSrdRef;
                     if !Spp.astMgr.buildAst(
                         (ast Rows.ForeignKey(
@@ -123,12 +135,12 @@ import "Spp/Ast";
                             Srl.String("{{refCol}}")
                         )),
                         Map[String, ref[TiObject]]()
-                            .set(String("col"), Core.Data.Ast.Identifier(var(i)))
-                            .set(String("refTbl"), Core.Data.Ast.Identifier(modsParams(i)(j)(0)))
-                            .set(String("refCol"), Core.Data.Ast.Identifier(modsParams(i)(j)(1))),
+                            .set(String("col"), Core.Data.Ast.Identifier(columnName))
+                            .set(String("refTbl"), Core.Data.Ast.Identifier(modsParams(j)(0)))
+                            .set(String("refCol"), Core.Data.Ast.Identifier(modsParams(j)(1))),
                         fkResult
                     ) {
-                        System.fail(1, "generateTable/build Data Type var : error\n");
+                        System.fail(1, "Unexpected error while processing foreign-key in generateTable.\n");
                     }
                     fkResultsContainer.addElement(fkResult);
                 }
@@ -137,46 +149,33 @@ import "Spp/Ast";
             if !Spp.astMgr.buildAst(
                 (ast set(Srl.String("{{varName}}"), Rows.Column().{ columnDesc })),
                 Map[String, ref[TiObject]]()
-                    .set(String("varName"), TiStr(var(i)))
+                    .set(String("varName"), TiStr(columnName))
                     .set(String("columnDesc"), columnResult),
                 result
             ) {
-                System.fail(1, "generateTable/build Data Type var : error\n");
+                System.fail(1, "Unexpected error while processing column definition in generateTable.\n");
             }
             columnResultsContainer.addElement(result);
         }
 
-        def tblResult: TioSrdRef;
         if !Spp.astMgr.buildAst(
-            ast {
+            (ast Rows.CreateTable().{
                 name = Srl.String("{{tableName}}");
                 notExists = true;
                 columns = Srl.Map[Srl.String, Srl.SrdRef[Rows.Column]]().columnDefs;
                 primaryKey = Srl.Array[Srl.String]({ pkColumns });
                 foreignKeys = Srl.Array[Srl.SrdRef[Rows.ForeignKey]](fkDefs);
-            },
+            }),
             Map[String, ref[TiObject]]()
-                .set(String("tableName"), Core.Data.Ast.Identifier(tableName))
+                .set(String("tableName"), Core.Data.Ast.Identifier(getTableName(classAst)))
                 .set(String("columnDefs"), columnResults)
                 .set(String("pkColumns"), pkResults)
                 .set(String("fkDefs"), fkResults),
             result
         ) {
-            System.fail(1, "generateTable/build Data Type var : error\n");
+            System.fail(1, "Unexpected error while processing table definition in generateTable.\n");
         }
-        tblResult = result;
-
-        def fnResult: TioSrdRef;
-        if !Spp.astMgr.buildAst(
-            (ast if !this.db.exec(Rows.CreateTable().{ tableDef }) {
-                Srl.System.fail(1, Srl.String("Table creation failed: ") + this.db.getLastError());
-            }),
-            Map[String, ref[TiObject]]().set(String("tableDef"), tblResult),
-            fnResult
-        ) {
-            System.fail(1, "generateTable/build Data Type var : error\n");
-        }
-        return fnResult;
+        return result;
     }
 
     function isDataType (varType : String): int {

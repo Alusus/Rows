@@ -2,11 +2,13 @@
     macro define_model_essentials {
         def db: ref[Db];
         db~ptr = 0;
-        handler this.save() {
-            if this.db~ptr != 0 Rows.Query[this_type](this.db).save(this);
+        handler this.save(): Result {
+            if this.db~ptr != 0 return Rows.Query[this_type](this.db).save(this)
+            else return Result.failure(String("No DB connection is set for this model."));
         }
-        handler this.delete() {
-            if this.db~ptr != 0 Rows.Query[this_type](this.db).delete(this);
+        handler this.delete(): Result {
+            if this.db~ptr != 0 return Rows.Query[this_type](this.db).delete(this)
+            else return Result.failure(String("No DB connection is set for this model."));
         }
     }
 
@@ -37,7 +39,7 @@
             def binding: ref[Binding](getInterface[obj, Binding]);
             def operator: String = castRef[binding.getMember("type"), TiStr].value;
             if operator != "not" and operator != "!" {
-                System.fail(1, String("generateWhere error: Invalid PrefixOperator ") + operator + "\n");
+                Spp.buildMgr.raiseBuildNotice("SPPG1002", 1, obj);
             }
             def mapContaining: ref[MapContaining](getInterface[obj, MapContaining]);
             if !Spp.astMgr.buildAst(
@@ -46,7 +48,7 @@
                     .set(String("cond"), generateWhere(mapContaining.getElement(0)).obj),
                 result2
             ) {
-                System.fail(1, "generateWhere/Bracket: error\n");
+                System.fail(1, "Unexpected error while processing PrefixOperator in generateWhere.\n");
             }
             return result2
         } else if isDerivedFrom[obj, ComparisonOperator] or isDerivedFrom[obj, AssignmentOperator] {
@@ -54,7 +56,7 @@
             def mapContaining: ref[MapContaining](getInterface[obj, MapContaining]);
             def operator: String = castRef[binding.getMember("type"), TiStr].value;
             if infixOperators(operator) == "" {
-                System.fail(1, String("generateWhere error: Invalid InfixOperator ") + operator + "\n");
+                Spp.buildMgr.raiseBuildNotice("SPPG1002", 1, obj);
             } else {
                 operator = infixOperators(operator);
             }
@@ -71,7 +73,7 @@
                     .set(String("val"), mapContaining.getElement("second")),
                 result
             ) {
-                System.fail(1, "generateWhere error: building InfixOperator failed.\n");
+                System.fail(1, "Unexpected error while processing InfixOperator in generateWhere.\n");
             }
         } else if isDerivedFrom[obj, LogOperator] {
             def binding: ref[Binding](getInterface[obj, Binding]);
@@ -84,7 +86,7 @@
                     .set(String("cond2"), generateWhere(mapContaining.getElement("second")).obj),
                 result
             ) {
-                System.fail(1, "generateWhere/LogOperator: error\n");
+                System.fail(1, "Unexpected error while processing LogOperator in generateWhere.\n");
             }
         } else if isDerivedFrom[obj, Bracket] {
             def mapContaining: ref[MapContaining](getInterface[obj, MapContaining]);
@@ -94,7 +96,7 @@
                    .set(String("cond"), generateWhere(mapContaining.getElement("operand")).obj),
                 result
             ) {
-                System.fail(1, "generateWhere/Bracket: error\n");
+                System.fail(1, "Unexpected error while processing Bracket in generateWhere.\n");
             }
         } else if isDerivedFrom[obj, LinkOperator] {
             def mapContaining: ref[MapContaining](getInterface[obj, MapContaining]);
@@ -111,7 +113,7 @@
                 Map[String, ref[TiObject]]().set(String("name"),mapContaining.getElement("first")),
                 result2
             ) {
-                System.fail(1, "generateWhere/Bracket: error\n");
+                System.fail(1, "Unexpected error while processing LinkOperator in generateWhere.\n");
             }
 
             resultArray.add(result2);
@@ -130,7 +132,7 @@
                         .set(String("result"), resultArray(i)),
                     result2
                 ) {
-                    System.fail(1, "generateWhere/Bracket: error\n");
+                    System.fail(1, "Unexpected error while processing LinkOperator in generateWhere.\n");
                 }
                 resultArray.add(result2);
             }
@@ -148,13 +150,13 @@
                     .set(String("result"), resultArray(resultArray.getLength()-1)),
                 result
             ) {
-                System.fail(1, "generateWhere/Bracket: error\n");
+                System.fail(1, "Unexpected error while processing LinkOperator in generateWhere.\n");
             }
         } else {
-            def binding: ref[Binding](getInterface[obj, Binding]);
+            Spp.buildMgr.raiseBuildNotice("SPPG1002", 1, obj);
             if !Spp.astMgr.buildAst(
-                ast { String("bye") },
-                Map[String, ref[TiObject]]().set(String("op"), binding.getMember("type")),
+                ast { String("") },
+                Map[String, ref[TiObject]](),
                 result
             ) {
                 System.fail(1, "Failed to build condition.\n");
@@ -178,18 +180,18 @@
                 Map[String, ref[TiObject]]().set(String("column"), obj),
                 result
             ) {
-                System.fail(1, "generateOrder error - building Identifier failed.\n");
+                System.fail(1, "Unexpected error while processing Identifier in generateOrder.\n");
             }
         } else if isDerivedFrom[obj, PrefixOperator] {
             def binding: ref[Binding](getInterface[obj, Binding]);
             def operator: String = castRef[binding.getMember("type"), TiStr].value;
             if operator != "-" {
-                System.fail(1, String("generateOrder error: Invalid PrefixOperator ") + operator + "\n");
+                Spp.buildMgr.raiseBuildNotice("SPPG1002", 1, obj);
             }
             def mapContaining: ref[MapContaining](getInterface[obj, MapContaining]);
             obj~no_deref = mapContaining.getElement(0);
             if !isDerivedFrom[obj, Identifier] {
-                System.fail(1, String("generateOrder error: Invalid PrefixOperator operand type,\n"));
+                Spp.buildMgr.raiseBuildNotice("SPPG1002", 1, obj);
             }
             if !Spp.astMgr.buildAst(
                 ast {
@@ -199,7 +201,7 @@
                 Map[String, ref[TiObject]]().set(String("column"), obj),
                 result
             ) {
-                System.fail(1, "generateOrder error - building Identifier failed.\n");
+                System.fail(1, "Unexpected error while processing PrefixOperator in generateOrder.\n");
             }
         } else if isDerivedFrom[obj, Bracket] {
             def mapContainer: MapContainerOf[obj];
@@ -217,12 +219,19 @@
                         .set(String("result"), generateOrder(container.getElement(i))),
                     combinedResult
                 ) {
-                    System.fail(1, "generateOrder error - building List failed.\n");
+                    System.fail(1, "Unexpected error while processing List in generateOrder.\n");
                 }
                 result = combinedResult;
             }
         } else {
-            System.fail(1, "generateOrder error - unexpected AST object type.\n");
+            Spp.buildMgr.raiseBuildNotice("SPPG1002", 1, obj);
+            if !Spp.astMgr.buildAst(
+                ast { },
+                Map[String, ref[TiObject]](),
+                result
+            ) {
+                System.fail(1, "Unexpected error in generateOrder.\n");
+            }
         }
         return result;
     }
@@ -249,10 +258,13 @@
                         .set(String("val"), mapContainer.getElement("second")),
                     result
                 ) {
-                    System.fail(1, "generateUpdate error - building AssignmentOperator failed.\n");
+                    System.fail(1, "Unexpected error while processing AssignmentOperator in generateUpdate.\n");
                 }
             } else {
-                System.fail(1, String("generateUpdate error - Invalid AssignmentOperator type: ") + opType + "\n");
+                Spp.buildMgr.raiseBuildNotice("SPPG1002", 1, obj);
+                if !Spp.astMgr.buildAst(ast { }, Map[String, ref[TiObject]](), result) {
+                    System.fail(1, "Unexpected error while processing AssignmentOperator in generateUpdate.\n");
+                }
             }
         } else if isDerivedFrom[obj, Bracket] {
             def mapContainer: MapContainerOf[obj];
@@ -270,47 +282,53 @@
                         .set(String("result"), generateUpdate(container.getElement(i))),
                     combinedResult
                 ) {
-                    System.fail(1, "generateUpdate error - building List failed.\n");
+                    System.fail(1, "Unexpected error while processing List in generateUpdate.\n");
                 }
                 result = combinedResult;
             }
         } else {
-            System.fail(1, "generateUpdate error - unexpected AST object type.\n");
+            Spp.buildMgr.raiseBuildNotice("SPPG1002", 1, obj);
+            if !Spp.astMgr.buildAst(ast { }, Map[String, ref[TiObject]](), result) {
+                System.fail(1, "Unexpected error in generateUpdate.\n");
+            }
         }
         return result;
     }
 
-    func generateParsing (varArray: Array[String], typeArray: Array[ref[Spp.Ast.Type]]) {
+    func generateParsing (varNames: Array[String], varElements: Array[ref[Core.Basic.TiObject]]) {
         @shared def strType: ref[Spp.Ast.Type](Spp.astMgr.traceType(ast Root.Srl.String));
         def i: Int;
-        for i = 0, i < typeArray.getLength(), i = i+1 {
-            if typeArray(i)~ptr == strType~ptr {
+        for i = 0, i < varElements.getLength(), i = i+1 {
+            def varType: ref[Spp.Ast.Type](Spp.astMgr.traceType(varElements(i)));
+            if varType~ptr == strType~ptr {
                 if !Spp.astMgr.insertAst(
                     (ast model.strVal = data(j)),
                     Map[String, ref[TiObject]]()
                         .set(String("j"), Core.Data.Ast.IntegerLiteral(String("") + i))
-                        .set(String("strVal"), Core.Data.Ast.Identifier(varArray(i)))
+                        .set(String("strVal"), Core.Data.Ast.Identifier(varNames(i)))
                 ) {
-                    System.fail(1, "generateParsing error: inserting AST failed.\n");
+                    System.fail(1, "Unexpected error while processing generateParsing.\n");
                 }
-            } else if typeArray(i).getMyTypeInfo().typeName == "IntegerType" {
+            } else if varType.getMyTypeInfo().typeName == "IntegerType" {
                 if !Spp.astMgr.insertAst(
                     (ast model.intVal = parseInt(data(j).buf)),
                     Map[String, ref[TiObject]]()
                         .set(String("j"), Core.Data.Ast.IntegerLiteral(String("") + i))
-                        .set(String("intVal"), Core.Data.Ast.Identifier(varArray(i)))
+                        .set(String("intVal"), Core.Data.Ast.Identifier(varNames(i)))
                 ) {
-                    System.fail(1, "generateParsing error: inserting AST failed.\n");
+                    System.fail(1, "Unexpected error while processing generateParsing.\n");
                 }
-            } else if typeArray(i).getMyTypeInfo().typeName == "FloatType" {
+            } else if varType.getMyTypeInfo().typeName == "FloatType" {
                 if !Spp.astMgr.insertAst(
                     (ast model.floatVal = parseFloat(data(j).buf)),
                     Map[String, ref[TiObject]]()
                         .set(String("j"), Core.Data.Ast.IntegerLiteral(String("") + i))
-                        .set(String("floatVal"), Core.Data.Ast.Identifier(varArray(i)))
+                        .set(String("floatVal"), Core.Data.Ast.Identifier(varNames(i)))
                 ) {
-                    System.fail(1, "generateParsing error: inserting AST failed.\n");
+                    System.fail(1, "Unexpected error while processing generateParsing.\n");
                 }
+            } else {
+                Spp.buildMgr.raiseBuildNotice("ROWS1002", 1, varElements(i));
             }
         }
     }
@@ -322,19 +340,15 @@
                 (ast data.add(String() + model.varName)),
                 Map[String, ref[TiObject]]().set(String("varName"), Core.Data.Ast.Identifier(varArray(i)))
             ) {
-                System.fail(1, "generateGetData error: inserting AST failed.\n");
+                System.fail(1, "Unexpected error while processing generateGetData.\n");
             }
         }
     }
 
     func generateTableName (classAst: ref[Core.Basic.TiObject]) {
-        def params: Array[String] = getElementModifierParams(classAst, "model");
-        if params.getLength() != 1 {
-            System.fail(1, "generateTableName - Invalid model: Missing or invalid @model modifier.");
-        }
         Spp.astMgr.insertAst(
             (ast Srl.String("{{className}}")),
-            Srl.Map[Srl.String, ref[Core.Basic.TiObject]]().set(Srl.String("className"), TiStr(params(0)))
+            Srl.Map[Srl.String, ref[Core.Basic.TiObject]]().set(Srl.String("className"), TiStr(getTableName(classAst)))
         );
     }
 }

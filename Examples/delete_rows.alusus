@@ -13,7 +13,7 @@ if !db.driver.isConnected() {
     System.fail(1, String("Error connecting to DB: ") + db.getLastError());
 }
 
-if !db.exec(Delete().{
+if !!db.exec(Delete().{
     table = String("roles");
     condition("id=%i", 250);
 }) {
@@ -22,11 +22,12 @@ if !db.exec(Delete().{
 
 def i: Int;
 for i = 0, i < 4, ++i {
-    if !db.exec(Delete().{
+    def res: Result = db.exec(Delete().{
         table = String("users");
         condition("id=%i", 150+i);
-    }) {
-        System.fail(1, String("Query failed: ") + db.getLastError());
+    });
+    if !!res {
+        System.fail(1, String("Query failed: ") + res.error);
     }
 }
 

@@ -1,13 +1,13 @@
 >>>>>> create_table.alusus
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 CREATE TABLE IF NOT EXISTS "users"(
 "id" INT NOT NULL UNIQUE,
 "name" VARCHAR(90) NOT NULL UNIQUE DEFAULT 'me',
 "address" VARCHAR(200),
 PRIMARY KEY ("id")
 );
->> Executing SQL:
+[32m>> Executing SQL:[0m
 CREATE TABLE IF NOT EXISTS "roles"(
 "id" INT NOT NULL UNIQUE,
 "name" VARCHAR(90) NOT NULL UNIQUE DEFAULT 'viewer',
@@ -20,27 +20,27 @@ FOREIGN KEY ("userId") REFERENCES "users"("id")
 
 >>>>>> insert_rows.alusus
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 delete from roles
->> Executing SQL:
+[32m>> Executing SQL:[0m
 delete from users
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO users
 ("id", "name", "address")
 VALUES ( '150', 'Sarmad', 'Canada')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO users
 ("id", "name", "address")
 VALUES ( '151', 'Sleman', 'Syria')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO users
 ("id", "name", "address")
 VALUES ( '152', 'Abdullah', 'KSA')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO users
 ("id", "name", "address")
 VALUES ( '153', 'Salem', 'KSA')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO roles
 ("id", "name", "userId")
 VALUES ( '250', 'admin', '150')
@@ -49,19 +49,25 @@ VALUES ( '250', 'admin', '150')
 
 >>>>>> select_rows.alusus
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 SELECT *
 FROM users
 150    Sarmad    Canada    
 151    Sleman    Syria    
 152    Abdullah    KSA    
 153    Salem    KSA    
+[32m>> Executing SQL:[0m
+SELECT *
+FROM unknown_table
+[31m>> SQL Error:[0m
+Table 'alusus.unknown_table' doesn't exist
+Error: Query failed: Table 'alusus.unknown_table' doesn't exist
 
 
 
 >>>>>> update_row.alusus
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 UPDATE users
 SET "name" = 'Sarmad 1', "address" = '211, Surrey'
 WHERE id=150
@@ -70,13 +76,19 @@ WHERE id=150
 
 >>>>>> select_rows.alusus
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 SELECT *
 FROM users
 150    Sarmad 1    211, Surrey    
 151    Sleman    Syria    
 152    Abdullah    KSA    
 153    Salem    KSA    
+[32m>> Executing SQL:[0m
+SELECT *
+FROM unknown_table
+[31m>> SQL Error:[0m
+Table 'alusus.unknown_table' doesn't exist
+Error: Query failed: Table 'alusus.unknown_table' doesn't exist
 
 
 
@@ -91,15 +103,15 @@ FROM users
 
 >>>>>> delete_rows.alusus
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 DELETE FROM roles WHERE id=250;
->> Executing SQL:
+[32m>> Executing SQL:[0m
 DELETE FROM users WHERE id=150;
->> Executing SQL:
+[32m>> Executing SQL:[0m
 DELETE FROM users WHERE id=151;
->> Executing SQL:
+[32m>> Executing SQL:[0m
 DELETE FROM users WHERE id=152;
->> Executing SQL:
+[32m>> Executing SQL:[0m
 DELETE FROM users WHERE id=153;
 
 
@@ -107,17 +119,17 @@ DELETE FROM users WHERE id=153;
 >>>>>> prepared_statement.alusus
 
 Connection established
->> Executing SQL:
+[32m>> Executing SQL:[0m
 delete from users where id = 20 or id = 21
->> Executing SQL:
+[32m>> Executing SQL:[0m
 insert into users(id, name) values (20, 'sarmad')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 insert into users(id, name) values (21, 'abdullah')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 select * from users where id in (20,21,200)
 20	sarmad		
 21	abdullah		
->> Executing SQL:
+[32m>> Executing SQL:[0m
 select * from users where name in ('sarmad','abdullah')
 21	abdullah		
 20	sarmad		
@@ -126,7 +138,7 @@ select * from users where name in ('sarmad','abdullah')
 
 >>>>>> table_generation.alusus
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 CREATE TABLE IF NOT EXISTS "properties"(
 "id" INT NOT NULL DEFAULT 10,
 "ssd" INT,
@@ -141,38 +153,38 @@ FOREIGN KEY ("userId") REFERENCES "users"("id")
 
 >>>>>> sql_injection.alusus
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 CREATE TABLE IF NOT EXISTS "books"(
 "id" INT NOT NULL,
 "name" VARCHAR(50),
 PRIMARY KEY ("id")
 );
->> Executing SQL:
+[32m>> Executing SQL:[0m
 DELETE FROM books
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO books
 ("id", "name")
 VALUES ( '1', 'Book 1\'), (2, \'Book 2')
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 SELECT "id", "name"
 FROM books
 1		Book 1'), (2, 'Book 2
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 SELECT "id", "name"
 FROM books
 WHERE "name" = 'Book 1\' or name = \'Book 2'
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 SELECT "id", "name"
 FROM books
 WHERE "id" = '1'
->> Executing SQL:
+[32m>> Executing SQL:[0m
 UPDATE books
 SET "id" = '1', "name" = 'Book 2u\', id=\'3'
 WHERE "id" = '1'
->> Executing SQL:
+[32m>> Executing SQL:[0m
 SELECT "id", "name"
 FROM books
 1		Book 2u', id='3
@@ -182,133 +194,133 @@ FROM books
 
 >>>>>> orm_mysql.alusus
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 CREATE TABLE IF NOT EXISTS "cars"(
 "id" INT NOT NULL,
 "name" VARCHAR(50) DEFAULT 'My Car',
 "price" FLOAT,
 PRIMARY KEY ("id")
 );
->> Executing SQL:
+[32m>> Executing SQL:[0m
 DELETE FROM cars
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '1', 'Car 1', '200.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '2', 'Car 2', '400.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '3', 'Car 3', '600.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '4', 'Car 4', '800.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '5', 'Car 5', '1000.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '6', 'Car 6', '1200.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '7', 'Car 7', '1400.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '8', 'Car 8', '1600.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '9', 'Car 9', '1800.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '10', 'Car 10', '2000.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '11', 'Car 11', '2200.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '12', 'Car 12', '2400.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '13', 'Car 13', '2600.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '14', 'Car 14', '2800.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '15', 'Car 15', '3000.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '16', 'Car 16', '3200.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '17', 'Car 17', '3400.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '18', 'Car 18', '3600.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '19', 'Car 19', '3800.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '20', 'Car 20', '4000.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '21', 'Car 21', '4200.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '22', 'Car 22', '4400.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '23', 'Car 23', '4600.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '24', 'Car 24', '4800.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '25', 'Car 25', '5000.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '26', 'Car 26', '5200.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '27', 'Car 27', '5400.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '28', 'Car 28', '5600.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '29', 'Car 29', '5800.000000')
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 SELECT "id", "name", "price"
 FROM cars
 WHERE ("price" < '1000.000000' or "price" > '5000.000000') and "id" > '2'
@@ -319,19 +331,19 @@ WHERE ("price" < '1000.000000' or "price" > '5000.000000') and "id" > '2'
 28		Car 28		5600.000000
 29		Car 29		5800.000000
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 DELETE FROM cars WHERE "id" = '3';
->> Executing SQL:
+[32m>> Executing SQL:[0m
 UPDATE cars
 SET "id" = '4', "name" = 'Car 4u', "price" = '400.000000'
 WHERE "id" = '4'
->> Executing SQL:
+[32m>> Executing SQL:[0m
 UPDATE cars
 SET "price" = '90.000000', "name" = 'BMW'
 WHERE "id" = '20'
->> Executing SQL:
+[32m>> Executing SQL:[0m
 DELETE FROM cars WHERE "id" > '23' and "id" <= '28';
->> Executing SQL:
+[32m>> Executing SQL:[0m
 SELECT "id", "name", "price"
 FROM cars
 1		Car 1		200.000000
@@ -358,7 +370,7 @@ FROM cars
 23		Car 23		4600.000000
 29		Car 29		5800.000000
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 SELECT "id", "name", "price"
 FROM cars
 WHERE NOT ("id" > '10')
@@ -372,7 +384,7 @@ WHERE NOT ("id" > '10')
 9		Car 9		1800.000000
 10		Car 10		2000.000000
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 SELECT "id", "name", "price"
 FROM cars
 WHERE NOT ("id" in ('1' , '5' , '7' , '2'))
@@ -396,7 +408,7 @@ WHERE NOT ("id" in ('1' , '5' , '7' , '2'))
 23		Car 23		4600.000000
 29		Car 29		5800.000000
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 SELECT "id", "name", "price"
 FROM cars
 WHERE "id" in ('1' , '2' , '4' , '5' , '7')
@@ -407,7 +419,7 @@ ORDER BY "price" DESC, "id"
 4		Car 4u		400.000000
 1		Car 1		200.000000
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 SELECT "id", "name", "price"
 FROM cars
 WHERE "id" in ('1' , '2' , '4' , '5' , '7')
@@ -422,7 +434,7 @@ ORDER BY "price" DESC, "id" DESC
 
 >>>>>> orm_postgresql.alusus
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 CREATE TABLE IF NOT EXISTS "cars"(
 "id" integer NOT NULL,
 "name" varchar(50) DEFAULT 'My Car',
@@ -430,126 +442,126 @@ CREATE TABLE IF NOT EXISTS "cars"(
 "fullName" varchar(50),
 PRIMARY KEY ("id")
 );
->> Executing SQL:
+[32m>> Executing SQL:[0m
 DELETE FROM cars
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "the_price", "fullName")
 VALUES ( '1', 'Car 1', '200.000000', '')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "the_price", "fullName")
 VALUES ( '2', 'Car 2', '400.000000', '')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "the_price", "fullName")
 VALUES ( '3', 'Car 3', '600.000000', '')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "the_price", "fullName")
 VALUES ( '4', 'Car 4', '800.000000', '')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "the_price", "fullName")
 VALUES ( '5', 'Car 5', '1000.000000', '')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "the_price", "fullName")
 VALUES ( '6', 'Car 6', '1200.000000', '')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "the_price", "fullName")
 VALUES ( '7', 'Car 7', '1400.000000', '')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "the_price", "fullName")
 VALUES ( '8', 'Car 8', '1600.000000', '')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "the_price", "fullName")
 VALUES ( '9', 'Car 9', '1800.000000', '')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "the_price", "fullName")
 VALUES ( '10', 'Car 10', '2000.000000', '')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "the_price", "fullName")
 VALUES ( '11', 'Car 11', '2200.000000', '')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "the_price", "fullName")
 VALUES ( '12', 'Car 12', '2400.000000', '')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "the_price", "fullName")
 VALUES ( '13', 'Car 13', '2600.000000', '')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "the_price", "fullName")
 VALUES ( '14', 'Car 14', '2800.000000', '')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "the_price", "fullName")
 VALUES ( '15', 'Car 15', '3000.000000', '')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "the_price", "fullName")
 VALUES ( '16', 'Car 16', '3200.000000', '')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "the_price", "fullName")
 VALUES ( '17', 'Car 17', '3400.000000', '')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "the_price", "fullName")
 VALUES ( '18', 'Car 18', '3600.000000', '')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "the_price", "fullName")
 VALUES ( '19', 'Car 19', '3800.000000', '')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "the_price", "fullName")
 VALUES ( '20', 'Car 20', '4000.000000', '')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "the_price", "fullName")
 VALUES ( '21', 'Car 21', '4200.000000', '')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "the_price", "fullName")
 VALUES ( '22', 'Car 22', '4400.000000', '')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "the_price", "fullName")
 VALUES ( '23', 'Car 23', '4600.000000', '')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "the_price", "fullName")
 VALUES ( '24', 'Car 24', '4800.000000', '')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "the_price", "fullName")
 VALUES ( '25', 'Car 25', '5000.000000', '')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "the_price", "fullName")
 VALUES ( '26', 'Car 26', '5200.000000', '')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "the_price", "fullName")
 VALUES ( '27', 'Car 27', '5400.000000', '')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "the_price", "fullName")
 VALUES ( '28', 'Car 28', '5600.000000', '')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "the_price", "fullName")
 VALUES ( '29', 'Car 29', '5800.000000', '')
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 SELECT "id", "name", "the_price", "fullName"
 FROM cars
 WHERE ("the_price" < '1000.000000' or "the_price" > '5000.000000') and "id" > '2'
@@ -561,23 +573,23 @@ ORDER BY "id"
 28		Car 28		5600.000000
 29		Car 29		5800.000000
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 DELETE FROM cars WHERE "id" = '3';
->> Executing SQL:
+[32m>> Executing SQL:[0m
 UPDATE cars
 SET "id" = '4', "name" = 'Car 4u', "the_price" = '400.000000', "fullName" = ''
 WHERE "id" = '4'
->> Executing SQL:
+[32m>> Executing SQL:[0m
 UPDATE cars
 SET "fullName" = 'BMW X5'
 WHERE "id" = '19'
->> Executing SQL:
+[32m>> Executing SQL:[0m
 UPDATE cars
 SET "the_price" = '90.000000', "name" = 'BMW'
 WHERE "id" = '20'
->> Executing SQL:
+[32m>> Executing SQL:[0m
 DELETE FROM cars WHERE "id" > '23' and "id" <= '28';
->> Executing SQL:
+[32m>> Executing SQL:[0m
 SELECT "id", "name", "the_price", "fullName"
 FROM cars
 WHERE "fullName" != 'BMW X5'
@@ -604,7 +616,7 @@ WHERE "fullName" != 'BMW X5'
 4		Car 4u		400.000000
 20		BMW		90.000000
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 SELECT "id", "name", "the_price", "fullName"
 FROM cars
 WHERE NOT ("id" > '10')
@@ -618,7 +630,7 @@ WHERE NOT ("id" > '10')
 10		Car 10		2000.000000
 4		Car 4u		400.000000
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 SELECT "id", "name", "the_price", "fullName"
 FROM cars
 WHERE NOT ("id" in ('1' , '5' , '7' , '2'))
@@ -642,7 +654,7 @@ WHERE NOT ("id" in ('1' , '5' , '7' , '2'))
 19		Car 19		3800.000000
 20		BMW		90.000000
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 SELECT "id", "name", "the_price", "fullName"
 FROM cars
 WHERE "id" in ('1' , '2' , '4' , '5' , '7')
@@ -653,7 +665,7 @@ ORDER BY "the_price" DESC, "id"
 4		Car 4u		400.000000
 1		Car 1		200.000000
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 SELECT "id", "name", "the_price", "fullName"
 FROM cars
 WHERE "id" in ('1' , '2' , '4' , '5' , '7')
@@ -668,133 +680,133 @@ ORDER BY "the_price" DESC, "id" DESC
 
 >>>>>> orm_sqlite.alusus
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 CREATE TABLE IF NOT EXISTS "cars"(
 "id" INTEGER NOT NULL,
 "name" TEXT(50) DEFAULT 'My Car',
 "price" REAL,
 PRIMARY KEY ("id")
 );
->> Executing SQL:
+[32m>> Executing SQL:[0m
 DELETE FROM cars
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '1', 'Car 1', '200.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '2', 'Car 2', '400.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '3', 'Car 3', '600.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '4', 'Car 4', '800.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '5', 'Car 5', '1000.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '6', 'Car 6', '1200.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '7', 'Car 7', '1400.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '8', 'Car 8', '1600.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '9', 'Car 9', '1800.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '10', 'Car 10', '2000.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '11', 'Car 11', '2200.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '12', 'Car 12', '2400.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '13', 'Car 13', '2600.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '14', 'Car 14', '2800.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '15', 'Car 15', '3000.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '16', 'Car 16', '3200.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '17', 'Car 17', '3400.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '18', 'Car 18', '3600.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '19', 'Car 19', '3800.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '20', 'Car 20', '4000.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '21', 'Car 21', '4200.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '22', 'Car 22', '4400.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '23', 'Car 23', '4600.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '24', 'Car 24', '4800.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '25', 'Car 25', '5000.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '26', 'Car 26', '5200.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '27', 'Car 27', '5400.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '28', 'Car 28', '5600.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO cars
 ("id", "name", "price")
 VALUES ( '29', 'Car 29', '5800.000000')
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 SELECT "id", "name", "price"
 FROM cars
 WHERE ("price" < '1000.000000' or "price" > '5000.000000') and "id" > '2'
@@ -805,19 +817,19 @@ WHERE ("price" < '1000.000000' or "price" > '5000.000000') and "id" > '2'
 28		Car 28		5600.000000
 29		Car 29		5800.000000
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 DELETE FROM cars WHERE "id" = '3';
->> Executing SQL:
+[32m>> Executing SQL:[0m
 UPDATE cars
 SET "id" = '4', "name" = 'Car 4u', "price" = '400.000000'
 WHERE "id" = '4'
->> Executing SQL:
+[32m>> Executing SQL:[0m
 UPDATE cars
 SET "price" = '90.000000', "name" = 'BMW'
 WHERE "id" = '20'
->> Executing SQL:
+[32m>> Executing SQL:[0m
 DELETE FROM cars WHERE "id" > '23' and "id" <= '28';
->> Executing SQL:
+[32m>> Executing SQL:[0m
 SELECT "id", "name", "price"
 FROM cars
 1		Car 1		200.000000
@@ -844,7 +856,7 @@ FROM cars
 23		Car 23		4600.000000
 29		Car 29		5800.000000
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 SELECT "id", "name", "price"
 FROM cars
 WHERE NOT ("id" > '10')
@@ -858,7 +870,7 @@ WHERE NOT ("id" > '10')
 9		Car 9		1800.000000
 10		Car 10		2000.000000
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 SELECT "id", "name", "price"
 FROM cars
 WHERE NOT ("id" in ('1' , '5' , '7' , '2'))
@@ -882,7 +894,7 @@ WHERE NOT ("id" in ('1' , '5' , '7' , '2'))
 23		Car 23		4600.000000
 29		Car 29		5800.000000
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 SELECT "id", "name", "price"
 FROM cars
 WHERE "id" in ('1' , '2' , '4' , '5' , '7')
@@ -893,7 +905,7 @@ ORDER BY "price" DESC, "id"
 4		Car 4u		400.000000
 1		Car 1		200.000000
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 SELECT "id", "name", "price"
 FROM cars
 WHERE "id" in ('1' , '2' , '4' , '5' , '7')
@@ -936,14 +948,14 @@ ORDER BY "price" DESC, "id" DESC
 
 >>>>>> إنشاء_جدول.أسس
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 CREATE TABLE IF NOT EXISTS "users"(
 "id" INT NOT NULL UNIQUE,
 "name" VARCHAR(90) NOT NULL UNIQUE DEFAULT 'me',
 "address" VARCHAR(200),
 PRIMARY KEY ("id")
 );
->> Executing SQL:
+[32m>> Executing SQL:[0m
 CREATE TABLE IF NOT EXISTS "roles"(
 "id" INT NOT NULL UNIQUE,
 "name" VARCHAR(90) NOT NULL UNIQUE DEFAULT 'viewer',
@@ -956,27 +968,27 @@ FOREIGN KEY ("userId") REFERENCES "users"("id")
 
 >>>>>> إدخال_صفوف.أسس
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 delete from roles
->> Executing SQL:
+[32m>> Executing SQL:[0m
 delete from users
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO users
 ("id", "name", "address")
 VALUES ( '150', 'سرمد', 'كندا')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO users
 ("id", "name", "address")
 VALUES ( '151', 'سليمان', 'سوريا')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO users
 ("id", "name", "address")
 VALUES ( '152', 'عبد الله', 'السعودية')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO users
 ("id", "name", "address")
 VALUES ( '153', 'سالم', 'السعودية')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO roles
 ("id", "name", "userId")
 VALUES ( '250', 'admin', '150')
@@ -985,7 +997,7 @@ VALUES ( '250', 'admin', '150')
 
 >>>>>> جلب_صفوف.أسس
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 SELECT *
 FROM users
 150    سرمد    كندا    
@@ -997,7 +1009,7 @@ FROM users
 
 >>>>>> تحديث_صفوف.أسس
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 UPDATE users
 SET "name" = 'سرمد 3', "address" = '957، سَري'
 WHERE id=150
@@ -1006,7 +1018,7 @@ WHERE id=150
 
 >>>>>> جلب_صفوف.أسس
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 SELECT *
 FROM users
 150    سرمد 3    957، سَري    
@@ -1018,22 +1030,22 @@ FROM users
 
 >>>>>> حذف_صفوف.أسس
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 DELETE FROM roles WHERE id=250;
->> Executing SQL:
+[32m>> Executing SQL:[0m
 DELETE FROM users WHERE id=150;
->> Executing SQL:
+[32m>> Executing SQL:[0m
 DELETE FROM users WHERE id=151;
->> Executing SQL:
+[32m>> Executing SQL:[0m
 DELETE FROM users WHERE id=152;
->> Executing SQL:
+[32m>> Executing SQL:[0m
 DELETE FROM users WHERE id=153;
 
 
 
 >>>>>> توليد_تلقائي_لجدول.أسس
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 CREATE TABLE IF NOT EXISTS "عقارات"(
 "المعرف" INT NOT NULL,
 "ابت" INT,
@@ -1048,133 +1060,133 @@ FOREIGN KEY ("معرف_المستخدم") REFERENCES "users"("id")
 
 >>>>>> مطابقة_مايسكويل.أسس
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 CREATE TABLE IF NOT EXISTS "سيارات"(
 "المعرف" INT NOT NULL,
 "الاسم" VARCHAR(50),
 "سعر_السيارة" FLOAT,
 PRIMARY KEY ("المعرف")
 );
->> Executing SQL:
+[32m>> Executing SQL:[0m
 DELETE FROM سيارات
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '1', 'سيارة 1', '200.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '2', 'سيارة 2', '400.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '3', 'سيارة 3', '600.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '4', 'سيارة 4', '800.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '5', 'سيارة 5', '1000.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '6', 'سيارة 6', '1200.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '7', 'سيارة 7', '1400.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '8', 'سيارة 8', '1600.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '9', 'سيارة 9', '1800.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '10', 'سيارة 10', '2000.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '11', 'سيارة 11', '2200.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '12', 'سيارة 12', '2400.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '13', 'سيارة 13', '2600.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '14', 'سيارة 14', '2800.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '15', 'سيارة 15', '3000.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '16', 'سيارة 16', '3200.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '17', 'سيارة 17', '3400.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '18', 'سيارة 18', '3600.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '19', 'سيارة 19', '3800.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '20', 'سيارة 20', '4000.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '21', 'سيارة 21', '4200.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '22', 'سيارة 22', '4400.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '23', 'سيارة 23', '4600.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '24', 'سيارة 24', '4800.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '25', 'سيارة 25', '5000.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '26', 'سيارة 26', '5200.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '27', 'سيارة 27', '5400.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '28', 'سيارة 28', '5600.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '29', 'سيارة 29', '5800.000000')
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 SELECT "المعرف", "الاسم", "سعر_السيارة"
 FROM سيارات
 WHERE ("سعر_السيارة" < '1000.000000' or "سعر_السيارة" > '5000.000000') and "المعرف" > '2'
@@ -1185,19 +1197,19 @@ WHERE ("سعر_السيارة" < '1000.000000' or "سعر_السيارة" > '500
 28		سيارة 28		5600.000000
 29		سيارة 29		5800.000000
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 DELETE FROM سيارات WHERE "المعرف" = '3';
->> Executing SQL:
+[32m>> Executing SQL:[0m
 UPDATE سيارات
 SET "المعرف" = '4', "الاسم" = 'سيارة 4م', "سعر_السيارة" = '400.000000'
 WHERE "المعرف" = '4'
->> Executing SQL:
+[32m>> Executing SQL:[0m
 UPDATE سيارات
 SET "سعر_السيارة" = '90.000000', "الاسم" = 'BMW'
 WHERE "المعرف" = '20'
->> Executing SQL:
+[32m>> Executing SQL:[0m
 DELETE FROM سيارات WHERE "المعرف" > '23' and "المعرف" <= '28';
->> Executing SQL:
+[32m>> Executing SQL:[0m
 SELECT "المعرف", "الاسم", "سعر_السيارة"
 FROM سيارات
 1		سيارة 1		200.000000
@@ -1224,7 +1236,7 @@ FROM سيارات
 23		سيارة 23		4600.000000
 29		سيارة 29		5800.000000
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 SELECT "المعرف", "الاسم", "سعر_السيارة"
 FROM سيارات
 WHERE NOT ("المعرف" > '10')
@@ -1238,7 +1250,7 @@ WHERE NOT ("المعرف" > '10')
 9		سيارة 9		1800.000000
 10		سيارة 10		2000.000000
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 SELECT "المعرف", "الاسم", "سعر_السيارة"
 FROM سيارات
 WHERE NOT ("المعرف" in ('1' , '2' , '5' , '7'))
@@ -1262,7 +1274,7 @@ WHERE NOT ("المعرف" in ('1' , '2' , '5' , '7'))
 23		سيارة 23		4600.000000
 29		سيارة 29		5800.000000
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 SELECT "المعرف", "الاسم", "سعر_السيارة"
 FROM سيارات
 WHERE "المعرف" in ('1' , '2' , '4' , '5' , '7')
@@ -1273,7 +1285,7 @@ ORDER BY "سعر_السيارة" DESC, "المعرف"
 4		سيارة 4م		400.000000
 1		سيارة 1		200.000000
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 SELECT "المعرف", "الاسم", "سعر_السيارة"
 FROM سيارات
 WHERE "المعرف" in ('1' , '2' , '4' , '5' , '7')
@@ -1288,133 +1300,133 @@ ORDER BY "سعر_السيارة" DESC, "المعرف" DESC
 
 >>>>>> مطابقة_بوستغرس.أسس
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 CREATE TABLE IF NOT EXISTS "سيارات"(
 "المعرف" integer NOT NULL,
 "الاسم" varchar(50),
 "سعر_السيارة" double precision,
 PRIMARY KEY ("المعرف")
 );
->> Executing SQL:
+[32m>> Executing SQL:[0m
 DELETE FROM سيارات
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '1', 'سيارة 1', '200.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '2', 'سيارة 2', '400.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '3', 'سيارة 3', '600.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '4', 'سيارة 4', '800.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '5', 'سيارة 5', '1000.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '6', 'سيارة 6', '1200.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '7', 'سيارة 7', '1400.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '8', 'سيارة 8', '1600.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '9', 'سيارة 9', '1800.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '10', 'سيارة 10', '2000.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '11', 'سيارة 11', '2200.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '12', 'سيارة 12', '2400.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '13', 'سيارة 13', '2600.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '14', 'سيارة 14', '2800.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '15', 'سيارة 15', '3000.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '16', 'سيارة 16', '3200.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '17', 'سيارة 17', '3400.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '18', 'سيارة 18', '3600.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '19', 'سيارة 19', '3800.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '20', 'سيارة 20', '4000.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '21', 'سيارة 21', '4200.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '22', 'سيارة 22', '4400.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '23', 'سيارة 23', '4600.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '24', 'سيارة 24', '4800.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '25', 'سيارة 25', '5000.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '26', 'سيارة 26', '5200.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '27', 'سيارة 27', '5400.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '28', 'سيارة 28', '5600.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '29', 'سيارة 29', '5800.000000')
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 SELECT "المعرف", "الاسم", "سعر_السيارة"
 FROM سيارات
 WHERE ("سعر_السيارة" < '1000.000000' or "سعر_السيارة" > '5000.000000') and "المعرف" > '2'
@@ -1425,19 +1437,19 @@ WHERE ("سعر_السيارة" < '1000.000000' or "سعر_السيارة" > '500
 28		سيارة 28		5600.000000
 29		سيارة 29		5800.000000
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 DELETE FROM سيارات WHERE "المعرف" = '3';
->> Executing SQL:
+[32m>> Executing SQL:[0m
 UPDATE سيارات
 SET "المعرف" = '4', "الاسم" = 'سيارة 4م', "سعر_السيارة" = '400.000000'
 WHERE "المعرف" = '4'
->> Executing SQL:
+[32m>> Executing SQL:[0m
 UPDATE سيارات
 SET "سعر_السيارة" = '90.000000', "الاسم" = 'BMW'
 WHERE "المعرف" = '20'
->> Executing SQL:
+[32m>> Executing SQL:[0m
 DELETE FROM سيارات WHERE "المعرف" > '23' and "المعرف" <= '28';
->> Executing SQL:
+[32m>> Executing SQL:[0m
 SELECT "المعرف", "الاسم", "سعر_السيارة"
 FROM سيارات
 1		سيارة 1		200.000000
@@ -1464,7 +1476,7 @@ FROM سيارات
 4		سيارة 4م		400.000000
 20		BMW		90.000000
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 SELECT "المعرف", "الاسم", "سعر_السيارة"
 FROM سيارات
 WHERE NOT ("المعرف" > '10')
@@ -1478,7 +1490,7 @@ WHERE NOT ("المعرف" > '10')
 10		سيارة 10		2000.000000
 4		سيارة 4م		400.000000
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 SELECT "المعرف", "الاسم", "سعر_السيارة"
 FROM سيارات
 WHERE NOT ("المعرف" in ('1' , '2' , '5' , '7'))
@@ -1502,7 +1514,7 @@ WHERE NOT ("المعرف" in ('1' , '2' , '5' , '7'))
 4		سيارة 4م		400.000000
 20		BMW		90.000000
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 SELECT "المعرف", "الاسم", "سعر_السيارة"
 FROM سيارات
 WHERE "المعرف" in ('1' , '2' , '4' , '5' , '7')
@@ -1513,7 +1525,7 @@ ORDER BY "سعر_السيارة" DESC, "المعرف"
 4		سيارة 4م		400.000000
 1		سيارة 1		200.000000
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 SELECT "المعرف", "الاسم", "سعر_السيارة"
 FROM سيارات
 WHERE "المعرف" in ('1' , '2' , '4' , '5' , '7')
@@ -1528,133 +1540,133 @@ ORDER BY "سعر_السيارة" DESC, "المعرف" DESC
 
 >>>>>> مطابقة_سكويلايت.أسس
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 CREATE TABLE IF NOT EXISTS "سيارات"(
 "المعرف" INTEGER NOT NULL,
 "الاسم" TEXT(50),
 "سعر_السيارة" REAL,
 PRIMARY KEY ("المعرف")
 );
->> Executing SQL:
+[32m>> Executing SQL:[0m
 DELETE FROM سيارات
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '1', 'سيارة 1', '200.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '2', 'سيارة 2', '400.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '3', 'سيارة 3', '600.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '4', 'سيارة 4', '800.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '5', 'سيارة 5', '1000.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '6', 'سيارة 6', '1200.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '7', 'سيارة 7', '1400.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '8', 'سيارة 8', '1600.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '9', 'سيارة 9', '1800.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '10', 'سيارة 10', '2000.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '11', 'سيارة 11', '2200.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '12', 'سيارة 12', '2400.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '13', 'سيارة 13', '2600.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '14', 'سيارة 14', '2800.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '15', 'سيارة 15', '3000.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '16', 'سيارة 16', '3200.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '17', 'سيارة 17', '3400.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '18', 'سيارة 18', '3600.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '19', 'سيارة 19', '3800.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '20', 'سيارة 20', '4000.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '21', 'سيارة 21', '4200.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '22', 'سيارة 22', '4400.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '23', 'سيارة 23', '4600.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '24', 'سيارة 24', '4800.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '25', 'سيارة 25', '5000.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '26', 'سيارة 26', '5200.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '27', 'سيارة 27', '5400.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '28', 'سيارة 28', '5600.000000')
->> Executing SQL:
+[32m>> Executing SQL:[0m
 INSERT INTO سيارات
 ("المعرف", "الاسم", "سعر_السيارة")
 VALUES ( '29', 'سيارة 29', '5800.000000')
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 SELECT "المعرف", "الاسم", "سعر_السيارة"
 FROM سيارات
 WHERE ("سعر_السيارة" < '1000.000000' or "سعر_السيارة" > '5000.000000') and "المعرف" > '2'
@@ -1665,19 +1677,19 @@ WHERE ("سعر_السيارة" < '1000.000000' or "سعر_السيارة" > '500
 28		سيارة 28		5600.000000
 29		سيارة 29		5800.000000
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 DELETE FROM سيارات WHERE "المعرف" = '3';
->> Executing SQL:
+[32m>> Executing SQL:[0m
 UPDATE سيارات
 SET "المعرف" = '4', "الاسم" = 'سيارة 4م', "سعر_السيارة" = '400.000000'
 WHERE "المعرف" = '4'
->> Executing SQL:
+[32m>> Executing SQL:[0m
 UPDATE سيارات
 SET "سعر_السيارة" = '90.000000', "الاسم" = 'BMW'
 WHERE "المعرف" = '20'
->> Executing SQL:
+[32m>> Executing SQL:[0m
 DELETE FROM سيارات WHERE "المعرف" > '23' and "المعرف" <= '28';
->> Executing SQL:
+[32m>> Executing SQL:[0m
 SELECT "المعرف", "الاسم", "سعر_السيارة"
 FROM سيارات
 1		سيارة 1		200.000000
@@ -1704,7 +1716,7 @@ FROM سيارات
 23		سيارة 23		4600.000000
 29		سيارة 29		5800.000000
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 SELECT "المعرف", "الاسم", "سعر_السيارة"
 FROM سيارات
 WHERE NOT ("المعرف" > '10')
@@ -1718,7 +1730,7 @@ WHERE NOT ("المعرف" > '10')
 9		سيارة 9		1800.000000
 10		سيارة 10		2000.000000
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 SELECT "المعرف", "الاسم", "سعر_السيارة"
 FROM سيارات
 WHERE NOT ("المعرف" in ('1' , '2' , '5' , '7'))
@@ -1742,7 +1754,7 @@ WHERE NOT ("المعرف" in ('1' , '2' , '5' , '7'))
 23		سيارة 23		4600.000000
 29		سيارة 29		5800.000000
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 SELECT "المعرف", "الاسم", "سعر_السيارة"
 FROM سيارات
 WHERE "المعرف" in ('1' , '2' , '4' , '5' , '7')
@@ -1753,7 +1765,7 @@ ORDER BY "سعر_السيارة" DESC, "المعرف"
 4		سيارة 4م		400.000000
 1		سيارة 1		200.000000
 
->> Executing SQL:
+[32m>> Executing SQL:[0m
 SELECT "المعرف", "الاسم", "سعر_السيارة"
 FROM سيارات
 WHERE "المعرف" in ('1' , '2' , '4' , '5' , '7')

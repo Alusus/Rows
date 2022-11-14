@@ -39,7 +39,9 @@
                 sql += String("\"") + this._columns(i) + String("\" = '") + this._data(i) + "'";
                 if i < this._data.getLength()-1 sql += ", " else sql += "\n";
             }
-            sql += String("WHERE ") + this._condition;
+            if this._condition != "" {
+                sql += String("WHERE ") + this._condition;
+            }
             return sql;
         }
     }

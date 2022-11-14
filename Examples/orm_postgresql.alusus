@@ -65,7 +65,14 @@ func printRows (r: Array[SrdRef[Car]]) {
 }
 
 def d: Array[SrdRef[Car]];
-d = db.from[Car].where[(price < 1000 or price > 5000) and id > 2].order[id].select();
+
+def res: Result[Array[SrdRef[Car]]];
+res = db.from[Car].where[(price < 1000 or price > 5000) and id > 2].order[id].select();
+if !!res {
+    Console.print("%s%s%s\n", Console.Style.FG_RED, res.error.buf, Console.Style.RESET);
+    System.exit(1);
+}
+d = res;
 printRows(d);
 Console.print("\n");
 

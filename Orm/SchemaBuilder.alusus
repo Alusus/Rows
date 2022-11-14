@@ -10,28 +10,18 @@
             this.db~no_deref = value.db;
         }
 
-        function getTableName(): String {
-            return preprocess { generateTableName(Model~ast) };
-        }
+        handler this.create(): Result {
+            return this.db.exec(
+                preprocess {
+                    // Pre-generate classes to avoid circular dependencies during code generation.
+                    ref[Core.Data.Ast.Identifier]();
+                    ref[Core.Data.Ast.Definition]();
 
-        handler this.create() {
-            preprocess {
-                // Pre-generate classes to avoid circular dependencies during code generation.
-                ref[Core.Data.Ast.Identifier]();
-                ref[Core.Data.Ast.Definition]();
-
-                def var: Array[String] = getColumnNames(Model~ast, 0);
-
-                def modsKeywords: Array[Array[String]];
-                def modsParams: Array[ Array[Array[String]]];
-                getVarModifiers(Model~ast, modsKeywords, modsParams);
-
-                if !Spp.astMgr.insertAst(
-                    generateTable(getTableName(), modsKeywords, modsParams, var).obj
-                ) {
-                    System.fail(1, "Failed to insert statment.\n");
+                    if !Spp.astMgr.insertAst(generateTable(Model~ast).obj) {
+                        System.fail(1, "Unexpected error in SchemaBuilder.create.\n");
+                    }
                 }
-            }
+            );
         }
     }
 }

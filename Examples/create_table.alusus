@@ -13,7 +13,7 @@ if !db.driver.isConnected() {
     System.fail(1, String("Error connecting to DB: ") + db.getLastError());
 }
 
-if !db.exec(CreateTable().{
+if !!db.exec(CreateTable().{
     name = String("users");
     notExists = true;
     columns = Map[String, SrdRef[Column]]().{
@@ -37,7 +37,7 @@ if !db.exec(CreateTable().{
     System.fail(1, String("Query failed: ") + db.getLastError());
 }
 
-if !db.exec(CreateTable().{
+def res: Result = db.exec(CreateTable().{
     name = String("roles");
     notExists = true;
     columns = Map[String, SrdRef[Column]]().{
@@ -60,7 +60,8 @@ if !db.exec(CreateTable().{
     foreignKeys = Array[SrdRef[ForeignKey]]({
         ForeignKey(String("userId"), String("users"), String("id"))
     });
-}) {
-    System.fail(1, String("Query failed: ") + db.getLastError());
+});
+if not res {
+    System.fail(1, String("Query failed: ") + res.error);
 }
 

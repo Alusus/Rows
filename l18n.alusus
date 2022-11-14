@@ -1,0 +1,17 @@
+if 1 {
+    Core.addLocalization("en", "ROWS1001", "Model class is missing the @model modifier.");
+    Core.addLocalization("ar", "ROWS1001", "صنف الجدول يفتقر للمبدل @جدول.");
+
+    Core.addLocalization("en", "ROWS1002", "Invalid model field data type.");
+    Core.addLocalization("ar", "ROWS1002", "صنف حقل الجدول غير صالح.");
+
+    Core.addLocalization("en", "ROWS1003", "Missing param for @default modifier.");
+    Core.addLocalization("ar", "ROWS1003", "المعطى مفقود للمبدل @مبدئي.");
+
+    Core.addLocalization("en", "ROWS1004", "Missing param for @check modifier.");
+    Core.addLocalization("ar", "ROWS1004", "المعطى مفقود للمبدل @تحقق.");
+
+    Core.addLocalization("en", "ROWS1005", "Missing params for @foreignKey modifier.");
+    Core.addLocalization("ar", "ROWS1005", "المعطيات مفقودة للمبدل @فهرس_وصل.");
+}
+
