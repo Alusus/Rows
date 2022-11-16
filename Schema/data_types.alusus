@@ -219,5 +219,19 @@
             return castSrdRef[d, DataType];
         }
     }
+    class Uuid {
+        @injection def dataType: DataType;
+        handler (this:DataType).isString(): Bool set_ptr {
+            return true;
+        }
+        handler (this:DataType).generateSqlString(driver: ref[Driver]): String set_ptr {
+            return driver.mapDataType(String(1, "Uuid"));
+        }
+        handler this_type(): SrdRef[DataType] {
+            def d: SrdRef[Uuid];
+            d.construct();
+            return castSrdRef[d, DataType];
+        }
+    }
 }
 
