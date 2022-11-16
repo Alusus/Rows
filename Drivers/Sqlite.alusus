@@ -112,6 +112,7 @@ import "libsqlite3.so.0";
         set(String("CharType"), String("TEXT"));
         set(String("Text"), String("TEXT"));
         set(String("Date"), String("TEXT"));
+        set(String("Uuid"), String("TEXT"));
     };
 
     module Sqlite {

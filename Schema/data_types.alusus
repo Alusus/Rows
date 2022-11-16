@@ -219,6 +219,7 @@
             return castSrdRef[d, DataType];
         }
     }
+
     class Uuid {
         @injection def dataType: DataType;
         handler (this:DataType).isString(): Bool set_ptr {
