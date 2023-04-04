@@ -80,7 +80,7 @@
             if fmt~cnt == '%' {
                 fmt = fmt + 1;
                 if fmt~cnt == 's' {
-                    currentSize += appendReplacement(output, currentSize, args~next_arg[String]);
+                    currentSize += appendReplacement(output, currentSize, args~next_arg[Srl.String]);
                     fmt = fmt + 1;
                 } else if fmt~cnt == 'p' {
                     currentSize += appendReplacement(output, currentSize, args~next_arg[CharsPtr]);
@@ -98,33 +98,33 @@
                     currentSize += appendReplacement(output, currentSize, args~next_arg[Float[64]]);
                     fmt = fmt + 1;
                 } else if fmt~cnt == 'a' and (fmt + 1)~cnt == 's' {
-                    currentSize += appendReplacementArray[String](
-                        output, currentSize, args~next_arg[Array[String]]
+                    currentSize += appendReplacementArray[Srl.String](
+                        output, currentSize, args~next_arg[Srl.Array[Srl.String]]
                     );
                     fmt = fmt + 2;
                 } else if fmt~cnt == 'a' and (fmt + 1)~cnt == 'p' {
                     currentSize += appendReplacementArray[CharsPtr](
-                        output, currentSize, args~next_arg[Array[CharsPtr]]
+                        output, currentSize, args~next_arg[Srl.Array[CharsPtr]]
                     );
                     fmt = fmt + 2;
                 } else if fmt~cnt == 'a' and (fmt + 1)~cnt == 'i' {
                     currentSize += appendReplacementArray[Int](
-                        output, currentSize, args~next_arg[Array[Int]]
+                        output, currentSize, args~next_arg[Srl.Array[Int]]
                     );
                     fmt = fmt + 2;
                 } else if fmt~cnt == 'a' and (fmt + 1)~cnt == 'l' {
                     currentSize += appendReplacementArray[Int[64]](
-                        output, currentSize, args~next_arg[Array[Int[64]]]
+                        output, currentSize, args~next_arg[Srl.Array[Int[64]]]
                     );
                     fmt = fmt + 2;
                 } else if fmt~cnt == 'a' and (fmt + 1)~cnt == 'f' {
                     currentSize += appendReplacementArray[Float[32]](
-                        output, currentSize, args~next_arg[Array[Float[32]]]
+                        output, currentSize, args~next_arg[Srl.Array[Float[32]]]
                     );
                     fmt = fmt + 2;
                 } else if fmt~cnt == 'a' and (fmt + 1)~cnt == 'd' {
                     currentSize += appendReplacementArray[Float[64]](
-                        output, currentSize, args~next_arg[Array[Float[64]]]
+                        output, currentSize, args~next_arg[Srl.Array[Float[64]]]
                     );
                     fmt = fmt + 2;
                 }

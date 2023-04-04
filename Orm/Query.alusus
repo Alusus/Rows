@@ -98,27 +98,27 @@
             this~use_in(_this) no_injection {
                 _this.where = preprocess {
                     if !Spp.astMgr.insertAst(
-                        generateWhere(ast condition).obj
+                        Rows.generateWhere(ast condition).obj
                     ) {
-                        System.fail(1, "Failed to insert condition.\n");
+                        Srl.System.fail(1, "Failed to insert condition.\n");
                     }
                 }
             }
         }
 
         @member macro update [this, expression] {
-            Result()~use_in(_result) no_injection {
+            Rows.Result()~use_in(_result) no_injection {
                 this~use_in(_this) no_injection {
-                    def data: Array[String];
-                    def columns: Array[String];
+                    def data: Srl.Array[Srl.String];
+                    def columns: Srl.Array[Srl.String];
                     preprocess {
                         if !Spp.astMgr.insertAst(
-                            generateUpdate(ast expression).obj
+                            Rows.generateUpdate(ast expression).obj
                         ) {
-                            System.fail(1, "Failed to insert update statements.\n");
+                            Srl.System.fail(1, "Failed to insert update statements.\n");
                         }
                     }
-                    _result = _this.db.exec(Update()~use_in(update) no_injection {
+                    _result = _this.db.exec(Rows.Update()~use_in(update) no_injection {
                         update.table = _this.getTableName();
                         update.columns = columns;
                         update.data = data;

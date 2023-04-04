@@ -1,14 +1,14 @@
 @merge module Rows {
     macro define_model_essentials {
-        def db: ref[Db];
+        def db: ref[Rows.Db];
         db~ptr = 0;
-        handler this.save(): Result {
+        handler this.save(): Rows.Result {
             if this.db~ptr != 0 return Rows.Query[this_type](this.db).save(this)
-            else return Result.failure(String("No DB connection is set for this model."));
+            else return Rows.Result.failure(Srl.String("No DB connection is set for this model."));
         }
-        handler this.delete(): Result {
+        handler this.delete(): Rows.Result {
             if this.db~ptr != 0 return Rows.Query[this_type](this.db).delete(this)
-            else return Result.failure(String("No DB connection is set for this model."));
+            else return Rows.Result.failure(Srl.String("No DB connection is set for this model."));
         }
     }
 
@@ -43,7 +43,7 @@
             }
             def mapContaining: ref[MapContaining](getInterface[obj, MapContaining]);
             if !Spp.astMgr.buildAst(
-                ast { String("NOT ") + (cond) },
+                ast { Srl.String("NOT ") + (cond) },
                 Map[String, ref[TiObject]]()
                     .set(String("cond"), generateWhere(mapContaining.getElement(0)).obj),
                 result2
@@ -62,10 +62,10 @@
             }
             if !Spp.astMgr.buildAst(
                 ast {
-                    String("\"") + escapeString(_this.getColumnNameForVar(String("{{name}}"))) + "\"" +
-                    String(" {{op}} '") +
-                    escapeString(_this.validationBuffer.name~use_in(_buffer) no_injection { _buffer = val }) +
-                    String("'")
+                    Srl.String("\"") + Rows.escapeString(_this.getColumnNameForVar(Srl.String("{{name}}"))) + "\"" +
+                    Srl.String(" {{op}} '") +
+                    Rows.escapeString(_this.validationBuffer.name~use_in(_buffer) no_injection { _buffer = val }) +
+                    Srl.String("'")
                 },
                 Map[String, ref[TiObject]]()
                     .set(String("name"), mapContaining.getElement("first"))
@@ -79,7 +79,7 @@
             def binding: ref[Binding](getInterface[obj, Binding]);
             def mapContaining: ref[MapContaining](getInterface[obj, MapContaining]);
             if !Spp.astMgr.buildAst(
-                ast { (cond1) + String(" {{op}} ") + (cond2) },
+                ast { (cond1) + Srl.String(" {{op}} ") + (cond2) },
                 Map[String, ref[TiObject]]()
                     .set(String("cond1"), generateWhere(mapContaining.getElement("first")).obj)
                     .set(String("op"), binding.getMember("type"))
@@ -91,7 +91,7 @@
         } else if isDerivedFrom[obj, Bracket] {
             def mapContaining: ref[MapContaining](getInterface[obj, MapContaining]);
             if !Spp.astMgr.buildAst(
-                ast { String("(") + (cond) + String(")") },
+                ast { Srl.String("(") + (cond) + Srl.String(")") },
                 Map[String, ref[TiObject]]()
                    .set(String("cond"), generateWhere(mapContaining.getElement("operand")).obj),
                 result
@@ -107,8 +107,8 @@
 
             if !Spp.astMgr.buildAst(
                 ast {
-                    String("\"") + escapeString(_this.getColumnNameForVar(String("{{name}}"))) + "\"" +
-                    String(" in (")
+                    Srl.String("\"") + Rows.escapeString(_this.getColumnNameForVar(Srl.String("{{name}}"))) + "\"" +
+                    Srl.String(" in (")
                 },
                 Map[String, ref[TiObject]]().set(String("name"),mapContaining.getElement("first")),
                 result2
@@ -121,9 +121,11 @@
                 if !Spp.astMgr.buildAst(
                     ast {
                         result + (
-                            String("'" ) +
-                            escapeString(_this.validationBuffer.name~use_in(_buffer) no_injection { _buffer = val }) +
-                            String("' , ")
+                            Srl.String("'" ) +
+                            Rows.escapeString(
+                                _this.validationBuffer.name~use_in(_buffer) no_injection { _buffer = val }
+                            ) +
+                            Srl.String("' , ")
                         )
                     },
                     Map[String, ref[TiObject]]()
@@ -139,9 +141,9 @@
             if !Spp.astMgr.buildAst(
                 ast {
                     result + (
-                        String("'" ) +
-                        escapeString(_this.validationBuffer.name~use_in(_buffer) no_injection { _buffer = val }) +
-                        String("')")
+                        Srl.String("'" ) +
+                        Rows.escapeString(_this.validationBuffer.name~use_in(_buffer) no_injection { _buffer = val }) +
+                        Srl.String("')")
                     )
                 },
                 Map[String, ref[TiObject]]()
@@ -155,7 +157,7 @@
         } else {
             Spp.buildMgr.raiseBuildNotice("SPPG1002", 1, obj);
             if !Spp.astMgr.buildAst(
-                ast { String("") },
+                ast { Srl.String("") },
                 Map[String, ref[TiObject]](),
                 result
             ) {
@@ -174,7 +176,7 @@
         if isDerivedFrom[obj, Identifier] {
             if !Spp.astMgr.buildAst(
                 ast {
-                    this.ordering.add(this.getColumnNameForVar(String("{{column}}")));
+                    this.ordering.add(this.getColumnNameForVar(Srl.String("{{column}}")));
                     this.validationBuffer.column;
                 },
                 Map[String, ref[TiObject]]().set(String("column"), obj),
@@ -195,7 +197,7 @@
             }
             if !Spp.astMgr.buildAst(
                 ast {
-                    this.ordering.add(String("-") + this.getColumnNameForVar(String("{{column}}")));
+                    this.ordering.add(Srl.String("-") + this.getColumnNameForVar(Srl.String("{{column}}")));
                     this.validationBuffer.column;
                 },
                 Map[String, ref[TiObject]]().set(String("column"), obj),
@@ -249,9 +251,9 @@
                 def mapContainer: MapContainerOf[obj];
                 if !Spp.astMgr.buildAst(
                     ast {
-                        columns.add(_this.getColumnNameForVar(String("{{name}}")));
+                        columns.add(_this.getColumnNameForVar(Srl.String("{{name}}")));
                         _this.validationBuffer.name = val;
-                        data.add(String() + _this.validationBuffer.name);
+                        data.add(Srl.String() + _this.validationBuffer.name);
                     },
                     Map[String, ref[TiObject]]()
                         .set(String("name"), mapContainer.getElement("first"))
@@ -311,7 +313,7 @@
                 }
             } else if varType.getMyTypeInfo().typeName == "IntegerType" {
                 if !Spp.astMgr.insertAst(
-                    (ast model.intVal = parseInt(data(j).buf)),
+                    (ast model.intVal = Rows.parseInt(data(j).buf)),
                     Map[String, ref[TiObject]]()
                         .set(String("j"), Core.Data.Ast.IntegerLiteral(String("") + i))
                         .set(String("intVal"), Core.Data.Ast.Identifier(varNames(i)))
@@ -320,7 +322,7 @@
                 }
             } else if varType.getMyTypeInfo().typeName == "FloatType" {
                 if !Spp.astMgr.insertAst(
-                    (ast model.floatVal = parseFloat(data(j).buf)),
+                    (ast model.floatVal = Rows.parseFloat(data(j).buf)),
                     Map[String, ref[TiObject]]()
                         .set(String("j"), Core.Data.Ast.IntegerLiteral(String("") + i))
                         .set(String("floatVal"), Core.Data.Ast.Identifier(varNames(i)))
@@ -337,7 +339,7 @@
         def i: Int;
         for i = 0, i < varArray.getLength(), i = i+1 {
             if !Spp.astMgr.insertAst(
-                (ast data.add(String() + model.varName)),
+                (ast data.add(Srl.String() + model.varName)),
                 Map[String, ref[TiObject]]().set(String("varName"), Core.Data.Ast.Identifier(varArray(i)))
             ) {
                 System.fail(1, "Unexpected error while processing generateGetData.\n");
