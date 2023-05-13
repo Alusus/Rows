@@ -7,7 +7,7 @@
 
 يمكن تثبيت هذه المكتبة باستعمال التعليمات البرمجية التالية:
 
-<dir dir=rtl>
+<div dir=rtl>
 
 ```
 اشمل "مـحا"؛
@@ -99,6 +99,7 @@ def db: Db(MysqlDriver(ConnectionParams().{
 
 ```
 Apm.importFile("Alusus/Rows", { "Rows.alusus", "Drivers/Sqlite.alusus" });
+use Rows;
 def db: Db(SqliteDriver(ConnectionParams().{
     dbName = "alusus.db";
 }));
