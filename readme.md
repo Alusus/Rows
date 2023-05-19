@@ -305,7 +305,7 @@ or `Db.save` or `SchemaBuilder.create`.
 ### Data Type Modifiers
 
 * `@Integer`
-* `@BitInteger`
+* `@BigInteger`
 * `@SmallInteger`
 * `@TinyInteger`
 * `@Real`
