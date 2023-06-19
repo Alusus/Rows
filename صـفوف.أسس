@@ -100,7 +100,7 @@
     عرف مـعرف_عالمي: لقب Uuid؛
 
     ماكرو عرف_أساسيات_الجدول {
-        ‏define_model_essentials[];
+        ‏صـفوف.define_model_essentials[]؛
         عرف قب: لقب db؛
         عرف احفظ: لقب save؛
         عرف احذف: لقب delete؛
