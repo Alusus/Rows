@@ -14,12 +14,12 @@ if !db.driver.isConnected() {
 }
 
 def data: Array[Array[String]];
-def res: Result[Array[Array[String]]];
+def res: Possible[Array[Array[String]]];
 res = db.exec(Select().{
     table = String("users");
 });
 if !!res {
-    System.fail(1, String("Query failed: ") + res.error);
+    System.fail(1, String("Query failed: ") + res.error.getMessage());
 }
 data = res;
 
@@ -37,6 +37,6 @@ res = db.exec(Select().{
     table = String("unknown_table");
 });
 if !!res {
-    System.fail(1, String("Query failed: ") + res.error);
+    System.fail(1, String("Query failed: ") + res.error.getMessage());
 }
 

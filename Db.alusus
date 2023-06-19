@@ -21,43 +21,49 @@
             else return this.driver.getLastError();
         }
 
-        handler this.exec(select: ref[Select]): Result[Array[Array[String]]] {
+        handler this.exec(select: ref[Select]): Possible[Array[Array[String]]] {
             return this._execSelect(select.generateSqlString(), "Select");
         }
 
-        handler this.exec(update: ref[Update]): Result {
+        handler this.exec(update: ref[Update]): Possible[Int] {
             return this._exec(update.generateSqlString(), "Update");
         }
 
-        handler this.exec(insert: ref[Insert]): Result {
+        handler this.exec(insert: ref[Insert]): Possible[Int] {
             return this._exec(insert.generateSqlString(), "Insert");
         }
 
-        handler this.exec(delete: ref[Delete]): Result {
+        handler this.exec(delete: ref[Delete]): Possible[Int] {
             return this._exec(delete.generateSqlString(), "Delete");
         }
 
-        handler this.exec(createTable: ref[CreateTable]): Result {
+        handler this.exec(createTable: ref[CreateTable]): Possible[Int] {
             return this._exec(createTable.generateSqlString(this.driver), "Table creation");
         }
 
-        handler this.execSelect(statement: CharsPtr, args: ...any): Result[Array[Array[String]]] {
+        handler this.execSelect(statement: CharsPtr, args: ...any): Possible[Array[Array[String]]] {
             def sql: String;
             prepareStatement[sql, statement, args];
             return this._execSelect(sql, "Raw query");
         }
 
-        handler this.exec(statement: CharsPtr, args: ...any): Result {
+        handler this.exec(statement: CharsPtr, args: ...any): Possible[Int] {
             def sql: String;
             prepareStatement[sql, statement, args];
             return this._exec(sql, "Raw query");
         }
 
-        handler this._execSelect(sql: String, operationName: CharsPtr): Result[Array[Array[String]]] {
+        handler this._execSelect(sql: String, operationName: CharsPtr): Possible[Array[Array[String]]] {
             if this.driver.obj~ptr == 0 {
-                return Result[Array[Array[String]]].failure(String("Error: DB is not initialzied."));
+                return Possible[Array[Array[String]]].failure(SrdRef[GenericError].construct().{
+                    code = 1;
+                    message = "Error: DB is not initialzied.";
+                });
             } else if !this.driver.isConnected() {
-                return Result[Array[Array[String]]].failure(String("Error: DB is not connected."));
+                return Possible[Array[Array[String]]].failure(SrdRef[GenericError].construct().{
+                    code = 1;
+                    message = "Error: DB is not connected.";
+                });
             } else {
                 if this.logging {
                     Console.print("%s>> Executing SQL:%s\n%s\n", Console.Style.FG_GREEN, Console.Style.RESET, sql.buf);
@@ -67,7 +73,9 @@
                     if this.logging {
                         Console.print("%s>> SQL Error:%s\n%s\n", Console.Style.FG_RED, Console.Style.RESET, err.buf);
                     }
-                    return Result[Array[Array[String]]].failure(err);
+                    return Possible[Array[Array[String]]].failure(
+                        SrdRef[GenericError].construct().{ code = 1; message = err }
+                    );
                 } else {
                     def numberOfFileds: int;
                     numberOfFileds = this.driver.getColumnCount();
@@ -80,28 +88,34 @@
                         }
                         result.add(row);
                     }
-                    return Result[Array[Array[String]]].success(result);
+                    return Possible[Array[Array[String]]].success(result);
                 }
             }
         }
 
-        handler this._exec(sql: String, operationName: CharsPtr): Result {
+        handler this._exec(sql: String, operationName: CharsPtr): Possible[Int] {
             if this.logging {
                 Console.print("%s>> Executing SQL:%s\n%s\n", Console.Style.FG_GREEN, Console.Style.RESET, sql.buf);
             }
             if this.driver.obj~ptr == 0 {
-	            return Result.failure(String("Error: DB is not initialzied."));
+	            return Possible[Int].failure(
+	                SrdRef[GenericError].construct().{ code = 1; message = "Error: DB is not initialzied." }
+	            );
             } else if !this.driver.isConnected() {
-	            return Result.failure(String("Error: DB is not connected."));
+	            return Possible[Int].failure(
+	                SrdRef[GenericError].construct().{ code = 1; message = "Error: DB is not connected." }
+	            );
             } else {
                 if !this.driver.exec(sql, false) {
                     def err: String = this.driver.getLastError();
                     if this.logging {
                         Console.print("%s>> SQL Error:%s\n%s\n", Console.Style.FG_RED, Console.Style.RESET, err.buf);
                     }
-                    return Result.failure(err);
+                    return Possible[Int].failure(
+    	                SrdRef[GenericError].construct().{ code = 1; message = err }
+                    );
                 }
-                return Result.success();
+                return Possible[Int].success(0);
             }
         }
 

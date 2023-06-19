@@ -22,12 +22,12 @@ if !!db.exec(Delete().{
 
 def i: Int;
 for i = 0, i < 4, ++i {
-    def res: Result = db.exec(Delete().{
+    def res: Possible[Int] = db.exec(Delete().{
         table = String("users");
         condition("id=%i", 150+i);
     });
     if !!res {
-        System.fail(1, String("Query failed: ") + res.error);
+        System.fail(1, String("Query failed: ") + res.error.getMessage());
     }
 }
 

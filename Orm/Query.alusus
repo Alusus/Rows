@@ -107,7 +107,7 @@
         }
 
         @member macro update [this, expression] {
-            Rows.Result()~use_in(_result) no_injection {
+            Possible[Int]()~use_in(_result) no_injection {
                 this~use_in(_this) no_injection {
                     def data: Srl.Array[Srl.String];
                     def columns: Srl.Array[Srl.String];
@@ -128,7 +128,7 @@
             }
         }
 
-        handler this.select(): Result[Array[SrdRef[Model]]] {
+        handler this.select(): Possible[Array[SrdRef[Model]]] {
             def data : Array[Array[String]];
             this.db.exec(Select()~use_in(select) {
                 table = this.getTableName();
@@ -136,7 +136,7 @@
                 _condition = this.where;
                 orderBy = this.ordering;
             })~use_in (res) no_injection {
-                if !!res return Result[Array[SrdRef[Model]]].failure(res.error);
+                if !!res return Possible[Array[SrdRef[Model]]].failure(res.error);
                 data = res;
             }
             def models: Array[SrdRef[Model]];
@@ -146,10 +146,10 @@
                 model.db~no_deref = this.db;
                 models.add(model);
             }
-            return Result[Array[SrdRef[Model]]].success(models);
+            return Possible[Array[SrdRef[Model]]].success(models);
         }
 
-        handler this.save(model: ref[Model]): Result {
+        handler this.save(model: ref[Model]): Possible[Int] {
             if model.db~ptr == this.db~ptr {
                 // Update an existing record.
                 this.setWhereForPrimaryKey(model);
@@ -161,7 +161,7 @@
                 });
             } else {
                 // Create a new record.
-                def res: Result = this.db.exec(Insert()~use_in(insert) no_injection {
+                def res: Possible[Int] = this.db.exec(Insert()~use_in(insert) no_injection {
                     insert.table = this.getTableName();
                     insert.columns = getColumnNames();
                     insert.data = getRecordData(model);
@@ -171,14 +171,14 @@
             }
         }
 
-        handler this.delete(model: ref[Model]): Result {
+        handler this.delete(model: ref[Model]): Possible[Int] {
             this.setWhereForPrimaryKey(model);
-            def res: Result = this.delete();
+            def res: Possible[Int] = this.delete();
             if res model.db~ptr = 0;
             return res;
         }
 
-        handler this.delete(): Result {
+        handler this.delete(): Possible[Int] {
             return this.db.exec(Delete()~use_in(delete) {
                 delete.table = this.getTableName();
                 delete._condition = this.where;

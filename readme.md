@@ -104,7 +104,7 @@ if !!db.exec(CreateTable().{
 
 // create another model
 // this model is linked to the first one by a foreign key
-def res: Result = db.exec(CreateTable().{
+def res: Possible[Int] = db.exec(CreateTable().{
     name = String("roles");
     notExists = true;
     columns = Map[String, SrdRef[Column]]().{
@@ -129,7 +129,7 @@ def res: Result = db.exec(CreateTable().{
     });
 });
 if not res {
-    System.fail(1, String("Query failed: ") + res.error);
+    System.fail(1, String("Query failed: ") + res.error.getMessage());
 }
 
 // Insert some data
@@ -141,25 +141,25 @@ def addresses: Array[String]({ String("Canada"), String("Syria"), String("KSA"),
 
 def i: Int;
 for i = 0, i < names.getLength(), ++i {
-    def res: Result = db.exec(Insert().{
+    def res: Possible[Int] = db.exec(Insert().{
         table = String("users");
         columns = Array[String]({ String("id"), String("name"), String("address") });
         data = Array[String]({ String("15") + i, names(i), addresses(i)  });
     });
     if !!res {
-        System.fail(1, String("Query failed: ") + res.error);
+        System.fail(1, String("Query failed: ") + res.error.getMessage());
     }
 }
 
 // Read the data
 
 def data: Array[Array[String]];
-def res: Result[Array[Array[String]]];
+def res: Possible[Array[Array[String]]];
 res = db.exec(Select().{
     table = String("users");
 });
 if !!res {
-    System.fail(1, String("Query failed: ") + res.error);
+    System.fail(1, String("Query failed: ") + res.error.getMessage());
 }
 data = res;
 
@@ -474,9 +474,9 @@ class Query [Model: type] {
     handler [exp: ast] this.order:ref[this_type];
     @member macro where [this, condition];
     @member macro update [this, expression];
-    handler this.select(): Result[Array[SrdRef[Model]]];
-    handler this.save(model: ref[Model]): Result;
-    handler this.delete(model: ref[Model]): Result;
+    handler this.select(): Possible[Array[SrdRef[Model]]];
+    handler this.save(model: ref[Model]): Possible[Int];
+    handler this.delete(model: ref[Model]): Possible[Int];
 }
 ```
 
@@ -522,7 +522,7 @@ db.from[User].where[name = arg1].update[address = arg2];
 
 ```
 class SchemaBuilder [Model: type] {
-    handler this.create(): Result;
+    handler this.create(): Possible[Int];
 }
 ```
 
@@ -537,12 +537,12 @@ correct decorations as specified in the Object Relational Mapping section above.
 class Db {
     handler this.isConnected(): Bool;
     handler this.getLastError(): String;
-    handler this.exec(select: ref[Select]): Result[Array[Array[String]]];
-    handler this.exec(update: ref[Update]): Result;
-    handler this.exec(insert: ref[Insert]): Result;
-    handler this.exec(delete: ref[Delete]): Result;
-    handler this.exec(createTable: ref[CreateTable]): Result;
-    handler this.exec(statement: CharsPtr, args: ...any): Result;
+    handler this.exec(select: ref[Select]): Possible[Array[Array[String]]];
+    handler this.exec(update: ref[Update]): Possible[Int];
+    handler this.exec(insert: ref[Insert]): Possible[Int];
+    handler this.exec(delete: ref[Delete]): Possible[Int];
+    handler this.exec(createTable: ref[CreateTable]): Possible[Int];
+    handler this.exec(statement: CharsPtr, args: ...any): Possible[Int];
     handler [Model: type] this.from: Query[Model];
     handler [Model: type] this.save(model: ref[Model]);
     handler [Model: type] this.schemaBuilder: SchemaBuilder[Model];
@@ -577,27 +577,6 @@ following types of data params are supported by this function:
 `save` used to call the method `save` in the class `Query`.
 
 `schemaBuilder` used to return a schemaBuilder based on the information of this class.
-
-### Result class
-
-```
-class Result [DataType: type = Int] {
-    def data: DataType;
-    def error: String;
-
-    func success (d: ref[DataType]): Result[DataType];
-    func success (): Result[DataType];
-    func failure (err: String): Result[DataType];
-}
-```
-
-`data` a variable that holds the data for the result from executing a query.
-
-`error` a variable that holds the error that occurred while executing a query.
-
-`success` used to return the result with or without a data.
-
-`failure` used to return the result with an error message.
 
 ## To Do
 - [ ] Add remaining DB operations:

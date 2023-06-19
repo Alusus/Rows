@@ -10,7 +10,7 @@
             this.db~no_deref = value.db;
         }
 
-        handler this.create(): Result {
+        handler this.create(): Possible[Int] {
             return this.db.exec(
                 preprocess {
                     // Pre-generate classes to avoid circular dependencies during code generation.

@@ -2,13 +2,17 @@
     macro define_model_essentials {
         def db: ref[Rows.Db];
         db~ptr = 0;
-        handler this.save(): Rows.Result {
+        handler this.save(): Srl.Possible[Int] {
             if this.db~ptr != 0 return Rows.Query[this_type](this.db).save(this)
-            else return Rows.Result.failure(Srl.String("No DB connection is set for this model."));
+            else return Srl.Possible[Int].failure(
+                SrdRef[GenericError].construct().{ code = 1; message = "No DB connection is set for this model." }
+            );
         }
-        handler this.delete(): Rows.Result {
+        handler this.delete(): Srl.Possible[Int] {
             if this.db~ptr != 0 return Rows.Query[this_type](this.db).delete(this)
-            else return Rows.Result.failure(Srl.String("No DB connection is set for this model."));
+            else return Srl.Possible[Int].failure(
+                SrdRef[GenericError].construct().{ code = 1; message = "No DB connection is set for this model." }
+            );
         }
     }
 

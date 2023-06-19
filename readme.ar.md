@@ -168,7 +168,7 @@ def db: Db(SqliteDriver(ConnectionParams().{
 // ننشئ جدولا آخر
 
 // هذا الجدول مرتبط بالجدول الأول عبر فهرس_وصل
-عرف نتيجة: نـتيجة = قب.نفذ(إنـشاء_جدول().{
+عرف نتيجة: لـا_مضمون[صـحيح] = قب.نفذ(إنـشاء_جدول().{
     الاسم = نـص("roles")؛
     جديد_فقط = 1؛
     الحقول = تـطبيق[نـص, سـندنا[حـقل]]().{
@@ -193,7 +193,7 @@ def db: Db(SqliteDriver(ConnectionParams().{
     })؛
 })؛
 إذا ليس نتيجة {
-    نـظام.فشل(1, نـص("فشلت العملية: ") + نتيجة.خطأ)؛
+    نـظام.فشل(1, نـص("فشلت العملية: ") + نتيجة.خطأ.هات_الرسالة())؛
 }
 
 // ندخل بعض البيانات
@@ -217,12 +217,12 @@ def db: Db(SqliteDriver(ConnectionParams().{
 // نقرأ البيانات
 
 عرف بيانات: مـصفوفة[مـصفوفة[نـص]]؛
-عرف نتيجة: نـتيجة[مـصفوفة[مـصفوفة[نـص]]]؛
+عرف نتيجة: لـا_مضمون[مـصفوفة[مـصفوفة[نـص]]]؛
 نتيجة = قب.نفذ(جـلب().{
     الجدول = نـص("users")؛
 })؛
 إذا !!نتيجة {
-    نـظام.فشل(1, نـص("فشلت العملية: ") + نتيجة.خطأ)؛
+    نـظام.فشل(1, نـص("فشلت العملية: ") + نتيجة.خطأ.هات_الرسالة())؛
 }
 بيانات = نتيجة؛
 
@@ -240,6 +240,7 @@ def db: Db(SqliteDriver(ConnectionParams().{
 </div>
 
 ```
+import "Srl/Possible";
 import "Apm";
 Apm.importFile("Alusus/Rows", { "Rows.alusus", "Drivers/Mysql.alusus" });
 use Srl;
@@ -286,7 +287,7 @@ if !!db.exec(CreateTable().{
 
 // ننشئ جدولا آخر
 // هذا الجدول مرتبط بالجدول الأول عبر فهرس_وصل
-def res: Result = db.exec(CreateTable().{
+def res: Possible[Int] = db.exec(CreateTable().{
     name = String("roles");
     notExists = true;
     columns = Map[String, SrdRef[Column]]().{
@@ -311,7 +312,7 @@ def res: Result = db.exec(CreateTable().{
     });
 });
 if not res {
-    System.fail(1, String("Query failed: ") + res.error);
+    System.fail(1, String("Query failed: ") + res.error.getMessage());
 }
 
 // ندخل بعض البيانات
@@ -324,25 +325,25 @@ def addresses: Array[String]({ String("Canada"), String("Syria"), String("KSA"),
 
 def i: Int;
 for i = 0, i < names.getLength(), ++i {
-    def res: Result = db.exec(Insert().{
+    def res: Possible[Int] = db.exec(Insert().{
         table = String("users");
         columns = Array[String]({ String("id"), String("name"), String("address") });
         data = Array[String]({ String("15") + i, names(i), addresses(i)  });
     });
     if !!res {
-        System.fail(1, String("Query failed: ") + res.error);
+        System.fail(1, String("Query failed: ") + res.error.getMessage());
     }
 }
 
 // نقرأ البيانات
 
 def data: Array[Array[String]];
-def res: Result[Array[Array[String]]];
+def res: Possible[Array[Array[String]]];
 res = db.exec(Select().{
     table = String("users");
 });
 if !!res {
-    System.fail(1, String("Query failed: ") + res.error);
+    System.fail(1, String("Query failed: ") + res.error.getMessage());
 }
 data = res;
 
@@ -865,9 +866,9 @@ class Column {
     عرف رتب: سند[نمط_هذا]؛
     عرف حيثما: ماكرو[هذا، شرط]؛
     عرف حدث: ماكرو[هذا، عبارة]؛
-    عرف اجلب(): نـتيجة[مـصفوفة[سـندنا[جـدول]]]؛
-    عرف احفظ(جدول: سند[جـدول]): نـتيجة؛
-    عرف احذف(جدول: سند[جـدول]): نـتيجة؛
+    عرف اجلب(): لـا_مضمون[مـصفوفة[سـندنا[جـدول]]]؛
+    عرف احفظ(جدول: سند[جـدول]): لـا_مضمون[صـحيح]؛
+    عرف احذف(جدول: سند[جـدول]): لـا_مضمون[صـحيح]؛
 }
 ```
 
@@ -878,9 +879,9 @@ class Query [Model: type] {
     handler [exp: ast] this.order:ref[this_type];
     @member macro where [this, condition];
     @member macro update [this, expression];
-    handler this.select(): Result[Array[SrdRef[Model]]];
-    handler this.save(model: ref[Model]): Result;
-    handler this.delete(model: ref[Model]): Result;
+    handler this.select(): Possible[Array[SrdRef[Model]]];
+    handler this.save(model: ref[Model]): Possible[Int];
+    handler this.delete(model: ref[Model]): Possible[Int];
 }
 ```
 
@@ -935,7 +936,7 @@ db.from[User].where[name = arg1].update[address = arg2];
 
 ```
 صنف مـهيكل {
-    عرف أنشئ(): نـتيجة؛
+    عرف أنشئ(): لـا_مضمون[صـحيح]؛
 }
 ```
 
@@ -943,7 +944,7 @@ db.from[User].where[name = arg1].update[address = arg2];
 
 ```
 class SchemaBuilder [Model: type] {
-    handler this.create(): Result;
+    handler this.create(): Possible[Int];
 }
 ```
 
@@ -960,12 +961,12 @@ class SchemaBuilder [Model: type] {
 صنف قـاعدة_بيانات {
     عرف أمتصل(): ثـنائي؛
     عرف هات_آخر_خطأ(): نـص؛
-    عرف نفذ(اجلب: سند[اجـلب]): نـتيجة[مـصفوفة[مـصفوفة[نـص]]]؛
-    عرف نفذ(تحديث: سند[تـحديث]): نـتيجة؛
-    عرف نفذ(أدخل: سند[احـشر]): نـتيجة؛
-    عرف نفذ(احذف: سند[احـذف]): نـتيجة؛
-    عرف نفذ(أنشئ_جـدول: سند[أنـشئ_جدول]): نـتيجة؛
-    عرف نفذ(عبارة: مؤشر[مـحرف]، معطيات: ...أي_معطيات_أخرى): نـتيجة؛
+    عرف نفذ(اجلب: سند[اجـلب]): لـا_مضمون[مـصفوفة[مـصفوفة[نـص]]]؛
+    عرف نفذ(تحديث: سند[تـحديث]): لـا_مضمون[صـحيح]؛
+    عرف نفذ(أدخل: سند[احـشر]): لـا_مضمون[صـحيح]؛
+    عرف نفذ(احذف: سند[احـذف]): لـا_مضمون[صـحيح]؛
+    عرف نفذ(أنشئ_جـدول: سند[أنـشئ_جدول]): لـا_مضمون[صـحيح]؛
+    عرف نفذ(عبارة: مؤشر[مـحرف]، معطيات: ...أي_معطيات_أخرى): لـا_مضمون[صـحيح]؛
     عرف [جـدول: نمط] من: اسـتعلام[جـدول]؛
     عرف [جـدول: نمط] احفظ(جدول: سند[جـدول])؛
     عرف [جـدول: نمط] مهيكل: مـهيكل[جـدول]؛
@@ -978,12 +979,12 @@ class SchemaBuilder [Model: type] {
 class Db {
     handler this.isConnected(): Bool;
     handler this.getLastError(): String;
-    handler this.exec(select: ref[Select]): Result[Array[Array[String]]];
-    handler this.exec(update: ref[Update]): Result;
-    handler this.exec(insert: ref[Insert]): Result;
-    handler this.exec(delete: ref[Delete]): Result;
-    handler this.exec(createTable: ref[CreateTable]): Result;
-    handler this.exec(statement: CharsPtr, args: ...any): Result;
+    handler this.exec(select: ref[Select]): Possible[Array[Array[String]]];
+    handler this.exec(update: ref[Update]): Possible[Int];
+    handler this.exec(insert: ref[Insert]): Possible[Int];
+    handler this.exec(delete: ref[Delete]): Possible[Int];
+    handler this.exec(createTable: ref[CreateTable]): Possible[Int];
+    handler this.exec(statement: CharsPtr, args: ...any): Possible[Int];
     handler [Model: type] this.from: Query[Model];
     handler [Model: type] this.save(model: ref[Model]);
     handler [Model: type] this.schemaBuilder: SchemaBuilder[Model];
@@ -1023,37 +1024,3 @@ class Db {
 
 `مهيكل` (`schemaBuilder`) يستعمل لإعادة مهيكل بناء على المعلومات في هذا الصنف.
 
-### الصنف نـتيجة (Result)
-
-<div dir=rtl>
-
-```
-صنف نـتيجة {
-    عرف بيانات: نـمط_البيانات؛
-    عرف خطأ: نـص؛
-    عرف نجاح(بيانات: سند[نـمط_البيانات]): نـتيجة[نـمط_البيانات]؛
-    عرف نجاح(): نـتيجة[نـمط_البيانات]؛
-    عرف فشل(خطأ: نـص): نـتيجة[نـمط_البيانات]؛
-}
-```
-
-</div>
-
-```
-class Result [DataType: type = Int] {
-    def data: DataType;
-    def error: String;
-
-    func success (d: ref[DataType]): Result[DataType];
-    func success (): Result[DataType];
-    func failure (err: String): Result[DataType];
-}
-```
-
-`بيانات` (`data`) متغير يحمل البيانات لهذه النتيجة الناتجة عن تطبيق استعلام ما.
-
-`خطأ` (`error`) متغير يحمل الخطأ الناتج أثناء محاولة تطبيق استعلام ما.
-
-`نجاح` (`success`) تستعمل لإعادة النتيجة مع بيانات أو بدون بيانات.
-
-`فشل` (`failure`) تستعمل لإعادة النتيجة مع رسالة خطأ.

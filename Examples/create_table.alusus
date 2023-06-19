@@ -37,7 +37,7 @@ if !!db.exec(CreateTable().{
     System.fail(1, String("Query failed: ") + db.getLastError());
 }
 
-def res: Result = db.exec(CreateTable().{
+def res: Possible[Int] = db.exec(CreateTable().{
     name = String("roles");
     notExists = true;
     columns = Map[String, SrdRef[Column]]().{
@@ -62,6 +62,6 @@ def res: Result = db.exec(CreateTable().{
     });
 });
 if not res {
-    System.fail(1, String("Query failed: ") + res.error);
+    System.fail(1, String("Query failed: ") + res.error.getMessage());
 }
 

@@ -22,22 +22,22 @@ def addresses: Array[String]({ String("Canada"), String("Syria"), String("KSA"),
 def i: Int;
 
 for i = 0, i < names.getLength(), ++i {
-    def res: Result = db.exec(Insert().{
+    def res: Possible[Int] = db.exec(Insert().{
         table = String("users");
         columns = Array[String]({ String("id"), String("name"), String("address") });
         data = Array[String]({ String("15") + i, names(i), addresses(i)  });
     });
     if !!res {
-        System.fail(1, String("Query failed: ") + res.error);
+        System.fail(1, String("Query failed: ") + res.error.getMessage());
     }
 }
 
-def res: Result = db.exec(Insert().{
+def res: Possible[Int] = db.exec(Insert().{
     table = String("roles");
     columns = Array[String]({ String("id"), String("name"), String("userId") });
     data = Array[String]({ String("250"), String("admin"), String("150") });
 });
 if !!res {
-    System.fail(1, String("Query failed: ") + res.error);
+    System.fail(1, String("Query failed: ") + res.error.getMessage());
 }
 
