@@ -55,15 +55,9 @@
 
         handler this._execSelect(sql: String, operationName: CharsPtr): Possible[Array[Array[String]]] {
             if this.driver.obj~ptr == 0 {
-                return Possible[Array[Array[String]]].failure(SrdRef[GenericError].construct().{
-                    code = 1;
-                    message = "Error: DB is not initialzied.";
-                });
+                return Possible[Array[Array[String]]].failure(Errors.dbNotInitialized());
             } else if !this.driver.isConnected() {
-                return Possible[Array[Array[String]]].failure(SrdRef[GenericError].construct().{
-                    code = 1;
-                    message = "Error: DB is not connected.";
-                });
+                return Possible[Array[Array[String]]].failure(Errors.dbNotConnected());
             } else {
                 if this.logging {
                     Console.print("%s>> Executing SQL:%s\n%s\n", Console.Style.FG_GREEN, Console.Style.RESET, sql.buf);
@@ -73,9 +67,7 @@
                     if this.logging {
                         Console.print("%s>> SQL Error:%s\n%s\n", Console.Style.FG_RED, Console.Style.RESET, err.buf);
                     }
-                    return Possible[Array[Array[String]]].failure(
-                        SrdRef[GenericError].construct().{ code = 1; message = err }
-                    );
+                    return Possible[Array[Array[String]]].failure(Errors.sqlError(err));
                 } else {
                     def numberOfFileds: int;
                     numberOfFileds = this.driver.getColumnCount();
@@ -98,22 +90,16 @@
                 Console.print("%s>> Executing SQL:%s\n%s\n", Console.Style.FG_GREEN, Console.Style.RESET, sql.buf);
             }
             if this.driver.obj~ptr == 0 {
-	            return Possible[Int].failure(
-	                SrdRef[GenericError].construct().{ code = 1; message = "Error: DB is not initialzied." }
-	            );
+	            return Possible[Int].failure(Errors.dbNotInitialized());
             } else if !this.driver.isConnected() {
-	            return Possible[Int].failure(
-	                SrdRef[GenericError].construct().{ code = 1; message = "Error: DB is not connected." }
-	            );
+	            return Possible[Int].failure(Errors.dbNotConnected());
             } else {
                 if !this.driver.exec(sql, false) {
                     def err: String = this.driver.getLastError();
                     if this.logging {
                         Console.print("%s>> SQL Error:%s\n%s\n", Console.Style.FG_RED, Console.Style.RESET, err.buf);
                     }
-                    return Possible[Int].failure(
-    	                SrdRef[GenericError].construct().{ code = 1; message = err }
-                    );
+                    return Possible[Int].failure(Errors.sqlError(err));
                 }
                 return Possible[Int].success(0);
             }

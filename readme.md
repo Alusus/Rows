@@ -578,6 +578,17 @@ following types of data params are supported by this function:
 
 `schemaBuilder` used to return a schemaBuilder based on the information of this class.
 
+### Errors
+
+The `Errors` submodule contains error codes for all errors that can be returned by this library.
+
+* `Errors.DB_NOT_INITIALIZED`: Raised when the `Db` class is being used before being initialized.
+* `Errors.DB_NOT_CONNECTED`: Raised when the `Db` is initialized with a DB driver but the driver is not properly
+  connected.
+* `Errors.SQL_ERROR`: Raised when an error occurs during the execution of an SQL statement.
+* `Errors.CONNECTION_MISSING`: Raised when `save` or `delete` is called on a model that isn't connected to a `Db`
+  object, i.e. it wasn't previously loaded using a `Db` object.
+
 ## To Do
 - [ ] Add remaining DB operations:
     - [ ] Adding column.

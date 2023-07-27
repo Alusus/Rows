@@ -1,0 +1,26 @@
+@merge module Rows {
+    module Errors {
+        def DB_NOT_INITIALIZED: "rows_db_not_initialized";
+        def DB_NOT_INITIALIZED_MSG: "DB is not initialized.";
+        func dbNotInitialized(): SrdRef[GenericError] {
+            return GenericError.new(DB_NOT_INITIALIZED, DB_NOT_INITIALIZED_MSG);
+        }
+
+        def DB_NOT_CONNECTED: "rows_db_not_connected";
+        def DB_NOT_CONNECTED_MSG: "DB is not connected.";
+        func dbNotConnected(): SrdRef[GenericError] {
+            return GenericError.new(DB_NOT_CONNECTED, DB_NOT_CONNECTED_MSG);
+        }
+
+        def SQL_ERROR: "rows_sql_error";
+        func sqlError(errorMsg: CharsPtr): SrdRef[GenericError] {
+            return GenericError.new(SQL_ERROR, errorMsg);
+        }
+
+        def CONNECTION_MISSING: "rows_connection_missing";
+        def CONNECTION_MISSING_MSG: "No DB connection is set for this model.";
+        func connectionMissing(): SrdRef[GenericError] {
+            return GenericError.new(CONNECTION_MISSING, CONNECTION_MISSING_MSG);
+        }
+    }
+}
