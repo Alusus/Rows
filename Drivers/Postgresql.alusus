@@ -17,6 +17,16 @@ import "libpq.so.5";
         def result: ptr[Postgresql.Result] = 0;
         def row: Int = -1;
 
+        func getBuildDependencies(): Array[String] {
+            return Array[String]({ String(preprocess {
+                if String.isEqual(Process.platform, "macos") {
+                    Spp.astMgr.insertAst(ast "libpq.dylib");
+                } else {
+                    Spp.astMgr.insertAst(ast "libpq.so.5");
+                }
+            }) });
+        }
+
         handler this_type(params: ref[ConnectionParams]): SrdRef[Driver] {
             def d: SrdRef[PostgresqlDriver];
             d.construct();
@@ -104,8 +114,7 @@ import "libpq.so.5";
         }
     }
 
-    def postgresqlDataTypeMap: Map[String, String];
-    postgresqlDataTypeMap.{
+    def postgresqlDataTypeMap: Map[String, String](Map[String, String]().{
         set(String("Integer"), String("integer"));
         set(String("BigInteger"), String("bigint"));
         set(String("SmallInteger"), String("smallint"));
@@ -119,7 +128,7 @@ import "libpq.so.5";
         set(String("Text"), String("text"));
         set(String("Date"), String("date"));
         set(String("Uuid"), String("uuid"));
-    };
+    });
 
     module Postgresql {
         // libpq Specific Definitions

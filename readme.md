@@ -535,6 +535,7 @@ correct decorations as specified in the Object Relational Mapping section above.
 
 ```
 class Db {
+    handler this.init(d: SrdRef[Driver]);
     handler this.isConnected(): Bool;
     handler this.getLastError(): String;
     handler this.exec(select: ref[Select]): Possible[Array[Array[String]]];
@@ -550,6 +551,8 @@ class Db {
 ```
 
 This class is used to manage the access to the database and executing many queries on it.
+
+`init` used to initialize the database with the given driver.
 
 `isConnected` used to check if there is a connection with the database.
 
@@ -577,6 +580,15 @@ following types of data params are supported by this function:
 `save` used to call the method `save` in the class `Query`.
 
 `schemaBuilder` used to return a schemaBuilder based on the information of this class.
+
+### getBuildDependencies Function
+
+```
+func getBuildDependencies(): Array[String];
+```
+
+Each of the available DB drivers defines this function for getting the external build dependencies
+needed to build an executable that connects with the given database type.
 
 ### Errors
 

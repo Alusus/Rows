@@ -18,6 +18,16 @@ import "libmysqlclient.so.21";
 
         def CONNECTION_SUCCESSFUL: "connected";
 
+        func getBuildDependencies(): Array[String] {
+            return Array[String]({ String(preprocess {
+                if String.isEqual(Process.platform, "macos") {
+                    Spp.astMgr.insertAst(ast "libmysqlclient.dylib");
+                } else {
+                    Spp.astMgr.insertAst(ast "libmysqlclient.so.21");
+                }
+            }) });
+        }
+
         handler this_type(params: ref[ConnectionParams]): SrdRef[Driver] {
             def d: SrdRef[MysqlDriver];
             d.construct();
@@ -107,8 +117,7 @@ import "libmysqlclient.so.21";
         }
     }
 
-    def mysqlDataTypeMap: Map[String, String];
-    mysqlDataTypeMap.{
+    def mysqlDataTypeMap: Map[String, String](Map[String, String]().{
         set(String("Integer"), String("INT"));
         set(String("BigInteger"), String("BIGINT"));
         set(String("SmallInteger"), String("SMALLINT"));
@@ -122,7 +131,7 @@ import "libmysqlclient.so.21";
         set(String("Text"), String("TEXT"));
         set(String("Date"), String("Date"));
         set(String("Uuid"), String("VARCHAR(36)"));
-    };
+    });
 
     module Mysql {
         // libmysqlclient Specific Definitions
