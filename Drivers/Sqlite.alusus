@@ -91,8 +91,10 @@ import "libsqlite3.so.0";
             return Sqlite.step(this.stmt) == Sqlite.Result.ROW;
         }
 
-        handler (this:Driver).getValue(i: Int): String set_ptr {
-            return String(Sqlite.column_text(this.stmt, i));
+        handler (this:Driver).getValue(i: Int): Nullable[String] set_ptr {
+            def val: CharsPtr = Sqlite.column_text(this.stmt, i);
+            if val == 0 return Nullable[String]()
+            else return Nullable[String](String(val));
         }
 
         handler (this:Driver).releaseResult() set_ptr {
@@ -113,6 +115,7 @@ import "libsqlite3.so.0";
         set(String("BigInteger"), String("INTEGER"));
         set(String("SmallInteger"), String("INTEGER"));
         set(String("TinyInteger"), String("INTEGER"));
+        set(String("Boolean"), String("INTEGER"));
         set(String("Real"), String("REAL"));
         set(String("Float"), String("REAL"));
         set(String("Decimal"), String("REAL"));
@@ -121,6 +124,7 @@ import "libsqlite3.so.0";
         set(String("CharType"), String("TEXT"));
         set(String("Text"), String("TEXT"));
         set(String("Date"), String("TEXT"));
+        set(String("DateTime"), String("TEXT"));
         set(String("Uuid"), String("TEXT"));
     });
 

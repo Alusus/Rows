@@ -8,7 +8,7 @@
         handler this.getColumnCount(): Int as_ptr;
         handler this.getColumnName(i: Int): String as_ptr;
         handler this.fetchNextRow(): Bool as_ptr;
-        handler this.getValue(i: Int): String as_ptr;
+        handler this.getValue(i: Int): Nullable[String] as_ptr;
         handler this.releaseResult() as_ptr;
         handler this.getLastError(): String as_ptr;
         handler this.mapDataType(dataType: String): String as_ptr;

@@ -6,12 +6,12 @@
             return this._table;
         }
 
-        def _data: Array[String];
-        handler this.data = Array[String] {
+        def _data: Array[Value];
+        handler this.data = Array[Value] {
             this._data.clear();
             def i: Int;
             for i = 0, i < value.getLength(), ++i {
-                this._data.add(escapeString(value(i)));
+                this._data.add(value(i));
             }
             return this._data;
         }
@@ -43,7 +43,7 @@
         }
 
         handler this.generateValsString(): String {
-            def str: String = "( ";
+            def str: String = "(";
 
             def size: int = 0;
             if this._data.getLength() < this._columns.getLength() size = this._data.getLength()
@@ -51,15 +51,15 @@
 
             def i: int = 0;
             for i = 0, i < size - 1, ++i {
-                str += String("'") + this._data(i) + "', ";
+                str += this._data(i).toString() + ", ";
             }
-            str += String("'") + this._data(size-1) + "')";
+            str += this._data(size-1).toString() + ")";
 
             return str;
         }
 
         handler this.generateSqlString(): String {
-            return String("INSERT INTO ") + this._table + "\n" + this.generateColsString() + "\n"
+            return String("INSERT INTO ") + this._table + this.generateColsString() + "\n"
                 + "VALUES " + this.generateValsString();
         }
     }

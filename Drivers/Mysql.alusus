@@ -99,9 +99,10 @@ import "libmysqlclient.so.21";
             return this.row != null;
         }
 
-        handler (this:Driver).getValue(i: Int): String set_ptr {
+        handler (this:Driver).getValue(i: Int): Nullable[String] set_ptr {
             // this.field = mysqlFetchFieldDirect(this.result, i);
-            return String(this.row~cnt(i));
+            if this.row~cnt(i) == 0 return Nullable[String]()
+            else return Nullable[String](String(this.row~cnt(i)));
         }
 
         handler (this:Driver).releaseResult() set_ptr {
@@ -122,6 +123,7 @@ import "libmysqlclient.so.21";
         set(String("BigInteger"), String("BIGINT"));
         set(String("SmallInteger"), String("SMALLINT"));
         set(String("TinyInteger"), String("TINYINT"));
+        set(String("Boolean"), String("BOOLEAN"));
         set(String("Real"), String("REAL"));
         set(String("Float"), String("FLOAT"));
         set(String("Decimal"), String("DECIMAL"));
@@ -129,7 +131,8 @@ import "libmysqlclient.so.21";
         set(String("VarChar"), String("VARCHAR"));
         set(String("CharType"), String("CHAR"));
         set(String("Text"), String("TEXT"));
-        set(String("Date"), String("Date"));
+        set(String("Date"), String("DATE"));
+        set(String("DateTime"), String("DATETIME"));
         set(String("Uuid"), String("VARCHAR(36)"));
     });
 

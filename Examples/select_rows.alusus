@@ -13,8 +13,8 @@ if !db.driver.isConnected() {
     System.fail(1, String("Error connecting to DB: ") + db.getLastError());
 }
 
-def data: Array[Array[String]];
-def res: Possible[Array[Array[String]]];
+def data: Array[Array[Nullable[String]]];
+def res: Possible[Array[Array[Nullable[String]]]];
 res = db.exec(Select().{
     table = String("users");
 });
@@ -27,7 +27,8 @@ def i: int = 0;
 def j: int = 0;
 for i = 0, i < data.getLength(), i = i + 1 {
     for j = 0, j < data(i).getLength(), j = j + 1 {
-        Console.print(data(i)(j));
+        if data(i)(j).isNull Console.print("NULL")
+        else Console.print(data(i)(j));
         Console.print("    ");
     }
     Console.print("\n");

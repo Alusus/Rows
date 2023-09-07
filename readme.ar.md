@@ -559,6 +559,10 @@ func printRows (r: Array[SrdRef[Car]]) {
     @عـدد_عائم
     @حقل["سعر_السيارة"]
     عرف السعر: عائم؛
+    
+    @مـحارف_مرنة["50"]
+    @حقل
+    عرف الاسم_الكامل: بـعدم[نـص]؛
 }
 ```
 
@@ -586,7 +590,7 @@ class Car {
 
     @VarChar["50"]
     @column
-    def fullName: String;
+    def fullName: Nullable[String];
 }
 ```
 
@@ -611,6 +615,7 @@ class Car {
 * `@صـحيح_كبير` (`@BigInteger`)
 * `@صـحيح_صغير` (`@SmallInteger`)
 * `@صـحيح_ضئيل` (`@TinyInteger`)
+* `@ثـنائية` (`@Boolean`)
 * `@عـدد_حقيقي` (`@Real`)
 * `@عـدد_عائم` (`@Float`)
 * `@عـدد_عشري` (`@Decimal`)
@@ -619,6 +624,7 @@ class Car {
 * `@مـحارف_محددة` (`@CharType`)
 * `@نـص_كبير` (`@Text`)
 * `@تـاريخ` (`@Date`)
+* `@تـاريخ_ووقت` (`@DateTime`)
 
 ## الأصناف والتوابع
 
@@ -722,6 +728,48 @@ class Delete {
 
 `الشرط` (`condition`) الشرط الذي تم الحذف على أساسه.
 
+### الصنف قـيمة (Value)
+
+<div dir=rtl>
+
+```
+صنف قـيمة {
+    عملية هذا~هيئ()؛
+    عملية هذا~هيئ(ثـنائي)؛
+    عملية هذا~هيئ(بـعدم[ثـنائي])؛
+    عملية هذا~هيئ(صـحيح[64])؛
+    عملية هذا~هيئ(بـعدم[صـحيح[32]])؛
+    عملية هذا~هيئ(بـعدم[صـحيح[64]])؛
+    عملية هذا~هيئ(عـائم[64])؛
+    عملية هذا~هيئ(بـعدم[عـائم[32]])؛
+    عملية هذا~هيئ(بـعدم[عـائم[64]])؛
+    عملية هذا~هيئ(نـص)؛
+    عملية هذا~هيئ(بـعدم[نـص])؛
+    عملية هذا~هيئ(مـؤشر_محارف)؛
+}
+```
+
+</div>
+
+```
+class Value {
+    handler this~init();
+    handler this~init(Bool);
+    handler this~init(Nullable[Bool]);
+    handler this~init(Int[64]);
+    handler this~init(Nullable[Int[32]]);
+    handler this~init(Nullable[Int[64]]);
+    handler this~init(Float[64]);
+    handler this~init(Nullable[Float[32]]);
+    handler this~init(Nullable[Float[64]]);
+    handler this~init(String);
+    handler this~init(Nullable[String]);
+    handler this~init(CharsPtr);
+}
+```
+
+يستخدم هذا الصنف لتمرير بيانات من أي صنف كان لعمليتي `إدخـال` (`Insert`) و `تـحديث` (`Update`).
+
 ### الصنف إدخـال (Insert)
 
 <div dir=rtl>
@@ -729,7 +777,7 @@ class Delete {
 ```
 صنف إدخـال {
     عرف الجدول = نـض؛
-    عرف البيانات = مـصفوفة[نـص]؛
+    عرف البيانات = مـصفوفة[قـيمة]؛
     عرف الحقول = مـصفوفة[نـص]؛
 }
 ```
@@ -739,7 +787,7 @@ class Delete {
 ```
 class Insert {
     handler this.table = String;
-    handler this.data = Array[String];
+    handler this.data = Array[Value];
     handler this.columns = Array[String];
 }
 ```
@@ -792,7 +840,7 @@ class Select {
 ```
 صنف تـحديث {
     عرف الجدول = نـص؛
-    عرف البيانات = مـصفوفة[نـص]؛
+    عرف البيانات = مـصفوفة[قـيمة]؛
     عرف الحقول = مـصفوفة[نـص]؛
     عرف الشرط(عبارة: مؤشر[مـحرف]، معطيات: ...أي_معطيات_أخرى)؛
 }
@@ -803,7 +851,7 @@ class Select {
 ```
 class Update {
     handler this.table = String;
-    handler this.data = Array[String];
+    handler this.data = Array[Value];
     handler this.columns = Array[String];
     handler this.condition(statement: CharsPtr, args: ...any);
 }

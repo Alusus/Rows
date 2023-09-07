@@ -17,7 +17,7 @@ if !db.driver.isConnected() {
 if !!db.exec(Update().{
     table = String("users");
     columns = Array[String]({ String("name"), String("address") });
-    data = Array[String]({ String("Sarmad 1"), String("211, Surrey") });
+    data = Array[Value]({ Value("Sarmad 1"), Value("211, Surrey") });
     condition("id=%i", 150);
 }) {
     System.fail(1, String("Query failed: ") + db.getLastError());

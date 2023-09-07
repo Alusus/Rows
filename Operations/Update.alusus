@@ -6,12 +6,12 @@
             return this._table;
         }
 
-        def _data: Array[String];
-        handler this.data = Array[String] {
+        def _data: Array[Value];
+        handler this.data = Array[Value] {
             this._data.clear();
             def i: Int;
             for i = 0, i < value.getLength(), ++i {
-                this._data.add(escapeString(value(i)));
+                this._data.add(value(i));
             }
             return this._data;
         }
@@ -36,7 +36,7 @@
             def sql: String = String("UPDATE ") + this._table + "\nSET ";
             def i: int = 0;
             for i = 0, i < this._data.getLength(), ++i {
-                sql += String("\"") + this._columns(i) + String("\" = '") + this._data(i) + "'";
+                sql += String("\"") + this._columns(i) + String("\" = ") + this._data(i).toString();
                 if i < this._data.getLength()-1 sql += ", " else sql += "\n";
             }
             if this._condition != "" {
@@ -46,4 +46,3 @@
         }
     }
 }
-

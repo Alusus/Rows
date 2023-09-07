@@ -284,7 +284,7 @@ class Car {
 
     @VarChar["50"]
     @column
-    def fullName: String;
+    def fullName: Nullable[String];
 }
 ```
 
@@ -308,6 +308,7 @@ or `Db.save` or `SchemaBuilder.create`.
 * `@BigInteger`
 * `@SmallInteger`
 * `@TinyInteger`
+* `@Boolean`
 * `@Real`
 * `@Float`
 * `@Decimal`
@@ -316,6 +317,7 @@ or `Db.save` or `SchemaBuilder.create`.
 * `@CharType`
 * `@Text`
 * `@Date`
+* `@DateTime`
 
 ## Functions and Types
 
@@ -382,12 +384,33 @@ This class is used to delete rows from a model based on a condition.
 
 `condition` the condition the a row must satisfy in order to delete it.
 
+### Value class
+
+```
+class Value {
+    handler this~init();
+    handler this~init(Bool);
+    handler this~init(Nullable[Bool]);
+    handler this~init(Int[64]);
+    handler this~init(Nullable[Int[32]]);
+    handler this~init(Nullable[Int[64]]);
+    handler this~init(Float[64]);
+    handler this~init(Nullable[Float[32]]);
+    handler this~init(Nullable[Float[64]]);
+    handler this~init(String);
+    handler this~init(Nullable[String]);
+    handler this~init(CharsPtr);
+}
+```
+
+This class is used to pass values of any type to the `Insert` and `Update` operations.
+
 ### Insert class
 
 ```
 class Insert {
     handler this.table = String;
-    handler this.data = Array[String];
+    handler this.data = Array[Value];
     handler this.columns = Array[String];
 }
 ```
@@ -427,7 +450,7 @@ This class is used to retrieve rows from the model.
 ```
 class Update {
     handler this.table = String;
-    handler this.data = Array[String];
+    handler this.data = Array[Value];
     handler this.columns = Array[String];
     handler this.condition(statement: CharsPtr, args: ...any);
 }

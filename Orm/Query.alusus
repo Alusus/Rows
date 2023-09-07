@@ -48,7 +48,7 @@
             });
         }
 
-        func parseRecord (data: Array[String]): SrdRef[Model] {
+        func parseRecord (data: Array[Nullable[String]]): SrdRef[Model] {
             def model: SrdRef[Model];
             model.construct();
             preprocess {
@@ -60,8 +60,8 @@
             return model;
         }
 
-        func getRecordData [colummnNameGetter: function = getColumnVarNames] (model: ref[Model]): Array[String] {
-            def data: Array[String];
+        func getRecordData [colummnNameGetter: function = getColumnVarNames] (model: ref[Model]): Array[Value] {
+            def data: Array[Value];
             preprocess {
                 generateGetData(colummnNameGetter());
             }
@@ -74,12 +74,12 @@
 
         handler this.setWhereForPrimaryKey(model: ref[Model]) {
             def columns: Array[String] = getPrimaryColumnNames();
-            def data: Array[String] = getRecordData[getPrimaryColumnVarNames](model);
-            this.where = String("\"") + escapeString(columns(0)) + "\" = '" + escapeString(data(0)) + "'";
+            def data: Array[Value] = getRecordData[getPrimaryColumnVarNames](model);
+            this.where = String("\"") + escapeString(columns(0)) + "\" = " + data(0).toString();
             def i: Int;
             for i = 1, i < columns.getLength(), ++i {
                 this.where += " AND \"";
-                this.where += escapeString(columns(i)) + "\" = '" + escapeString(data(i)) + "'";
+                this.where += escapeString(columns(i)) + "\" = " + data(i).toString();
             }
         }
 
@@ -109,7 +109,7 @@
         @member macro update [this, expression] {
             Possible[Int]()~use_in(_result) no_injection {
                 this~use_in(_this) no_injection {
-                    def data: Srl.Array[Srl.String];
+                    def data: Srl.Array[Rows.Value];
                     def columns: Srl.Array[Srl.String];
                     preprocess {
                         if !Spp.astMgr.insertAst(
@@ -129,7 +129,7 @@
         }
 
         handler this.select(): Possible[Array[SrdRef[Model]]] {
-            def data : Array[Array[String]];
+            def data: Array[Array[Nullable[String]]];
             this.db.exec(Select()~use_in(select) {
                 table = this.getTableName();
                 fields = getColumnNames();
