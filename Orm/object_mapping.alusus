@@ -66,7 +66,7 @@
                         Srl.String("\"") + Rows.escapeString(_this.getColumnNameForVar(Srl.String("{{name}}"))) + "\"" +
                         Srl.String().{
                             def v: Rows.Value(_this.validationBuffer.name~use_in(_buffer) no_injection { _buffer = val })
-                            if v.valueType == Value.Type.NULL this = " is null"
+                            if v.valueType == Rows.Value.Type.NULL this = " is null"
                             else this = String(" = ") + v.toString();
                         }
                     },
@@ -83,7 +83,7 @@
                         Srl.String("\"") + Rows.escapeString(_this.getColumnNameForVar(Srl.String("{{name}}"))) + "\"" +
                         Srl.String().{
                             def v: Rows.Value(_this.validationBuffer.name~use_in(_buffer) no_injection { _buffer = val })
-                            if v.valueType == Value.Type.NULL this = " is not null"
+                            if v.valueType == Rows.Value.Type.NULL this = " is not null"
                             else this = String(" != ") + v.toString();
                         }
                     },
