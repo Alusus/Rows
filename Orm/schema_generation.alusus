@@ -184,6 +184,7 @@
             String("BigInteger"),
             String("SmallInteger"),
             String("TinyInteger"),
+            String("Boolean"),
             String("Real"),
             String("Float"),
             String("Decimal"),
@@ -192,6 +193,7 @@
             String("CharType"),
             String("Text"),
             String("Date"),
+            String("DateTime"),
 	        String("Uuid")
         });
 

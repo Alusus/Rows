@@ -5,6 +5,7 @@ import "Srl/Array";
 import "Srl/Map";
 import "Srl/String";
 import "Srl/Possible";
+import "Srl/Nullable";
 
 import "Core/Data";
 import "Spp";
@@ -19,7 +20,10 @@ import "Spp/Ast";
     def TioSrdRef: alias SrdRef[Core.Basic.TiObject];
 
     @expname[atof] func parseFloat(CharsPtr): Float[64];
-    @expname[atoi] func parseInt(CharsPtr): int;
+    @expname[atoi] func parseInt(CharsPtr): Int;
+    func parseBool(v: CharsPtr): Bool {
+        return v != 0 and (v~cnt(0) == 't' or v~cnt(0) == 'T' or v~cnt(0) == '1');
+    }
 }
 
 import "Drivers/ConnectionParams";
@@ -29,6 +33,7 @@ import "Schema/data_types";
 import "Schema/Column";
 import "Schema/ForeignKey";
 
+import "Operations/Value";
 import "Operations/Select";
 import "Operations/Insert";
 import "Operations/Update";

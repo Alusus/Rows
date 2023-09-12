@@ -17,7 +17,12 @@ db.exec("delete from roles");
 db.exec("delete from users");
 
 def names: Array[String]({ String("Sarmad"), String("Sleman"), String("Abdullah"), String("Salem") });
-def addresses: Array[String]({ String("Canada"), String("Syria"), String("KSA"), String("KSA") });
+def addresses: Array[Nullable[String]]({
+    Nullable[String]("Canada"),
+    Nullable[String]("Syria"),
+    Nullable[String]("KSA"),
+    Nullable[String]()
+});
 
 def i: Int;
 
@@ -25,7 +30,7 @@ for i = 0, i < names.getLength(), ++i {
     def res: Possible[Int] = db.exec(Insert().{
         table = String("users");
         columns = Array[String]({ String("id"), String("name"), String("address") });
-        data = Array[String]({ String("15") + i, names(i), addresses(i)  });
+        data = Array[Value]({ Value(String("15") + i), Value(names(i)), Value(addresses(i)) });
     });
     if !!res {
         System.fail(1, String("Query failed: ") + res.error.getMessage());
@@ -35,7 +40,7 @@ for i = 0, i < names.getLength(), ++i {
 def res: Possible[Int] = db.exec(Insert().{
     table = String("roles");
     columns = Array[String]({ String("id"), String("name"), String("userId") });
-    data = Array[String]({ String("250"), String("admin"), String("150") });
+    data = Array[Value]({ Value("250"), Value("admin"), Value("150") });
 });
 if !!res {
     System.fail(1, String("Query failed: ") + res.error.getMessage());

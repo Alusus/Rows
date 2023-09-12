@@ -96,8 +96,9 @@ import "libpq.so.5";
             return this.row < Postgresql.ntuples(this.result);
         }
 
-        handler (this:Driver).getValue(i: Int): String set_ptr {
-            return String(Postgresql.getvalue(this.result, this.row, i));
+        handler (this:Driver).getValue(i: Int): Nullable[String] set_ptr {
+            if Postgresql.getisnull(this.result, this.row, i) != 0 return Nullable[String]()
+            else return Nullable[String](String(Postgresql.getvalue(this.result, this.row, i)));
         }
 
         handler (this:Driver).releaseResult() set_ptr {
@@ -119,6 +120,7 @@ import "libpq.so.5";
         set(String("BigInteger"), String("bigint"));
         set(String("SmallInteger"), String("smallint"));
         set(String("TinyInteger"), String("smallint"));
+        set(String("Boolean"), String("boolean"));
         set(String("Real"), String("real"));
         set(String("Float"), String("double precision"));
         set(String("Decimal"), String("double precision"));
@@ -127,6 +129,7 @@ import "libpq.so.5";
         set(String("CharType"), String("char"));
         set(String("Text"), String("text"));
         set(String("Date"), String("date"));
+        set(String("DateTime"), String("timestamp"));
         set(String("Uuid"), String("uuid"));
     });
 
@@ -175,6 +178,9 @@ import "libpq.so.5";
 
         @expname[PQgetvalue]
         func getvalue(res: ptr[Result], row: int, collomn: int): CharsPtr;
+
+        @expname[PQgetisnull]
+        func getisnull(res: ptr[Result], row: int, collomn: int): Int;
 
         @expname[PQclear]
         func clear(res: ptr[Result]);

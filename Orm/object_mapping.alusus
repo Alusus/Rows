@@ -60,20 +60,55 @@
             } else {
                 operator = infixOperators(operator);
             }
-            if !Spp.astMgr.buildAst(
-                ast {
-                    Srl.String("\"") + Rows.escapeString(_this.getColumnNameForVar(Srl.String("{{name}}"))) + "\"" +
-                    Srl.String(" {{op}} '") +
-                    Rows.escapeString(_this.validationBuffer.name~use_in(_buffer) no_injection { _buffer = val }) +
-                    Srl.String("'")
-                },
-                Map[String, ref[TiObject]]()
-                    .set(String("name"), mapContaining.getElement("first"))
-                    .set(String("op"), TiStr(operator))
-                    .set(String("val"), mapContaining.getElement("second")),
-                result
-            ) {
-                System.fail(1, "Unexpected error while processing InfixOperator in generateWhere.\n");
+            if operator == "=" {
+                if !Spp.astMgr.buildAst(
+                    ast {
+                        Srl.String("\"") + Rows.escapeString(_this.getColumnNameForVar(Srl.String("{{name}}"))) + "\"" +
+                        Srl.String().{
+                            def v: Rows.Value(_this.validationBuffer.name~use_in(_buffer) no_injection { _buffer = val })
+                            if v.valueType == Rows.Value.Type.NULL this = " is null"
+                            else this = String(" = ") + v.toString();
+                        }
+                    },
+                    Map[String, ref[TiObject]]()
+                        .set(String("name"), mapContaining.getElement("first"))
+                        .set(String("val"), mapContaining.getElement("second")),
+                    result
+                ) {
+                    System.fail(1, "Unexpected error while processing InfixOperator in generateWhere.\n");
+                }
+            } else if operator == "!=" {
+                if !Spp.astMgr.buildAst(
+                    ast {
+                        Srl.String("\"") + Rows.escapeString(_this.getColumnNameForVar(Srl.String("{{name}}"))) + "\"" +
+                        Srl.String().{
+                            def v: Rows.Value(_this.validationBuffer.name~use_in(_buffer) no_injection { _buffer = val })
+                            if v.valueType == Rows.Value.Type.NULL this = " is not null"
+                            else this = String(" != ") + v.toString();
+                        }
+                    },
+                    Map[String, ref[TiObject]]()
+                        .set(String("name"), mapContaining.getElement("first"))
+                        .set(String("val"), mapContaining.getElement("second")),
+                    result
+                ) {
+                    System.fail(1, "Unexpected error while processing InfixOperator in generateWhere.\n");
+                }
+            } else {
+                if !Spp.astMgr.buildAst(
+                    ast {
+                        Srl.String("\"") + Rows.escapeString(_this.getColumnNameForVar(Srl.String("{{name}}"))) + "\"" +
+                        Srl.String(" {{op}} ") +
+                        Rows.Value(_this.validationBuffer.name~use_in(_buffer) no_injection { _buffer = val }).toString()
+                    },
+                    Map[String, ref[TiObject]]()
+                        .set(String("name"), mapContaining.getElement("first"))
+                        .set(String("op"), TiStr(operator))
+                        .set(String("val"), mapContaining.getElement("second")),
+                    result
+                ) {
+                    System.fail(1, "Unexpected error while processing InfixOperator in generateWhere.\n");
+                }
             }
         } else if isDerivedFrom[obj, LogOperator] {
             def binding: ref[Binding](getInterface[obj, Binding]);
@@ -110,7 +145,7 @@
                     Srl.String("\"") + Rows.escapeString(_this.getColumnNameForVar(Srl.String("{{name}}"))) + "\"" +
                     Srl.String(" in (")
                 },
-                Map[String, ref[TiObject]]().set(String("name"),mapContaining.getElement("first")),
+                Map[String, ref[TiObject]]().set(String("name"), mapContaining.getElement("first")),
                 result2
             ) {
                 System.fail(1, "Unexpected error while processing LinkOperator in generateWhere.\n");
@@ -121,11 +156,10 @@
                 if !Spp.astMgr.buildAst(
                     ast {
                         result + (
-                            Srl.String("'" ) +
-                            Rows.escapeString(
+                            Rows.Value(
                                 _this.validationBuffer.name~use_in(_buffer) no_injection { _buffer = val }
-                            ) +
-                            Srl.String("' , ")
+                            ).toString() +
+                            Srl.String(" , ")
                         )
                     },
                     Map[String, ref[TiObject]]()
@@ -141,9 +175,10 @@
             if !Spp.astMgr.buildAst(
                 ast {
                     result + (
-                        Srl.String("'" ) +
-                        Rows.escapeString(_this.validationBuffer.name~use_in(_buffer) no_injection { _buffer = val }) +
-                        Srl.String("')")
+                        Rows.Value(
+                            _this.validationBuffer.name~use_in(_buffer) no_injection { _buffer = val }
+                        ).toString() +
+                        Srl.String(")")
                     )
                 },
                 Map[String, ref[TiObject]]()
@@ -253,7 +288,7 @@
                     ast {
                         columns.add(_this.getColumnNameForVar(Srl.String("{{name}}")));
                         _this.validationBuffer.name = val;
-                        data.add(Srl.String() + _this.validationBuffer.name);
+                        data.add(Rows.Value(_this.validationBuffer.name));
                     },
                     Map[String, ref[TiObject]]()
                         .set(String("name"), mapContainer.getElement("first"))
@@ -299,36 +334,51 @@
 
     func generateParsing (varNames: Array[String], varElements: Array[ref[Core.Basic.TiObject]]) {
         @shared def strType: ref[Spp.Ast.Type](Spp.astMgr.traceType(ast Root.Srl.String));
+        @shared def nullableStrType: ref[Spp.Ast.Type](Spp.astMgr.traceType(ast Root.Srl.Nullable[Root.Srl.String]));
+        @shared def boolType: ref[Spp.Ast.Type](Spp.astMgr.traceType(ast Root.Bool));
+        @shared def nullableBoolType: ref[Spp.Ast.Type](Spp.astMgr.traceType(ast Root.Srl.Nullable[Root.Bool]));
+        @shared def nullableInt32Type: ref[Spp.Ast.Type](Spp.astMgr.traceType(ast Root.Srl.Nullable[Root.Int[32]]));
+        @shared def nullableInt64Type: ref[Spp.Ast.Type](Spp.astMgr.traceType(ast Root.Srl.Nullable[Root.Int[64]]));
+        @shared def nullableFloat32Type: ref[Spp.Ast.Type](Spp.astMgr.traceType(ast Root.Srl.Nullable[Root.Float[32]]));
+        @shared def nullableFloat64Type: ref[Spp.Ast.Type](Spp.astMgr.traceType(ast Root.Srl.Nullable[Root.Float[64]]));
+
+        macro generateParseBlock[valType] generateParseBlock[valType, String];
+        macro generateParseBlock[valType, parser] {
+            if !Spp.astMgr.insertAst(
+                (ast model.varName = valType().{
+                    if not data(j).isNull this = parser(data(j))
+                }),
+                Map[String, ref[TiObject]]()
+                    .set(String("j"), Core.Data.Ast.IntegerLiteral(String("") + i))
+                    .set(String("varName"), Core.Data.Ast.Identifier(varNames(i)))
+            ) {
+                System.fail(1, "Unexpected error while processing generateParsing.\n");
+            }
+        }
+
         def i: Int;
         for i = 0, i < varElements.getLength(), i = i+1 {
             def varType: ref[Spp.Ast.Type](Spp.astMgr.traceType(varElements(i)));
             if varType~ptr == strType~ptr {
-                if !Spp.astMgr.insertAst(
-                    (ast model.strVal = data(j)),
-                    Map[String, ref[TiObject]]()
-                        .set(String("j"), Core.Data.Ast.IntegerLiteral(String("") + i))
-                        .set(String("strVal"), Core.Data.Ast.Identifier(varNames(i)))
-                ) {
-                    System.fail(1, "Unexpected error while processing generateParsing.\n");
-                }
+                generateParseBlock[Srl.String];
+            } else if varType~ptr == nullableStrType~ptr {
+                generateParseBlock[Srl.Nullable[Srl.String]];
+            } else if varType~ptr == boolType~ptr {
+                generateParseBlock[Root.Bool, Rows.parseBool];
+            } else if varType~ptr == nullableBoolType~ptr {
+                generateParseBlock[Srl.Nullable[Root.Bool], Rows.parseBool];
             } else if varType.getMyTypeInfo().typeName == "IntegerType" {
-                if !Spp.astMgr.insertAst(
-                    (ast model.intVal = Rows.parseInt(data(j).buf)),
-                    Map[String, ref[TiObject]]()
-                        .set(String("j"), Core.Data.Ast.IntegerLiteral(String("") + i))
-                        .set(String("intVal"), Core.Data.Ast.Identifier(varNames(i)))
-                ) {
-                    System.fail(1, "Unexpected error while processing generateParsing.\n");
-                }
+                generateParseBlock[Root.Int[64], Rows.parseInt];
+            } else if varType~ptr == nullableInt32Type~ptr {
+                generateParseBlock[Srl.Nullable[Root.Int[32]], Rows.parseInt];
+            } else if varType~ptr == nullableInt64Type~ptr {
+                generateParseBlock[Srl.Nullable[Root.Int[64]], Rows.parseInt];
             } else if varType.getMyTypeInfo().typeName == "FloatType" {
-                if !Spp.astMgr.insertAst(
-                    (ast model.floatVal = Rows.parseFloat(data(j).buf)),
-                    Map[String, ref[TiObject]]()
-                        .set(String("j"), Core.Data.Ast.IntegerLiteral(String("") + i))
-                        .set(String("floatVal"), Core.Data.Ast.Identifier(varNames(i)))
-                ) {
-                    System.fail(1, "Unexpected error while processing generateParsing.\n");
-                }
+                generateParseBlock[Root.Float[64], Rows.parseFloat];
+            } else if varType~ptr == nullableFloat32Type~ptr {
+                generateParseBlock[Srl.Nullable[Root.Float[32]], Rows.parseFloat];
+            } else if varType~ptr == nullableFloat64Type~ptr {
+                generateParseBlock[Srl.Nullable[Root.Float[64]], Rows.parseFloat];
             } else {
                 Spp.buildMgr.raiseBuildNotice("ROWS1002", 1, varElements(i));
             }
@@ -339,7 +389,7 @@
         def i: Int;
         for i = 0, i < varArray.getLength(), i = i+1 {
             if !Spp.astMgr.insertAst(
-                (ast data.add(Srl.String() + model.varName)),
+                (ast data.add(Rows.Value(model.varName))),
                 Map[String, ref[TiObject]]().set(String("varName"), Core.Data.Ast.Identifier(varArray(i)))
             ) {
                 System.fail(1, "Unexpected error while processing generateGetData.\n");
@@ -354,4 +404,3 @@
         );
     }
 }
-

@@ -24,7 +24,15 @@ class Car {
 
     @VarChar["50"]
     @column
-    def fullName: String;
+    def fullName: Nullable[String];
+
+    @Boolean
+    @column
+    def electrical: Nullable[Bool];
+
+    @DateTime
+    @column
+    def createdAt: Nullable[String];
 }
 
 def db: Db(PostgresqlDriver(ConnectionParams().{
@@ -48,6 +56,8 @@ for i = 1, i < 30, i = i+1 {
     c.id = i
     c.name = String("Car ") + i;
     c.price = 200.0 * i
+    if i > 5 c.electrical = i > 15;
+    if i < 2 c.createdAt = "2023-02-18 10:57:33";
     db.save[Car](c);
 }
 Console.print("\n");
@@ -60,6 +70,18 @@ func printRows (r: Array[SrdRef[Car]]) {
         Console.print(r(k).name);
         Console.print("\t\t");
         Console.print(r(k).price);
+        Console.print("\t\t");
+        if r(k).electrical.isNull Console.print("not known")
+        else if r(k).electrical Console.print("electrical")
+        else Console.print("traditional");
+        if not r(k).fullName.isNull {
+            Console.print("\t\t");
+            Console.print(r(k).fullName);
+        }
+        if not r(k).createdAt.isNull {
+            Console.print("\t\t");
+            Console.print(r(k).createdAt);
+        }
         Console.print("\n");
     }
 }
@@ -82,12 +104,12 @@ d(1).name = String("Car 4u");
 d(1).price = 400;
 d(1).save();
 
-db.from[Car].where[id == 19].update[{ fullName="BMW X5" }];
+db.from[Car].where[id == 19].update[{ fullName = String("BMW X5") }];
 db.from[Car].where[id == 20].update[{ price=90, name="BMW" }];
 
 db.from[Car].where[id > 23 and id <= 28].delete();
 
-d = db.from[Car].where[fullName != "BMW X5"].select();
+d = db.from[Car].where[fullName == Nullable[String]() or fullName != "BMW X5"].select();
 printRows(d);
 Console.print("\n");
 
@@ -105,4 +127,7 @@ Console.print("\n");
 
 d = db.from[Car].where[id in (1, 2, 4, 5, 7)].order[(-price, -id)].select();
 printRows(d);
+Console.print("\n");
 
+d = db.from[Car].where[fullName != Nullable[String]()].select();
+printRows(d);

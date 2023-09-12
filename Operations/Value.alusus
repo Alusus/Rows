@@ -1,0 +1,103 @@
+@merge module Rows {
+    class Value {
+        def Type: {
+            def NULL: 0;
+            def INT: 1;
+            def FLOAT: 2;
+            def STRING: 3;
+            def BOOLEAN: 4;
+        }
+
+        def valueType: Int;
+        def intValue: Int[64];
+        def floatValue: Float[64];
+        def strValue: String;
+
+        handler this~init() {
+            this.valueType = Type.NULL;
+        }
+        handler this~init(Bool) {
+            this.valueType = Type.BOOLEAN;
+            this.intValue = value;
+        }
+        handler this~init(Nullable[Bool]) {
+            if value.isNull this.valueType = Type.NULL
+            else {
+                this.valueType = Type.BOOLEAN;
+                this.intValue = value;
+            }
+        }
+        handler this~init(Int[64]) {
+            this.valueType = Type.INT;
+            this.intValue = value;
+        }
+        handler this~init(Nullable[Int[32]]) {
+            if value.isNull this.valueType = Type.NULL
+            else {
+                this.valueType = Type.INT;
+                this.intValue = value;
+            }
+        }
+        handler this~init(Nullable[Int[64]]) {
+            if value.isNull this.valueType = Type.NULL
+            else {
+                this.valueType = Type.INT;
+                this.intValue = value;
+            }
+        }
+        handler this~init(Float[64]) {
+            this.valueType = Type.FLOAT;
+            this.floatValue = value;
+        }
+        handler this~init(Nullable[Float[32]]) {
+            if value.isNull this.valueType = Type.NULL
+            else {
+                this.valueType = Type.FLOAT;
+                this.floatValue = value;
+            }
+        }
+        handler this~init(Nullable[Float[64]]) {
+            if value.isNull this.valueType = Type.NULL
+            else {
+                this.valueType = Type.FLOAT;
+                this.floatValue = value;
+            }
+        }
+        handler this~init(String) {
+            this.valueType = Type.STRING;
+            this.strValue = value;
+        }
+        handler this~init(Nullable[String]) {
+            if value.isNull this.valueType = Type.NULL
+            else {
+                this.valueType = Type.STRING;
+                this.strValue = value;
+            }
+        }
+        handler this~init(CharsPtr) {
+            if value == 0 this.valueType = Type.NULL
+            else {
+                this.valueType = Type.STRING;
+                this.strValue = value;
+            }
+        }
+
+        handler this~init(ref[this_type]) {
+            this = value;
+        }
+        handler this = ref[this_type] {
+            this.valueType = value.valueType;
+            this.intValue = value.intValue;
+            this.floatValue = value.floatValue;
+            this.strValue = value.strValue;
+        }
+
+        handler this.toString(): String {
+            if this.valueType == Type.NULL return String("null")
+            else if this.valueType == Type.INT return String() + this.intValue
+            else if this.valueType == Type.FLOAT return String() + this.floatValue
+            else if this.valueType == Type.BOOLEAN return String("'") + this.intValue + "'"
+            else return String("'") + escapeString(this.strValue) + "'";
+        }
+    }
+}

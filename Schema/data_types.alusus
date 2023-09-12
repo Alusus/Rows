@@ -64,6 +64,21 @@
         }
     }
 
+    class Boolean {
+        @injection def dataType: DataType;
+        handler (this:DataType).isString(): Bool set_ptr {
+            return false;
+        }
+        handler (this:DataType).generateSqlString(driver: ref[Driver]): String set_ptr {
+            return driver.mapDataType(String(1, "Boolean"));
+        }
+        handler this_type(): SrdRef[DataType] {
+            def d: SrdRef[Boolean];
+            d.construct();
+            return castSrdRef[d, DataType];
+        }
+    }
+
     class Real {
         @injection def dataType: DataType;
         handler (this:DataType).isString(): Bool set_ptr {
@@ -215,6 +230,21 @@
         }
         handler this_type(): SrdRef[DataType] {
             def d: SrdRef[Date];
+            d.construct();
+            return castSrdRef[d, DataType];
+        }
+    }
+
+    class DateTime {
+        @injection def dataType: DataType;
+        handler (this:DataType).isString(): Bool set_ptr {
+            return true;
+        }
+        handler (this:DataType).generateSqlString(driver: ref[Driver]): String set_ptr {
+            return driver.mapDataType(String(1, "DateTime"));
+        }
+        handler this_type(): SrdRef[DataType] {
+            def d: SrdRef[DateTime];
             d.construct();
             return castSrdRef[d, DataType];
         }

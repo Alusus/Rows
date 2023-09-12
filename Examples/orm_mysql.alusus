@@ -20,7 +20,15 @@ class Car {
 
     @Float
     @column
-    def price: Float;
+    def price: Nullable[Float];
+
+    @VarChar["50"]
+    @column
+    def fullName: Nullable[String];
+
+    @Boolean
+    @column
+    def electrical: Bool;
 }
 
 def db: Db(MysqlDriver(ConnectionParams().{
@@ -43,6 +51,7 @@ for i = 1, i < 30, i = i+1 {
     c.id = i
     c.name = String("Car ") + i;
     c.price = 200.0 * i
+    c.electrical = i > 15;
     db.save[Car](c);
 }
 Console.print("\n");
@@ -54,7 +63,14 @@ func printRows (r: Array[SrdRef[Car]]) {
         Console.print("\t\t");
         Console.print(r(k).name);
         Console.print("\t\t");
-        Console.print(r(k).price);
+        if r(k).price.isNull Console.print("NULL") else Console.print(r(k).price~cast[Float]);
+        Console.print("\t\t");
+        if r(k).electrical Console.print("electrical")
+        else Console.print("traditional");
+        if not r(k).fullName.isNull {
+            Console.print("\t\t");
+            Console.print(r(k).fullName);
+        }
         Console.print("\n");
     }
 }
@@ -70,7 +86,7 @@ d(1).name = String("Car 4u");
 d(1).price = 400;
 d(1).save();
 
-db.from[Car].where[id == 20].update[{ price=90, name="BMW" }];
+db.from[Car].where[id == 20].update[{ price=Nullable[Float](), name="BMW", fullName = "BMW X5" }];
 
 db.from[Car].where[id > 23 and id <= 28].delete();
 
@@ -92,4 +108,7 @@ Console.print("\n");
 
 d = db.from[Car].where[id in (1, 2, 4, 5, 7)].order[(-price, -id)].select();
 printRows(d);
+Console.print("\n");
 
+d = db.from[Car].where[fullName != Nullable[String]()].select();
+printRows(d);

@@ -21,7 +21,7 @@
             else return this.driver.getLastError();
         }
 
-        handler this.exec(select: ref[Select]): Possible[Array[Array[String]]] {
+        handler this.exec(select: ref[Select]): Possible[Array[Array[Nullable[String]]]] {
             return this._execSelect(select.generateSqlString(), "Select");
         }
 
@@ -41,7 +41,7 @@
             return this._exec(createTable.generateSqlString(this.driver), "Table creation");
         }
 
-        handler this.execSelect(statement: CharsPtr, args: ...any): Possible[Array[Array[String]]] {
+        handler this.execSelect(statement: CharsPtr, args: ...any): Possible[Array[Array[Nullable[String]]]] {
             def sql: String;
             prepareStatement[sql, statement, args];
             return this._execSelect(sql, "Raw query");
@@ -53,11 +53,11 @@
             return this._exec(sql, "Raw query");
         }
 
-        handler this._execSelect(sql: String, operationName: CharsPtr): Possible[Array[Array[String]]] {
+        handler this._execSelect(sql: String, operationName: CharsPtr): Possible[Array[Array[Nullable[String]]]] {
             if this.driver.obj~ptr == 0 {
-                return Possible[Array[Array[String]]].failure(Errors.dbNotInitialized());
+                return Possible[Array[Array[Nullable[String]]]].failure(Errors.dbNotInitialized());
             } else if !this.driver.isConnected() {
-                return Possible[Array[Array[String]]].failure(Errors.dbNotConnected());
+                return Possible[Array[Array[Nullable[String]]]].failure(Errors.dbNotConnected());
             } else {
                 if this.logging {
                     Console.print("%s>> Executing SQL:%s\n%s\n", Console.Style.FG_GREEN, Console.Style.RESET, sql.buf);
@@ -67,20 +67,20 @@
                     if this.logging {
                         Console.print("%s>> SQL Error:%s\n%s\n", Console.Style.FG_RED, Console.Style.RESET, err.buf);
                     }
-                    return Possible[Array[Array[String]]].failure(Errors.sqlError(err));
+                    return Possible[Array[Array[Nullable[String]]]].failure(Errors.sqlError(err));
                 } else {
                     def numberOfFileds: int;
                     numberOfFileds = this.driver.getColumnCount();
-                    def result: Array[Array[String]];
+                    def result: Array[Array[Nullable[String]]];
                     while this.driver.fetchNextRow() {
-                        def row: Array[String];
+                        def row: Array[Nullable[String]];
                         def i: int;
                         for i = 0, i < numberOfFileds, i = i + 1 {
                             row.add(this.driver.getValue(i));
                         }
                         result.add(row);
                     }
-                    return Possible[Array[Array[String]]].success(result);
+                    return Possible[Array[Array[Nullable[String]]]].success(result);
                 }
             }
         }
