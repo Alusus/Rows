@@ -5,6 +5,7 @@
         handler this.getDriverName(): String as_ptr;
         handler this.isConnected(): Bool as_ptr;
         handler this.exec(sql: CharsPtr, forSelect: Bool): Bool as_ptr;
+        handler this.getAffectedRowCount(): Int as_ptr;
         handler this.getColumnCount(): Int as_ptr;
         handler this.getColumnName(i: Int): String as_ptr;
         handler this.fetchNextRow(): Bool as_ptr;
