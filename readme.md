@@ -598,6 +598,8 @@ following types of data params are supported by this function:
 * Array[Float]: %af
 * Array[Float[64]]: %ad
 
+For write queries (inset, update, delete) the `exec` function returns the number od affected rows.
+
 `from` used to return a query based on the information of this class.
 
 `save` used to call the method `save` in the class `Query`.
