@@ -87,6 +87,10 @@ import "libmysqlclient.so.21";
             return true;
         }
 
+        handler (this:Driver).getAffectedRowCount(): Int set_ptr {
+            return Mysql.affectedRows(this.connection);
+        }
+
         handler (this:Driver).getColumnCount(): Int set_ptr {
             return Mysql.numFields(this.result);
         }
@@ -163,7 +167,7 @@ import "libmysqlclient.so.21";
             def flags: Word;
             def decimals: Word;
             def charsetnr: Word;
-            def fieldType: int;
+            def fieldType: Int;
             def extension: ptr;
         } */
 
@@ -173,20 +177,23 @@ import "libmysqlclient.so.21";
         @expname[mysql_real_connect]
         func realConnect(
             conn :ptr[Connection], host: CharsPtr, user: CharsPtr, password: CharsPtr,
-            dbName: CharsPtr, port :int, unixSocket: CharsPtr, clientFlags: int
+            dbName: CharsPtr, port :Int, unixSocket: CharsPtr, clientFlags: Int
         ): ptr[Connection];
 
         @expname[mysql_close]
         func close(conn: ptr[Connection]);
 
         @expname[mysql_query]
-        func query(conn: ptr[Connection] , Query: CharsPtr): int;
+        func query(conn: ptr[Connection] , Query: CharsPtr): Int;
+
+        @expname[mysql_affected_rows]
+        func affectedRows(conn: ptr[Connection]): Int[64];
 
         @expname[mysql_use_result]
         func useResult(conn: ptr[Connection] ): ptr[Result];
 
         @expname[mysql_num_fields]
-        func numFields(res: ptr[Result]): int;
+        func numFields(res: ptr[Result]): Word;
 
         // @expname[mysql_fetch_field_direct]
         // func fetchFieldDirect(res: ptr[Result], index: Word): ptr[Field];

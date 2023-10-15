@@ -101,7 +101,7 @@
                     }
                     return Possible[Int].failure(Errors.sqlError(err));
                 }
-                return Possible[Int].success(0);
+                return Possible[Int].success(this.driver.getAffectedRowCount());
             }
         }
 
@@ -109,8 +109,8 @@
             return Query[Model](this);
         }
 
-        handler [Model: type] this.save(model: ref[Model]) {
-            Query[Model](this).save(model);
+        handler [Model: type] this.save(model: ref[Model]): Possible[Int] {
+            return Query[Model](this).save(model);
         }
 
         handler [Model: type] this.schemaBuilder: SchemaBuilder[Model] {

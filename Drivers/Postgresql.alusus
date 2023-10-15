@@ -84,6 +84,10 @@ import "libpq.so.5";
             return status == Postgresql.ResultStatus.COMMAND_OK or status == Postgresql.ResultStatus.TUPLES_OK;
         }
 
+        handler (this:Driver).getAffectedRowCount(): Int set_ptr {
+            return parseInt(Postgresql.cmdTuples(this.result));
+        }
+
         handler (this:Driver).getColumnCount(): Int set_ptr {
             return Postgresql.nfields(this.result);
         }
@@ -166,6 +170,9 @@ import "libpq.so.5";
 
         @expname[PQresultStatus]
         func resultStatus(res: ptr[Result]): int;
+
+        @expname[PQcmdTuples]
+        func cmdTuples(res: ptr[Result]): CharsPtr;
 
         @expname[PQnfields]
         func nfields(res: ptr[Result]): int;

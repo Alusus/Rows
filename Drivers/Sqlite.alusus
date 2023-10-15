@@ -83,6 +83,10 @@ import "libsqlite3.so.0";
             }
         }
 
+        handler (this:Driver).getAffectedRowCount(): Int set_ptr {
+            return Sqlite.changes(this.connection);
+        }
+
         handler (this:Driver).getColumnCount(): Int set_ptr {
             return Sqlite.column_count(this.stmt);
         }
@@ -179,6 +183,9 @@ import "libsqlite3.so.0";
             data: ptr,
             errmsg: ptr[CharsPtr]
         ): Int;
+
+        @expname[sqlite3_changes]
+        func changes(db: DbHandle): Int;
     }
 }
 
