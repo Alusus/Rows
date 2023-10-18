@@ -1007,7 +1007,10 @@ class SchemaBuilder [Model: type] {
 
 ```
 صنف قـاعدة_بيانات {
+    عملية هذا~هيئ(م: سـندنا[مـشغل])؛
+    عملية هذا~هيئ(مهيئ: مغلفة(سند[سـندنا[مـشغل]]))؛
     عملية هذا.هيئ(م: سـندنا[مـشغل])؛
+    عملية هذا.هيئ(مهيئ: مغلفة(سند[سـندنا[مـشغل]]))؛
     عملية هذا.أمتصل(): ثـنائي؛
     عملية هذا.هات_آخر_خطأ(): نـص؛
     عملية هذا.نفذ(اجلب: سند[اجـلب]): لـا_مضمون[مـصفوفة[مـصفوفة[نـص]]]؛
@@ -1026,7 +1029,10 @@ class SchemaBuilder [Model: type] {
 
 ```
 class Db {
+    handler this~init(d: SrdRef[Driver]);
+    handler this~init(initializer: closure(ref[SrdRef[Driver]]));
     handler this.init(d: SrdRef[Driver]);
+    handler this.init(initializer: closure(ref[SrdRef[Driver]]));
     handler this.isConnected(): Bool;
     handler this.getLastError(): String;
     handler this.exec(select: ref[Select]): Possible[Array[Array[String]]];
@@ -1043,7 +1049,9 @@ class Db {
 
 يستعمل هذا الصنف لتنظيم الوصول إلى قاعدة البيانات و تنفيذ مختلف العمليات عليها.
 
-`هيئ` (`init`) يهيئ قاعدة البيانات بالمشغل المعطى.
+`هيئ` (`init`) يهيئ قاعدة البيانات بالمشغل المعطى. نسخة المغلفة من هذه الدالة تستخدم لتمكين استخدام
+كائن `قـاعدة_بيانات` من مسالك متعددة. تُستدعى الدالة لتهيئة مشغل جديد لكل مسلك جديد يستخدم قاعدة
+البيانات.
 
 `أمتصل` (`isConnected`) يستعمل للتحقق فيما إذا كان هناك اتصال مع قاعدة البيانات.
 

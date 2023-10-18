@@ -67,8 +67,7 @@ import "libsqlite3.so.0";
         }
 
         handler (this:Driver).getDriverName(): String set_ptr {
-            @shared def name: String("sqlite");
-            return name;
+            return String(1, "sqlite");
         }
 
         handler (this:Driver).isConnected(): Bool set_ptr {

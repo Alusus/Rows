@@ -558,7 +558,10 @@ correct decorations as specified in the Object Relational Mapping section above.
 
 ```
 class Db {
+    handler this~init(d: SrdRef[Driver]);
+    handler this~init(initializer: closure(ref[SrdRef[Driver]]));
     handler this.init(d: SrdRef[Driver]);
+    handler this.init(initializer: closure(ref[SrdRef[Driver]]));
     handler this.isConnected(): Bool;
     handler this.getLastError(): String;
     handler this.exec(select: ref[Select]): Possible[Array[Array[String]]];
@@ -575,7 +578,10 @@ class Db {
 
 This class is used to manage the access to the database and executing many queries on it.
 
-`init` used to initialize the database with the given driver.
+`init` used to initialize the database with the given driver. The closure version of the `init`
+function and constructor are used for supporting multi-threading, i.e. using the same `Db` object
+from multiple threads. The closure will be used to initialize a new driver for each new thread
+that uses the `Db` object.
 
 `isConnected` used to check if there is a connection with the database.
 
