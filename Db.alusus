@@ -1,23 +1,33 @@
 @merge module Rows {
     class Db {
-        def driver: SrdRef[Driver];
+        def tlsDriver: Threading.ThreadLocal[SrdRef[Driver]];
         def logging: Bool = true;
 
         handler this~init() {}
         handler this~init(d: SrdRef[Driver]) {
-            this.driver = d;
+            this.init(d);
+        }
+        handler this~init(initializer: closure(ref[SrdRef[Driver]])) {
+            this.init(initializer);
         }
 
         handler this.init(d: SrdRef[Driver]) {
-            this.driver = d;
+            this.tlsDriver.value = d;
+        }
+        handler this.init(initializer: closure(ref[SrdRef[Driver]])) {
+            this.tlsDriver.initializer = initializer;
+        }
+
+        handler this.driver: ref[Driver] {
+            return this.tlsDriver.value;
         }
 
         handler this.isConnected(): Bool {
-            return this.driver.obj~ptr != 0 && this.driver.isConnected();
+            return this.driver~ptr != 0 && this.driver.isConnected();
         }
 
         handler this.getLastError(): String {
-            if this.driver.obj~ptr == 0 return String("Not initialized")
+            if this.driver~ptr == 0 return String("Not initialized")
             else return this.driver.getLastError();
         }
 
@@ -54,7 +64,7 @@
         }
 
         handler this._execSelect(sql: String, operationName: CharsPtr): Possible[Array[Array[Nullable[String]]]] {
-            if this.driver.obj~ptr == 0 {
+            if this.driver~ptr == 0 {
                 return Possible[Array[Array[Nullable[String]]]].failure(Errors.dbNotInitialized());
             } else if !this.driver.isConnected() {
                 return Possible[Array[Array[Nullable[String]]]].failure(Errors.dbNotConnected());
@@ -89,7 +99,7 @@
             if this.logging {
                 Console.print("%s>> Executing SQL:%s\n%s\n", Console.Style.FG_GREEN, Console.Style.RESET, sql.buf);
             }
-            if this.driver.obj~ptr == 0 {
+            if this.driver~ptr == 0 {
 	            return Possible[Int].failure(Errors.dbNotInitialized());
             } else if !this.driver.isConnected() {
 	            return Possible[Int].failure(Errors.dbNotConnected());
@@ -118,4 +128,3 @@
         }
     }
 }
-

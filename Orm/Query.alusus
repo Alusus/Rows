@@ -16,17 +16,21 @@
         }
 
         func getColumnNames (): Array[String] {
-            @shared def names: Array[String]({
-                preprocess { generateColumnNames(Model~ast, "column") }
+            @shared def names: Threading.ThreadLocal[Array[String]](closure (val: ref[Array[String]]) {
+                val = Array[String]({
+                    preprocess { generateColumnNames(Model~ast, "column") }
+                });
             });
-            return names;
+            return names.value;
         }
 
         func getColumnVarNames (): Array[String] {
-            @shared def names: Array[String]({
-                preprocess { generateVarNames(Model~ast, "column") }
+            @shared def names: Threading.ThreadLocal[Array[String]](closure (val: ref[Array[String]]) {
+                val = Array[String]({
+                    preprocess { generateVarNames(Model~ast, "column") }
+                });
             });
-            return names;
+            return names.value;
         }
 
         handler this.getColumnNameForVar(varName: String): String {

@@ -11,6 +11,9 @@ import "Core/Data";
 import "Spp";
 import "Spp/Ast";
 
+import "Apm";
+Apm.importFile("Alusus/Threading");
+
 @merge module Rows {
     use Srl;
     use Core.Basic;

@@ -73,8 +73,7 @@ import "libmysqlclient.so.21";
         }
 
         handler (this:Driver).getDriverName(): String set_ptr {
-            @shared def name: String("mysql");
-            return name;
+            return String(1, "mysql");
         }
 
         handler (this:Driver).isConnected(): Bool set_ptr {

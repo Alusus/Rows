@@ -69,8 +69,7 @@ import "libpq.so.5";
         }
 
         handler (this:Driver).getDriverName(): String set_ptr {
-            @shared def name: String("postgresql");
-            return name;
+            return String(1, "postgresql");
         }
 
         handler (this:Driver).isConnected(): Bool set_ptr {
