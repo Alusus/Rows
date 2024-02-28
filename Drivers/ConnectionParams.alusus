@@ -2,8 +2,8 @@
     class ConnectionParams {
         def dbName: String;
         def userName: String;
-        def password: String;
-        def host: String;
+        def password: String="";
+        def host: String="";
         def port: int = 0;
 
         handler this~init() {}
