@@ -49,25 +49,25 @@ import "libpq.so.5";
             this.disconnect();
 
             this.connectionParams = params;
-            def hostString :String ="";
-            def portString :String ="";
-            def passwordString :String ="";
-            if params.password !=String(""){
-                passwordString=String.format(" password=%s",params.password.buf);
+            def hostString: String;
+            def portString: String;
+            def passwordString: String;
+            if params.password != "" {
+                passwordString=String.format("password=%s", params.password.buf);
             }
-            if params.host !=String(""){
-                hostString=String.format("host=%s ",params.host.buf);
+            if params.host != "" {
+                hostString=String.format("host=%s", params.host.buf);
             }
-            if params.port !=0{
-                portString=String.format("port=%i ",params.port);
+            if params.port !=0 {
+                portString=String.format("port=%i", params.port);
             }
             this.connection = Postgresql.connectdb(
-                String.format("%s%sdbname=%s user=%s%s",
-                    hostString.buf,
-                    portString.buf,
+                String.format("dbname=%s user=%s %s %s %s",
                     params.dbName.buf,
                     params.userName.buf,
-                    passwordString.buf
+                    passwordString.buf,
+                    hostString.buf,
+                    portString.buf
                 )
             );
             this.connectionState = Postgresql.status(this.connection);
