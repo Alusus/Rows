@@ -49,16 +49,13 @@ import "libpq.so.5";
             this.disconnect();
 
             this.connectionParams = params;
-            def hostString :String;
-            def portString :String;
-            def dbnameString :String;
-            def userString :String;
-            def passwordString :String;
-            
-            if params.password !=""{
+            def hostString :String ="";
+            def portString :String ="";
+            def passwordString :String ="";
+            if params.password !=String(""){
                 passwordString=String.format(" password=%s",params.password.buf);
             }
-            if params.host !=""{
+            if params.host !=String(""){
                 hostString=String.format("host=%s ",params.host.buf);
             }
             if params.port !=0{
