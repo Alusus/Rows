@@ -90,6 +90,7 @@
                         }
                         result.add(row);
                     }
+                    this.driver.releaseResult();
                     return Possible[Array[Array[Nullable[String]]]].success(result);
                 }
             }
@@ -111,7 +112,9 @@
                     }
                     return Possible[Int].failure(Errors.sqlError(err));
                 }
-                return Possible[Int].success(this.driver.getAffectedRowCount());
+                def result: Possible[Int] = Possible[Int].success(this.driver.getAffectedRowCount());
+                this.driver.releaseResult();
+                return result;
             }
         }
 

@@ -101,7 +101,10 @@ import "libsqlite3.so.0";
         }
 
         handler (this:Driver).releaseResult() set_ptr {
-             Sqlite.finalize(this.stmt);
+            if this.stmt != 0 {
+                Sqlite.finalize(this.stmt);
+                this.stmt = 0;
+            }
         }
 
         handler (this:Driver).getLastError(): String set_ptr {
