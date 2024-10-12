@@ -101,10 +101,7 @@ import "libsqlite3.so.0";
         }
 
         handler (this:Driver).releaseResult() set_ptr {
-            if this.stmt != 0 {
-                Sqlite.finalize(this.stmt);
-                this.stmt = 0;
-            }
+             Sqlite.finalize(this.stmt);
         }
 
         handler (this:Driver).getLastError(): String set_ptr {
@@ -113,6 +110,10 @@ import "libsqlite3.so.0";
 
         handler (this:Driver).mapDataType(dataType: String): String set_ptr {
             return sqliteDataTypeMap(dataType);
+        }
+        
+        handler (this:Driver).getConnectionParams(): ConnectionParams set_ptr {
+            return this.connectionParams;
         }
     }
 

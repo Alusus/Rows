@@ -85,6 +85,7 @@ import "libpq.so.5";
         }
 
         handler (this:Driver).isConnected(): Bool set_ptr {
+            
             return this.connectionState == Postgresql.ConnectionStatus.OK;
         }
 
@@ -127,6 +128,10 @@ import "libpq.so.5";
 
         handler (this:Driver).mapDataType(dataType: String): String set_ptr {
             return postgresqlDataTypeMap(dataType);
+        }
+        
+        handler (this:Driver).getConnectionParams(): ConnectionParams set_ptr {
+            return this.connectionParams;
         }
     }
 
