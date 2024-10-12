@@ -114,6 +114,10 @@ import "libsqlite3.so.0";
         handler (this:Driver).mapDataType(dataType: String): String set_ptr {
             return sqliteDataTypeMap(dataType);
         }
+        
+        handler (this:Driver).getConnectionParams(): ConnectionParams set_ptr {
+            return this.connectionParams;
+        }
     }
 
     def sqliteDataTypeMap: Map[String, String](Map[String, String]().{

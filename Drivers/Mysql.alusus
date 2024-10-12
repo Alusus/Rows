@@ -119,6 +119,10 @@ import "libmysqlclient.so.21";
         handler (this:Driver).mapDataType(dataType: String): String set_ptr {
             return mysqlDataTypeMap(dataType);
         }
+        
+        handler (this:Driver).getConnectionParams(): ConnectionParams set_ptr {
+            return this.connectionParams;
+        }
     }
 
     def mysqlDataTypeMap: Map[String, String](Map[String, String]().{
