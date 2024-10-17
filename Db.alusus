@@ -32,17 +32,14 @@
         }
         
         handler this._reconnectAttempt(): bool {
-            def numberOfTest : int =10;
-            while numberOfTest > 0 {
-                if !this.driver.isConnected(){
-                    this.driver.connect(this.driver.getConnectionParams());
-                }
-                else {
-                    return true;
-                }
-                numberOfTest-=1;
+            def TIME_TO_RECONNECT: 5000; // 5 SEC IN milliseconds
+            if not this.driver.connect(this.driver.getConnectionParams()) {
+                System.sleep(TIME_TO_RECONNECT);
+                this.driver.connect(this.driver.getConnectionParams());
             }
-            return false;
+            if !this.driver.isConnected() return false;
+
+            return true;
         }
 
         handler this.exec(select: ref[Select]): Possible[Array[Array[Nullable[String]]]] {
