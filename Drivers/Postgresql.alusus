@@ -85,7 +85,12 @@ import "libpq.so.5";
         }
 
         handler (this:Driver).isConnected(): Bool set_ptr {
+            this.connectionState = Postgresql.status(this.connection);
             return this.connectionState == Postgresql.ConnectionStatus.OK;
+        }
+
+        handler (this:Driver).isConnectionEstablished(): Bool set_ptr {
+            return this.connection != null;
         }
 
         handler (this:Driver).exec(sql: CharsPtr, forSelect: Bool): Bool set_ptr {

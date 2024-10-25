@@ -30,17 +30,6 @@
             if this.driver~ptr == 0 return String("Not initialized")
             else return this.driver.getLastError();
         }
-        
-        handler this._reconnectAttempt(): bool {
-            def TIME_TO_RECONNECT: 5000; // 5 SEC IN milliseconds
-            if not this.driver.connect(this.driver.getConnectionParams()) {
-                System.sleep(TIME_TO_RECONNECT);
-                this.driver.connect(this.driver.getConnectionParams());
-            }
-            if !this.driver.isConnected() return false;
-
-            return true;
-        }
 
         handler this.exec(select: ref[Select]): Possible[Array[Array[Nullable[String]]]] {
             return this._execSelect(select.generateSqlString(), "Select");
@@ -77,13 +66,24 @@
         handler this._execSelect(sql: String, operationName: CharsPtr): Possible[Array[Array[Nullable[String]]]] {
             if this.driver~ptr == 0 {
                 return Possible[Array[Array[Nullable[String]]]].failure(Errors.dbNotInitialized());
-            } else if !this._reconnectAttempt() {
+            } else if !this.driver.isConnectionEstablished() {
                 return Possible[Array[Array[Nullable[String]]]].failure(Errors.dbNotConnected());
             } else {
                 if this.logging {
                     Console.print("%s>> Executing SQL:%s\n%s\n", Console.Style.FG_GREEN, Console.Style.RESET, sql.buf);
                 }
-                if !this.driver.exec(sql, true) {
+                def result: Bool = this.driver.exec(sql, true);
+                def attempts: Int = 3; // number of attempts
+                def TIME_TO_RECONNECT: 2000000; // 2 SEC IN microSeconds
+                while not result and attempts >0 {
+                    // TODO: delay
+                    // TODO: reconnect
+                    System.sleep(TIME_TO_RECONNECT);
+                    this.driver.connect(this.driver.getConnectionParams());
+                    result = this.driver.exec(sql, true);
+                    attempts -=1;
+                }
+                if !result {
                     def err: String = this.driver.getLastError();
                     if this.logging {
                         Console.print("%s>> SQL Error:%s\n%s\n", Console.Style.FG_RED, Console.Style.RESET, err.buf);
@@ -113,10 +113,21 @@
             }
             if this.driver~ptr == 0 {
 	            return Possible[Int].failure(Errors.dbNotInitialized());
-            } else if !this._reconnectAttempt() {
+            } else if !this.driver.isConnectionEstablished() {
 	            return Possible[Int].failure(Errors.dbNotConnected());
             } else {
-                if !this.driver.exec(sql, false) {
+                def resultStatus: Bool = this.driver.exec(sql, false);
+                def attempts: Int = 3; // number of attempts
+                def TIME_TO_RECONNECT: 2000000; // 2 SEC IN microSeconds
+                while not resultStatus and attempts >0 {
+                    // TODO: delay
+                    // TODO: reconnect
+                    System.sleep(TIME_TO_RECONNECT);
+                    this.driver.connect(this.driver.getConnectionParams());
+                    resultStatus = this.driver.exec(sql, false);
+                    attempts -=1;
+                }
+                if !resultStatus {
                     def err: String = this.driver.getLastError();
                     if this.logging {
                         Console.print("%s>> SQL Error:%s\n%s\n", Console.Style.FG_RED, Console.Style.RESET, err.buf);

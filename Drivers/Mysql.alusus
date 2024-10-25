@@ -80,6 +80,10 @@ import "libmysqlclient.so.21";
             return this.connectionState == CONNECTION_SUCCESSFUL;
         }
 
+        handler (this:Driver).isConnectionEstablished(): Bool set_ptr {
+            return this.connection != null;
+        }
+
         handler (this:Driver).exec(sql: CharsPtr, forSelect: Bool): Bool set_ptr {
             if Mysql.query(this.connection, sql) != 0 return false;
             this.result = Mysql.useResult(this.connection);

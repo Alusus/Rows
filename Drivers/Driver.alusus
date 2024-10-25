@@ -14,6 +14,7 @@
         handler this.getLastError(): String as_ptr;
         handler this.mapDataType(dataType: String): String as_ptr;
         handler this.getConnectionParams(): ConnectionParams as_ptr;
+        handler this.isConnectionEstablished(): Bool as_ptr;
     }
 }
 
