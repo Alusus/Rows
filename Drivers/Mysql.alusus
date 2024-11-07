@@ -27,7 +27,21 @@ import "libmysqlclient.so.21";
                 }
             }) });
         }
+        handler this.isConnectionError() : bool {
+            def errorStrings: Array[String]();
+            errorStrings.add(String("connect"));
+            errorStrings.add(String("Access denied"));
+            errorStrings.add(String("Lost connection"));
+            errorStrings.add(String("The MySQL server"));
+            def i : int=0;
+            for i =0 , i< errorStrings.getLength() , i++ {
+                if this.getLastError().find(errorStrings(i)) != -1 {
+                    return true;
+                }
+            }
+            return false;
 
+        }
         handler this_type(params: ref[ConnectionParams]): SrdRef[Driver] {
             def d: SrdRef[MysqlDriver];
             d.construct();
@@ -85,7 +99,10 @@ import "libmysqlclient.so.21";
         }
 
         handler (this:Driver).exec(sql: CharsPtr, forSelect: Bool): Bool set_ptr {
-            if Mysql.query(this.connection, sql) != 0 return false;
+            if Mysql.query(this.connection, sql) != 0 {
+                if(this.isConnectionError()) this.connectionState="";
+                return false;
+            }
             this.result = Mysql.useResult(this.connection);
             return true;
         }
