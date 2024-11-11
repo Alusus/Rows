@@ -13,5 +13,16 @@ if 1 {
 
     Core.addLocalization("en", "ROWS1005", "Missing params for @foreignKey modifier.");
     Core.addLocalization("ar", "ROWS1005", "المعطيات مفقودة للمبدل @فهرس_وصل.");
-}
 
+    Core.addLocalization("en", "ROWS1006", "Missing params for @model modifier.");
+    Core.addLocalization("ar", "ROWS1006", "المعطيات مفقودة للمبدل @جدول.");
+
+    Core.addLocalization("en", "ROWS1007", "Invalid param for @model modifier.");
+    Core.addLocalization("ar", "ROWS1007", "صنف معطى المبدل @جدول غير صالح.");
+
+    Core.addLocalization("en", "ROWS1008", "Missing params for @migration modifier.");
+    Core.addLocalization("ar", "ROWS1008", "المعطيات مفقودة للمبدل @مواكبة.");
+
+    Core.addLocalization("en", "ROWS1009", "Invalid param for @migration modifier.");
+    Core.addLocalization("ar", "ROWS1009", "صنف معطى المبدل @مواكبة غير صالح.");
+}

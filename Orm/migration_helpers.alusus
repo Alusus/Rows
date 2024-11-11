@@ -1,0 +1,324 @@
+@merge module Rows {
+    function generateMigrationsList(astRef: ref[TiObject]) {
+        if isDerivedFrom[astRef, Core.Data.Ast.List] {
+            def container: ContainerOf[astRef];
+            def i: Word;
+            for i = 0, i < container.getElementCount(), ++i {
+                generateMigrationsList(container.getElement(i));
+            }
+        } else {
+            insertModelMigrations(astRef);
+        }
+    }
+
+    function insertModelMigrations(modelRef: ref[TiObject]) {
+        def model: ref[TiObject](Spp.astMgr.traceType(modelRef));
+        if model~ptr == 0 return;
+        // Parse the model modifier.
+        def modifier: ref[TiObject](Spp.astMgr.findModifierForElement(model, "model", modifierKeywordTranslations));
+        if modifier~ptr == 0 {
+            Spp.buildMgr.raiseBuildNotice("ROWS1001", 1, model);
+            return;
+        }
+        def modifierParams: Array[ref[TiObject]];
+        if not Spp.astMgr.getModifierParams(modifier, modifierParams) or modifierParams.getLength() != 2 {
+            Spp.buildMgr.raiseBuildNotice("ROWS1006", 1, modifier);
+            return;
+        }
+        def tableNameLiteral: ref[Ast.StringLiteral](dynCastRef[modifierParams(0), Ast.StringLiteral]);
+        def modelVersionLiteral: ref[Ast.IntegerLiteral](dynCastRef[modifierParams(1), Ast.IntegerLiteral]);
+        if tableNameLiteral~ptr == 0 or modelVersionLiteral~ptr == 0 {
+            Spp.buildMgr.raiseBuildNotice("ROWS1007", 1, modifierParams(0));
+            return;
+        }
+        if String.parseInt(modelVersionLiteral.value.value) <= 0 {
+            Spp.buildMgr.raiseBuildNotice("ROWS1007", 1, modifierParams(1));
+            return;
+        }
+
+        def skipDefaultMigration: Bool = false;
+
+        // Insert manual migrations
+        def migrationFuncs: Array[ref[TiObject]] = Spp.astMgr.getClassFuncs(
+            model, "migration", modifierKeywordTranslations
+        );
+        def i: Int;
+        for i = 0, i < migrationFuncs.getLength(), ++i {
+            def modifier: ref[TiObject](
+                Spp.astMgr.findModifierForElement(migrationFuncs(i), "migration", modifierKeywordTranslations)
+            );
+            // modifier should never be null at this point since we are looping on functions having
+            // the modifier.
+            def modifierParams: Array[ref[TiObject]]
+            if not Spp.astMgr.getModifierParams(modifier, modifierParams) or modifierParams.getLength() < 2 {
+                Spp.buildMgr.raiseBuildNotice("ROWS1008", 1, modifier);
+                continue;
+            }
+            def fromVersionLiteral: ref[Ast.IntegerLiteral](dynCastRef[modifierParams(0), Ast.IntegerLiteral]);
+            def toVersionLiteral: ref[Ast.IntegerLiteral](dynCastRef[modifierParams(1), Ast.IntegerLiteral]);
+            if fromVersionLiteral~ptr == 0 or toVersionLiteral~ptr == 0 {
+                Spp.buildMgr.raiseBuildNotice("ROWS1009", 1, modifier);
+                continue;
+            }
+            def modelFromVersion: Int = String.parseInt(fromVersionLiteral.value.value);
+            def modelToVersion: Int = String.parseInt(toVersionLiteral.value.value);
+            if modelFromVersion < 0 or modelToVersion <= 0 or modelToVersion <= modelFromVersion {
+                Spp.buildMgr.raiseBuildNotice("ROWS1009", 1, modifier);
+                continue;
+            }
+            // Skip the auto table generation migration if we have a migration starting from version 0.
+            // Migrations starting from version 0 are responsible for creating the table themselves.
+            if modelFromVersion == 0 skipDefaultMigration = true;
+            Spp.astMgr.insertAst(
+                (ast Migration().{
+                    migrate = fn~ptr;
+                    tableName = tableNameLiteral;
+                    fromVersion = modelFromVersion;
+                    toVersion = modelToVersion;
+                    tableDependencies = tableDepsMap;
+                }),
+                AstTemplateMap()
+                    .set(String("fn"), Core.Data.Ast.Passage(migrationFuncs(i)))
+                    .set(String("tableNameLiteral"), tableNameLiteral)
+                    .set(String("modelFromVersion"), fromVersionLiteral)
+                    .set(String("modelToVersion"), toVersionLiteral)
+                    .set(String("tableDepsMap"), buildModelMigrationDependencies(modifierParams(2)).obj)
+            );
+        }
+
+        // Insert auto table generation migration, if needed.
+        if not skipDefaultMigration {
+            def list: SrdRef[Ast.List] = newSrdObj[Ast.List];
+            def listContainer: DynContainerOf[list.obj];
+            listContainer.addElement(Core.Data.Ast.Passage.create(model));
+            def instance: SrdRef[TiObject];
+            Spp.astMgr.matchTemplateInstance(createTableForModel~ast~cast[ref[Spp.Ast.Template]], list.obj, instance);
+            Spp.astMgr.insertAst(
+                (ast Migration().{
+                    migrate = fn~ptr;
+                    tableName = tableNameLiteral;
+                    fromVersion = 0;
+                    toVersion = modelVersion;
+                }),
+                AstTemplateMap()
+                    .set(String("fn"), Core.Data.Ast.Passage(instance.obj))
+                    .set(String("tableNameLiteral"), tableNameLiteral)
+                    .set(String("modelVersion"), modelVersionLiteral)
+            );
+        }
+    }
+
+    function buildModelMigrationDependencies(dependencies: ref[TiObject]): TioSrdRef {
+        def result: TioSrdRef = Spp.astMgr.buildAst((ast Map[String, Int]()), AstTemplateMap());
+        if dependencies~ptr != 0 {
+            if isDerivedFrom[dependencies, Core.Data.Ast.List] {
+                def container: ContainerOf[dependencies];
+                def i: Word;
+                for i = 0, i < container.getElementCount(), ++i {
+                    result = Spp.astMgr.buildAst(
+                        (ast a.set(b)),
+                        AstTemplateMap()
+                            .set(String("a"), result.obj)
+                            .set(String("b"), buildModelMigrationDependencyArgs(container.getElement(i)))
+                    );
+                }
+            } else {
+                result = Spp.astMgr.buildAst(
+                    (ast a.set(b)),
+                    AstTemplateMap()
+                        .set(String("a"), result.obj)
+                        .set(String("b"), buildModelMigrationDependencyArgs(dependencies).obj)
+                );
+            }
+        }
+        return result;
+    }
+
+    function buildModelMigrationDependencyArgs(dependency: ref[TiObject]): TioSrdRef {
+        def linkOp: ref[Ast.LinkOperator](dynCastRef[dependency, Ast.LinkOperator]);
+        if linkOp~ptr == 0 {
+            Spp.buildMgr.raiseBuildNotice("ROWS1009", 1, dependency);
+            return Spp.astMgr.buildAst((ast set(String("INVALID"), 0)), AstTemplateMap());
+        }
+        def container: MapContainerOf[linkOp];
+        return Spp.astMgr.buildAst(
+            (ast String("{{name}}"), version),
+            AstTemplateMap()
+                .set(String("name"), TiStr(getTableName(Spp.astMgr.traceType(container.getElement("first")))))
+                .set(String("version"), container.getElement("second"))
+        );
+    }
+
+    function buildModelVersionsMapSetStatements(obj: TioSrdRef, astRef: ref[TiObject]): TioSrdRef {
+        if isDerivedFrom[astRef, Core.Data.Ast.List] {
+            def container: ContainerOf[astRef];
+            def i: Word;
+            for i = 0, i < container.getElementCount(), ++i {
+                obj = buildModelVersionsMapSetStatements(obj, container.getElement(i));
+            }
+            return obj;
+        } else {
+            return Spp.astMgr.buildAst(
+                (ast a.set(b)),
+                AstTemplateMap()
+                    .set(String("a"), obj.obj)
+                    .set(String("b"), buildModelVersionSetStatementArgs(astRef))
+            );
+        }
+    }
+
+    function buildModelVersionSetStatementArgs(modelRef: ref[TiObject]): TioSrdRef {
+        def model: ref[TiObject](Spp.astMgr.traceType(modelRef));
+        if model~ptr == 0 return TioSrdRef();
+        // We can skip validation since we are doing it previously in insertModelMigrations.
+        def modifier: ref[TiObject](Spp.astMgr.findModifierForElement(model, "model", modifierKeywordTranslations));
+        def modifierParams: Array[ref[TiObject]];
+        Spp.astMgr.getModifierParams(modifier, modifierParams);
+        def tableNameLiteral: ref[Ast.StringLiteral](dynCastRef[modifierParams(0), Ast.StringLiteral]);
+        def modelVersionLiteral: ref[Ast.IntegerLiteral](dynCastRef[modifierParams(1), Ast.IntegerLiteral]);
+        return Spp.astMgr.buildAst(
+            (ast String(name), version),
+            AstTemplateMap()
+                .set(String("name"), tableNameLiteral)
+                .set(String("version"), modelVersionLiteral)
+        );
+    }
+
+    function pickNeededMigrations(
+        tableVersions: Map[String, Int], modelVersions: Map[String, Int], migrations: ref[Array[Migration]]
+    ): Possible[Array[Migration]] {
+        def resultMigrations: Array[Migration];
+        def i: Int;
+        for i = 0, i < modelVersions.getLength(), ++i {
+            def currentVersion: Int = Int().{
+                def pos: Int = tableVersions.findPos(modelVersions.keyAt(i));
+                if pos == -1 this = 0 else this = tableVersions.valAt(pos);
+            };
+            while currentVersion != modelVersions.valAt(i) {
+                def migrationIndex: Int = findMigration(migrations, modelVersions.keyAt(i), currentVersion);
+                if migrationIndex == -1 {
+                    return Possible[Array[Migration]].failure(
+                        Errors.migrationMissing(modelVersions.keyAt(i), currentVersion)
+                    );
+                }
+                currentVersion = migrations(migrationIndex).toVersion;
+                resultMigrations.add(migrations(migrationIndex));
+            }
+        }
+        return Possible[Array[Migration]].success(resultMigrations);
+    }
+
+    function findMigration(migrations: ref[Array[Migration]], tableName: String, fromVersion: Int): Int {
+        // We will find the migration that migrates from fromVersion to the highest possible version.
+        def i: Int;
+        def result: Int = -1;
+        def toVersion: Int = 0;
+        for i = 0, i < migrations.getLength(), ++i {
+            if migrations(i).tableName == tableName
+            and migrations(i).fromVersion == fromVersion
+            and migrations(i).toVersion > toVersion {
+                toVersion = migrations(i).toVersion;
+                result = i;
+            }
+        }
+        return result;
+    }
+
+    function populateMigrationsDependencies(
+        tableVersions: Map[String, Int], migrations: ref[Array[Migration]]
+    ): SrdRef[Error] {
+        def i: Int;
+        for i = 0, i < migrations.getLength(), ++i {
+            def j: Int;
+            if migrations(i).fromVersion != 0 {
+                migrations(i).tableDependencies(migrations(i).tableName) = migrations(i).fromVersion;
+            }
+            for j = 0, j < migrations(i).tableDependencies.getLength(), ++j {
+                def depTableName: String = migrations(i).tableDependencies.keyAt(j);
+                def depTableVersion: Int = migrations(i).tableDependencies.valAt(j);
+                def depVersionMet: Bool = false;
+                def currentVersion: Int = Int().{
+                    def pos: Int = tableVersions.findPos(depTableName);
+                    if pos == -1 this = 0 else this = tableVersions.valAt(pos);
+                };
+                if depTableVersion == currentVersion {
+                    depVersionMet = true;
+                }
+                def k: Int;
+                for k = 0, k < migrations.getLength(), ++k {
+                    if k == i continue;
+                    if migrations(k).tableName != depTableName continue;
+                    // If this migration migrates the table to the required version then it needs
+                    // to run before the dependent migration, i.e. it's a dependency of the
+                    // dependent migration (migration @ i), whereas if it migrates the table from
+                    // the required version then it shouldn't run until the dependent migration is
+                    // run, i.e. the dependent migration (migration @ i) is the dependency of this
+                    // migration.
+                    if migrations(k).toVersion == depTableVersion {
+                        if not depVersionMet {
+                            migrations(i).migrationDependencies.add(k);
+                            depVersionMet = true;
+                        }
+                    } else if migrations(k).fromVersion == depTableVersion {
+                        migrations(k).migrationDependencies.add(i);
+                    }
+                }
+                if not depVersionMet {
+                    return Errors.migrationDependencyMissing(
+                        migrations(i).tableName,
+                        migrations(i).fromVersion,
+                        migrations(i).toVersion
+                    );
+                }
+            }
+        }
+        return SrdRef[Error]();
+    }
+
+    function sortMigrations(migrations: ref[Array[Migration]]): Possible[Array[Migration]] {
+        // Sort the migrations using topological sort.
+        // Build the graph (adjacency list) and calculate in-degrees
+        def inDegree: Map[Int, Int];
+        def graph: Map[Int, Array[Int]];
+        def zeroInDegreeQueue: Array[Int];
+
+        // Populate the graph and in-degrees
+        def i: Int;
+        for i = 0, i < migrations.getLength(), ++i {
+            inDegree(i) = migrations(i).migrationDependencies.getLength();
+            if inDegree(i) == 0 zeroInDegreeQueue.add(i);
+            def j: Int;
+            for j = 0, j < migrations(i).migrationDependencies.getLength(), ++j {
+                // Dependency points to all elements depending on it.
+                graph(migrations(i).migrationDependencies(j)).add(i);
+            }
+        }
+
+        def sortedMigrations: Array[Migration];
+
+        // Process the queue
+        while zeroInDegreeQueue.getLength() > 0 {
+            def current: Int = zeroInDegreeQueue(0);
+            zeroInDegreeQueue.remove(0);
+
+            sortedMigrations.add(migrations(current));
+
+            // For each element that depends on the current one
+            for i = 0, i < graph(current).getLength(), ++i {
+                def dependent: Int = graph(current)(i);
+                inDegree(dependent) -= 1;
+                if inDegree(dependent) == 0 {
+                    // This dependent has no more dependencies.
+                    zeroInDegreeQueue.add(dependent)
+                }
+            }
+        }
+
+        // If the sorted list has all the elements, return it
+        if sortedMigrations.getLength() != migrations.getLength() {
+            return Possible[Array[Migration]].failure(Errors.migrationDependencyCycle());
+        }
+
+        return Possible[Array[Migration]].success(sortedMigrations);
+    }
+}

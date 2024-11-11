@@ -44,7 +44,7 @@
             def mapContaining: ref[MapContaining](getInterface[obj, MapContaining]);
             if !Spp.astMgr.buildAst(
                 ast { Srl.String("NOT ") + (cond) },
-                Map[String, ref[TiObject]]()
+                AstTemplateMap()
                     .set(String("cond"), generateWhere(mapContaining.getElement(0)).obj),
                 result2
             ) {
@@ -70,7 +70,7 @@
                             else this = String(" = ") + v.toString();
                         }
                     },
-                    Map[String, ref[TiObject]]()
+                    AstTemplateMap()
                         .set(String("name"), mapContaining.getElement("first"))
                         .set(String("val"), mapContaining.getElement("second")),
                     result
@@ -87,7 +87,7 @@
                             else this = String(" != ") + v.toString();
                         }
                     },
-                    Map[String, ref[TiObject]]()
+                    AstTemplateMap()
                         .set(String("name"), mapContaining.getElement("first"))
                         .set(String("val"), mapContaining.getElement("second")),
                     result
@@ -101,7 +101,7 @@
                         Srl.String(" {{op}} ") +
                         Rows.Value(_this.validationBuffer.name~use_in(_buffer) no_injection { _buffer = val }).toString()
                     },
-                    Map[String, ref[TiObject]]()
+                    AstTemplateMap()
                         .set(String("name"), mapContaining.getElement("first"))
                         .set(String("op"), TiStr(operator))
                         .set(String("val"), mapContaining.getElement("second")),
@@ -115,7 +115,7 @@
             def mapContaining: ref[MapContaining](getInterface[obj, MapContaining]);
             if !Spp.astMgr.buildAst(
                 ast { (cond1) + Srl.String(" {{op}} ") + (cond2) },
-                Map[String, ref[TiObject]]()
+                AstTemplateMap()
                     .set(String("cond1"), generateWhere(mapContaining.getElement("first")).obj)
                     .set(String("op"), binding.getMember("type"))
                     .set(String("cond2"), generateWhere(mapContaining.getElement("second")).obj),
@@ -127,7 +127,7 @@
             def mapContaining: ref[MapContaining](getInterface[obj, MapContaining]);
             if !Spp.astMgr.buildAst(
                 ast { Srl.String("(") + (cond) + Srl.String(")") },
-                Map[String, ref[TiObject]]()
+                AstTemplateMap()
                    .set(String("cond"), generateWhere(mapContaining.getElement("operand")).obj),
                 result
             ) {
@@ -145,7 +145,7 @@
                     Srl.String("\"") + Rows.escapeString(_this.getColumnNameForVar(Srl.String("{{name}}"))) + "\"" +
                     Srl.String(" in (")
                 },
-                Map[String, ref[TiObject]]().set(String("name"), mapContaining.getElement("first")),
+                AstTemplateMap().set(String("name"), mapContaining.getElement("first")),
                 result2
             ) {
                 System.fail(1, "Unexpected error while processing LinkOperator in generateWhere.\n");
@@ -162,7 +162,7 @@
                             Srl.String(" , ")
                         )
                     },
-                    Map[String, ref[TiObject]]()
+                    AstTemplateMap()
                         .set(String("name"), mapContaining.getElement("first"))
                         .set(String("val"), containing.getElement(i))
                         .set(String("result"), resultArray(i)),
@@ -181,7 +181,7 @@
                         Srl.String(")")
                     )
                 },
-                Map[String, ref[TiObject]]()
+                AstTemplateMap()
                     .set(String("name"), mapContaining.getElement("first"))
                     .set(String("val"), containing.getElement(containing.getElementCount()~cast[Int]-1))
                     .set(String("result"), resultArray(resultArray.getLength()-1)),
@@ -193,7 +193,7 @@
             Spp.buildMgr.raiseBuildNotice("SPPG1002", 1, obj);
             if !Spp.astMgr.buildAst(
                 ast { Srl.String("") },
-                Map[String, ref[TiObject]](),
+                AstTemplateMap(),
                 result
             ) {
                 System.fail(1, "Failed to build condition.\n");
@@ -214,7 +214,7 @@
                     this.ordering.add(this.getColumnNameForVar(Srl.String("{{column}}")));
                     this.validationBuffer.column;
                 },
-                Map[String, ref[TiObject]]().set(String("column"), obj),
+                AstTemplateMap().set(String("column"), obj),
                 result
             ) {
                 System.fail(1, "Unexpected error while processing Identifier in generateOrder.\n");
@@ -235,7 +235,7 @@
                     this.ordering.add(Srl.String("-") + this.getColumnNameForVar(Srl.String("{{column}}")));
                     this.validationBuffer.column;
                 },
-                Map[String, ref[TiObject]]().set(String("column"), obj),
+                AstTemplateMap().set(String("column"), obj),
                 result
             ) {
                 System.fail(1, "Unexpected error while processing PrefixOperator in generateOrder.\n");
@@ -251,7 +251,7 @@
                 def combinedResult: TioSrdRef;
                 if !Spp.astMgr.buildAst(
                     ast { prevResult; result; },
-                    Map[String, ref[TiObject]]()
+                    AstTemplateMap()
                         .set(String("prevResult"), result)
                         .set(String("result"), generateOrder(container.getElement(i))),
                     combinedResult
@@ -264,7 +264,7 @@
             Spp.buildMgr.raiseBuildNotice("SPPG1002", 1, obj);
             if !Spp.astMgr.buildAst(
                 ast { },
-                Map[String, ref[TiObject]](),
+                AstTemplateMap(),
                 result
             ) {
                 System.fail(1, "Unexpected error in generateOrder.\n");
@@ -290,7 +290,7 @@
                         _this.validationBuffer.name = val;
                         data.add(Rows.Value(_this.validationBuffer.name));
                     },
-                    Map[String, ref[TiObject]]()
+                    AstTemplateMap()
                         .set(String("name"), mapContainer.getElement("first"))
                         .set(String("val"), mapContainer.getElement("second")),
                     result
@@ -299,7 +299,7 @@
                 }
             } else {
                 Spp.buildMgr.raiseBuildNotice("SPPG1002", 1, obj);
-                if !Spp.astMgr.buildAst(ast { }, Map[String, ref[TiObject]](), result) {
+                if !Spp.astMgr.buildAst(ast { }, AstTemplateMap(), result) {
                     System.fail(1, "Unexpected error while processing AssignmentOperator in generateUpdate.\n");
                 }
             }
@@ -314,7 +314,7 @@
                 def combinedResult: TioSrdRef;
                 if !Spp.astMgr.buildAst(
                     ast { prevResult; result; },
-                    Map[String, ref[TiObject]]()
+                    AstTemplateMap()
                         .set(String("prevResult"), result)
                         .set(String("result"), generateUpdate(container.getElement(i))),
                     combinedResult
@@ -325,7 +325,7 @@
             }
         } else {
             Spp.buildMgr.raiseBuildNotice("SPPG1002", 1, obj);
-            if !Spp.astMgr.buildAst(ast { }, Map[String, ref[TiObject]](), result) {
+            if !Spp.astMgr.buildAst(ast { }, AstTemplateMap(), result) {
                 System.fail(1, "Unexpected error in generateUpdate.\n");
             }
         }
@@ -348,7 +348,7 @@
                 (ast model.varName = valType().{
                     if not data(j).isNull this = parser(data(j))
                 }),
-                Map[String, ref[TiObject]]()
+                AstTemplateMap()
                     .set(String("j"), Core.Data.Ast.IntegerLiteral(String("") + i))
                     .set(String("varName"), Core.Data.Ast.Identifier(varNames(i)))
             ) {
@@ -390,7 +390,7 @@
         for i = 0, i < varArray.getLength(), i = i+1 {
             if !Spp.astMgr.insertAst(
                 (ast data.add(Rows.Value(model.varName))),
-                Map[String, ref[TiObject]]().set(String("varName"), Core.Data.Ast.Identifier(varArray(i)))
+                AstTemplateMap().set(String("varName"), Ast.Identifier(varArray(i)))
             ) {
                 System.fail(1, "Unexpected error while processing generateGetData.\n");
             }

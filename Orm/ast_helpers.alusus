@@ -2,29 +2,7 @@
     def modifierKeywordTranslations: Map[String, String];
 
     function generateVarNames (parent: ref[Core.Basic.TiObject], modifierKwd: CharsPtr) {
-        generateStrings(getVarNames(parent, modifierKwd));
-    }
-
-    function getVarNames (parent: ref[Core.Basic.TiObject], modifierKwd: CharsPtr): Array[String] {
-        def elements: Array[ref[Core.Basic.TiObject]] = Spp.astMgr.findElements(
-            (ast elementType == "var"),
-            parent,
-            Spp.SeekerFlags.SKIP_OWNERS | Spp.SeekerFlags.SKIP_USES | Spp.SeekerFlags.SKIP_CHILDREN
-        );
-        def result: Array[String];
-        def i: Int;
-        for i = 0, i < elements.getLength(), ++i {
-            if modifierKwd != 0 and findElementModifier(elements(i), modifierKwd)~ptr == 0 continue;
-            result.add(getVarName(elements(i)));
-        }
-        return result;
-    }
-
-    function getVarName (var: ref[Core.Basic.TiObject]): String {
-        def node: ref[Core.Data.Node](castRef[var, Core.Data.Node]);
-        def d: ref[Core.Data.Ast.Definition](castRef[node.owner, Core.Data.Ast.Definition]);
-        def binding: ref[Core.Basic.Binding](Core.Basic.getInterface[d, Core.Basic.Binding]);
-        return castRef[binding.getMember("name"), TiStr].value;
+        generateStrings(Spp.astMgr.getClassVarNames(parent, modifierKwd, modifierKeywordTranslations));
     }
 
     function generateColumnNames (parent: ref[Core.Basic.TiObject], modifierKwd: CharsPtr) {
@@ -40,20 +18,26 @@
         def result: Array[String];
         def i: Int;
         for i = 0, i < elements.getLength(), ++i {
-            if modifierKwd != 0 and findElementModifier(elements(i), modifierKwd)~ptr == 0 continue;
+            if modifierKwd != 0
+            and Spp.astMgr.findModifierForElement(elements(i), modifierKwd, modifierKeywordTranslations)~ptr == 0 {
+                continue;
+            }
             result.add(getColumnName(elements(i)));
         }
         return result;
     }
 
     function getColumnName (var: ref[Core.Basic.TiObject]): String {
-        def modifier: ref[Core.Basic.TiObject](findElementModifier(var, "column"));
-        if modifier~ptr == 0 return getVarName(var);
-        def params: Array[String] = getModifierParams(modifier);
+        def modifier: ref[Core.Basic.TiObject](
+            Spp.astMgr.findModifierForElement(var, "column", modifierKeywordTranslations)
+        );
+        if modifier~ptr == 0 return Spp.astMgr.getDefinitionName(var);
+        def params: Array[String];
+        Spp.astMgr.getModifierStringParams(modifier, params);
         if params.getLength() > 0 {
             return params(0);
         } else {
-            return getVarName(var);
+            return Spp.astMgr.getDefinitionName(var);
         }
     }
 
@@ -66,7 +50,10 @@
         def result: Array[ref[Core.Basic.TiObject]];
         def i: Int;
         for i = 0, i < elements.getLength(), ++i {
-            if modifierKwd != 0 and findElementModifier(elements(i), modifierKwd)~ptr == 0 continue;
+            if modifierKwd != 0
+            and Spp.astMgr.findModifierForElement(elements(i), modifierKwd, modifierKeywordTranslations)~ptr == 0 {
+                continue;
+            }
             result.add(elements(i));
         }
         return result;
@@ -111,39 +98,33 @@
     }
 
     function getElementModifierParams (element: ref[Core.Basic.TiObject], modName: CharsPtr): Array[String] {
-        def modifier: ref[Core.Basic.TiObject](findElementModifier(element, modName));
-        if modifier~ptr != 0 return getModifierParams(modifier)
-        else return Array[String]();
-    }
-
-    function findElementModifier (element: ref[Core.Basic.TiObject], modName: CharsPtr): ref[Core.Basic.TiObject] {
-        def modifiers: ref[Core.Basic.Containing](Spp.astMgr.getModifiers(element));
-        if modifiers~ptr == 0 return nullRef[Core.Basic.TiObject];
-        def i: Int;
-        for i = 0, i < modifiers->getElementCount()~cast[Int], ++i {
-            def modifier: ref[Core.Basic.TiObject](modifiers.getElement(i));
-            if modifier~ptr == 0 continue;
-            def kwd: String = Spp.astMgr.getModifierKeyword(modifier);
-            def translatedKwd: String = modifierKeywordTranslations(kwd);
-            if translatedKwd == "" translatedKwd = kwd;
-            if translatedKwd == modName return modifier;
-        }
-        return nullRef[Core.Basic.TiObject];
-    }
-
-    function getModifierParams (modifier: ref[Core.Basic.TiObject]): Array[String] {
-        def params: Srl.Array[Srl.String];
-        Spp.astMgr.getModifierStringParams(modifier, params);
-        return params;
+        def modifier: ref[Core.Basic.TiObject](
+            Spp.astMgr.findModifierForElement(element, modName, modifierKeywordTranslations)
+        );
+        if modifier~ptr != 0 {
+            def params: Array[String];
+            Spp.astMgr.getModifierStringParams(modifier, params);
+            return params;
+        } else return Array[String]();
     }
 
     func getTableName (classAst: ref[Core.Basic.TiObject]): String {
-        def params: Array[String] = getElementModifierParams(classAst, "model");
-        if params.getLength() != 1 {
+        def modifier: ref[TiObject](Spp.astMgr.findModifierForElement(classAst, "model", modifierKeywordTranslations));
+        if modifier~ptr == 0 {
             Spp.buildMgr.raiseBuildNotice("ROWS1001", 1, classAst);
-            params.add(String("MISSING_TABLE_NAME"));
+            return String("MISSING_TABLE_NAME");
         }
-        return params(0);
+        def modifierParams: Array[ref[TiObject]];
+        if not Spp.astMgr.getModifierParams(modifier, modifierParams) or modifierParams.getLength() < 1 {
+            Spp.buildMgr.raiseBuildNotice("ROWS1006", 1, modifier);
+            return String("MISSING_TABLE_NAME");
+        }
+        def tableNameLiteral: ref[Ast.StringLiteral](dynCastRef[modifierParams(0), Ast.StringLiteral]);
+        if tableNameLiteral~ptr == 0 {
+            Spp.buildMgr.raiseBuildNotice("ROWS1007", 1, modifierParams(0));
+            return String("MISSING_TABLE_NAME");
+        }
+        return tableNameLiteral.value.value;
     }
 }
 

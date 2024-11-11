@@ -3,7 +3,7 @@ Apm.importFile("Alusus/Rows", { "Rows.alusus", "Drivers/Mysql.alusus" });
 use Srl;
 use Rows;
 
-@model["properties"]
+@model["properties", 1]
 class Property {
     @defult["10"]
     @notNull
@@ -44,5 +44,5 @@ if !db.driver.isConnected() {
     System.fail(1, String("Error connecting to DB: ") + db.getLastError());
 }
 
-db.schemaBuilder[Property].create();
+db.schemaBuilder[Property].migrate();
 
