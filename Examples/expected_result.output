@@ -137,18 +137,6 @@ select * from users where name in ('sarmad','abdullah')
 CREATE TABLE IF NOT EXISTS table_versions (name VARCHAR(256) PRIMARY KEY,version INTEGER NOT NULL)
 [32m>> Executing SQL:[0m
 SELECT name, version FROM table_versions
-[32m>> Executing SQL:[0m
-CREATE TABLE IF NOT EXISTS "properties"(
-"id" INT NOT NULL DEFAULT 10,
-"ssd" INT,
-"ss" VARCHAR(50),
-"address" VARCHAR(250) DEFAULT 'Baghdad',
-"userId" INT,
-PRIMARY KEY ("id"),
-FOREIGN KEY ("userId") REFERENCES "users"("id")
-);
-[32m>> Executing SQL:[0m
-INSERT INTO table_versions(name, version) VALUES ('properties', 1)
 
 
 
@@ -158,14 +146,6 @@ INSERT INTO table_versions(name, version) VALUES ('properties', 1)
 CREATE TABLE IF NOT EXISTS table_versions (name VARCHAR(256) PRIMARY KEY,version INTEGER NOT NULL)
 [32m>> Executing SQL:[0m
 SELECT name, version FROM table_versions
-[32m>> Executing SQL:[0m
-CREATE TABLE IF NOT EXISTS "books"(
-"id" INT NOT NULL,
-"name" VARCHAR(50),
-PRIMARY KEY ("id")
-);
-[32m>> Executing SQL:[0m
-INSERT INTO table_versions(name, version) VALUES ('books', 1)
 [32m>> Executing SQL:[0m
 DELETE FROM books
 [32m>> Executing SQL:[0m
@@ -977,18 +957,6 @@ DELETE FROM users WHERE id=153;
 CREATE TABLE IF NOT EXISTS table_versions (name VARCHAR(256) PRIMARY KEY,version INTEGER NOT NULL)
 [32m>> Executing SQL:[0m
 SELECT name, version FROM table_versions
-[32m>> Executing SQL:[0m
-CREATE TABLE IF NOT EXISTS "عقارات"(
-"المعرف" INT NOT NULL,
-"ابت" INT,
-"جحخ" VARCHAR(50),
-"العنوان" VARCHAR(250),
-"معرف_المستخدم" INT,
-PRIMARY KEY ("المعرف"),
-FOREIGN KEY ("معرف_المستخدم") REFERENCES "users"("id")
-);
-[32m>> Executing SQL:[0m
-INSERT INTO table_versions(name, version) VALUES ('عقارات', 1)
 
 
 
