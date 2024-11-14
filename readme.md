@@ -593,6 +593,10 @@ table manually on a new database instead of depending on the default table creat
 
 ```
 class Db {
+    def logging: Bool = true;
+    def reconnectionDelay: Word = 2000000; // 2 seconds
+    def reconnectionAttemptCount: Int = 3;
+
     handler this~init(d: SrdRef[Driver]);
     handler this~init(initializer: closure(ref[SrdRef[Driver]]));
     handler this.init(d: SrdRef[Driver]);
@@ -614,6 +618,14 @@ class Db {
 
 This class is used to manage the access to the database and executing many queries on it.
 
+`logging` when set to true the library will print the executed SQL statements to the console.
+
+`reconnectionDelay` the delay in microseconds that the library will wait after the connection
+to the server is lost before trying to reconnect.
+
+`reconnectionAttemptCount` The max number of reconnection retries before the library gives up
+and returns an error.
+
 `init` used to initialize the database with the given driver. The closure version of the `init`
 function and constructor are used for supporting multi-threading, i.e. using the same `Db` object
 from multiple threads. The closure will be used to initialize a new driver for each new thread
@@ -627,6 +639,7 @@ that uses the `Db` object.
 addition to an overload for executing raw SQL statements. The version for raw SQL splits the SQL
 structure from the data, which are passed as extra args to the function similar to printf. The
 following types of data params are supported by this function:
+* CharsPtr for field or table name: %n
 * String: %s
 * CharsPtr: %p
 * Int: %i

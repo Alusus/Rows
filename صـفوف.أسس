@@ -80,6 +80,9 @@
 
     عرف قـاعدة_بيانات: لقب Db؛
     @دمج صنف قـاعدة_بيانات {
+        عرف تدوين: لقب logging؛
+        عرف انتظار_إعادة_الاتصال: لقب reconnectionDelay؛
+        عرف عدد_محاولات_إعادة_الاتصال: لقب reconnectionAttemptCount؛
         عرف هيئ: لقب init؛
         عرف أمتصل: لقب isConnected؛
         عرف هات_آخر_خطأ: لقب getLastError؛
