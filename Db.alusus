@@ -1,7 +1,11 @@
 @merge module Rows {
     class Db {
+        def DEFAULT_RECONNECTION_DELAY: 2000000; // 2 SEC IN microSeconds
+
         def tlsDriver: Threading.ThreadLocal[SrdRef[Driver]];
         def logging: Bool = true;
+        def reconnectionDelay: Word = DEFAULT_RECONNECTION_DELAY;
+        def reconnectionAttemptCount: Int = 3;
 
         handler this~init() {}
         handler this~init(d: SrdRef[Driver]) {
@@ -72,23 +76,15 @@
                 if this.logging {
                     Console.print("%s>> Executing SQL:%s\n%s\n", Console.Style.FG_GREEN, Console.Style.RESET, sql.buf);
                 }
-                def result: Bool = this.driver.exec(sql, true);
-                def attempts: Int = 3; // number of attempts
-                def TIME_TO_RECONNECT: 2000000; // 2 SEC IN microSeconds
-                while not result and attempts >0 and not this.driver.isConnected(){
-
-                    System.sleep(TIME_TO_RECONNECT);
-                    this.driver.connect(this.driver.getConnectionParams());
-                    result = this.driver.exec(sql, true);
-                    attempts -=1;
-                }
-                if !result {
-                    def err: String = this.driver.getLastError();
-                    if this.logging {
-                        Console.print("%s>> SQL Error:%s\n%s\n", Console.Style.FG_RED, Console.Style.RESET, err.buf);
+                def success: Bool = this.driver.exec(sql, true);
+                def attempts: Int = this.reconnectionAttemptCount;
+                while not success and --attempts >= 0 and not this.driver.isConnected() {
+                    System.sleep(this.reconnectionDelay);
+                    if this.driver.connect(this.driver.getConnectionParams()) {
+                        success = this.driver.exec(sql, true);
                     }
-                    return Possible[Array[Array[Nullable[String]]]].failure(Errors.sqlError(err));
-                } else {
+                }
+                if success {
                     def numberOfFileds: int;
                     numberOfFileds = this.driver.getColumnCount();
                     def result: Array[Array[Nullable[String]]];
@@ -102,6 +98,12 @@
                     }
                     this.driver.releaseResult();
                     return Possible[Array[Array[Nullable[String]]]].success(result);
+                } else {
+                    def err: String = this.driver.getLastError();
+                    if this.logging {
+                        Console.print("%s>> SQL Error:%s\n%s\n", Console.Style.FG_RED, Console.Style.RESET, err.buf);
+                    }
+                    return Possible[Array[Array[Nullable[String]]]].failure(Errors.sqlError(err));
                 }
             }
         }
@@ -115,26 +117,25 @@
             } else if !this.driver.isConnectionEstablished() {
 	            return Possible[Int].failure(Errors.dbNotConnected());
             } else {
-                def resultStatus: Bool = this.driver.exec(sql, false);
-                def attempts: Int = 3; // number of attempts
-                def TIME_TO_RECONNECT: 2000000; // 2 SEC IN microSeconds
-                while not resultStatus and attempts >0 and not this.driver.isConnected(){
-
-                    System.sleep(TIME_TO_RECONNECT);
-                    this.driver.connect(this.driver.getConnectionParams());
-                    resultStatus = this.driver.exec(sql, false);
-                    attempts -=1;
+                def success: Bool = this.driver.exec(sql, false);
+                def attempts: Int = this.reconnectionAttemptCount;
+                while not success and --attempts >= 0 and not this.driver.isConnected() {
+                    System.sleep(this.reconnectionDelay);
+                    if this.driver.connect(this.driver.getConnectionParams()) {
+                        success = this.driver.exec(sql, false);
+                    }
                 }
-                if !resultStatus {
+                if success {
+                    def result: Possible[Int] = Possible[Int].success(this.driver.getAffectedRowCount());
+                    this.driver.releaseResult();
+                    return result;
+                } else {
                     def err: String = this.driver.getLastError();
                     if this.logging {
                         Console.print("%s>> SQL Error:%s\n%s\n", Console.Style.FG_RED, Console.Style.RESET, err.buf);
                     }
                     return Possible[Int].failure(Errors.sqlError(err));
                 }
-                def result: Possible[Int] = Possible[Int].success(this.driver.getAffectedRowCount());
-                this.driver.releaseResult();
-                return result;
             }
         }
 
