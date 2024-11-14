@@ -8,7 +8,7 @@
                 // Skip the sub ascii character.
                 --count;
             } else if stopAtPlaceholder and input~cnt == '%' {
-                def types: ptr[array[Char]] = "psilfd";
+                def types: ptr[array[Char]] = "npsilfd";
                 if (input + 1)~cnt == '%' {
                     input = input + 1;
                 } else if String.find(types, (input + 1)~cnt) != 0 {
@@ -33,7 +33,7 @@
                 input = input + 1;
                 continue;
             } else if stopAtPlaceholder and input~cnt == '%' {
-                def types: ptr[array[Char]] = "psilfd";
+                def types: ptr[array[Char]] = "npsilfd";
                 if (input + 1)~cnt == '%' {
                     input = input + 1;
                 } else if String.find(types, (input + 1)~cnt) != 0 {
@@ -79,7 +79,10 @@
 
             if fmt~cnt == '%' {
                 fmt = fmt + 1;
-                if fmt~cnt == 's' {
+                if fmt~cnt == 'n' {
+                    currentSize += appendReplacement(output, currentSize, args~next_arg[CharsPtr], '"');
+                    fmt = fmt + 1;
+                } else if fmt~cnt == 's' {
                     currentSize += appendReplacement(output, currentSize, args~next_arg[Srl.String]);
                     fmt = fmt + 1;
                 } else if fmt~cnt == 'p' {
@@ -133,17 +136,21 @@
         (output.buf~cast[ptr[Char]] + currentSize)~cnt = 0;
     }
 
-    func appendReplacement (output: ref[String], currentSize: ArchInt, str: ptr[array[Char]]): ArchInt {
+    func appendReplacement (output: ref[String], currentSize: ArchInt, str: CharsPtr, quote: Char): ArchInt {
         def replacementSize: ArchInt = getEscapedStringLength(str, false);
         output.realloc(currentSize + replacementSize + 2);
-        (output.buf~cast[ptr[Char]] + currentSize)~cnt = '\'';
+        (output.buf~cast[ptr[Char]] + currentSize)~cnt = quote;
         escapeString(str, output.buf + currentSize + 1, false);
-        (output.buf~cast[ptr[Char]] + currentSize + 1 + replacementSize)~cnt = '\'';
+        (output.buf~cast[ptr[Char]] + currentSize + 1 + replacementSize)~cnt = quote;
         return replacementSize + 2;
     }
 
+    func appendReplacement (output: ref[String], currentSize: ArchInt, str: CharsPtr): ArchInt {
+        return appendReplacement(output, currentSize, str, '\'');
+    }
+
     func appendReplacement (output: ref[String], currentSize: ArchInt, str: String): ArchInt {
-        return appendReplacement(output, currentSize, str.buf);
+        return appendReplacement(output, currentSize, str.buf, '\'');
     }
 
     func appendReplacement (output: ref[String], currentSize: ArchInt, num: Int[64]): ArchInt {

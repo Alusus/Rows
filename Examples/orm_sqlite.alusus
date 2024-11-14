@@ -30,6 +30,8 @@ if !db.isConnected() {
     System.fail(1, String("Error connecting to DB: ") + db.getLastError());
 }
 
+db.exec("drop table if exists table_versions");
+db.exec("drop table if exists cars");
 db.schemaBuilder[Car].migrate();
 
 db.from[Car].delete();

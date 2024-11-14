@@ -80,8 +80,15 @@ import "libmysqlclient.so.21";
             return this.connectionState == CONNECTION_SUCCESSFUL;
         }
 
+        handler (this:Driver).isConnectionEstablished(): Bool set_ptr {
+            return this.connection != null;
+        }
+
         handler (this:Driver).exec(sql: CharsPtr, forSelect: Bool): Bool set_ptr {
-            if Mysql.query(this.connection, sql) != 0 return false;
+            if Mysql.query(this.connection, sql) != 0 {
+                if this.isConnectionError() this.connectionState = this.getLastError();
+                return false;
+            }
             this.result = Mysql.useResult(this.connection);
             return true;
         }
@@ -113,11 +120,31 @@ import "libmysqlclient.so.21";
         }
 
         handler (this:Driver).getLastError(): String set_ptr {
-             return String(Mysql.error(this.connection));
+             return String.format("Error %i: %s", Mysql.errno(this.connection), Mysql.error(this.connection));
+        }
+
+        handler this.isConnectionError(): Bool {
+            Int(Mysql.errno(this.connection)).{
+                if this == Mysql.ErrorCodes.UNKNOWN_ERROR
+                or this == Mysql.ErrorCodes.CONNECTION_ERROR
+                or this == Mysql.ErrorCodes.CONN_HOST_ERROR
+                or this == Mysql.ErrorCodes.SERVER_GONE_ERROR
+                or this == Mysql.ErrorCodes.LOCALHOST_CONNECTION
+                or this == Mysql.ErrorCodes.TCP_CONNECTION
+                or this == Mysql.ErrorCodes.SERVER_HANDSHAKE_ERR
+                or this == Mysql.ErrorCodes.SERVER_LOST {
+                    return true;
+                }
+            }
+            return false;
         }
 
         handler (this:Driver).mapDataType(dataType: String): String set_ptr {
             return mysqlDataTypeMap(dataType);
+        }
+        
+        handler (this:Driver).getConnectionParams(): ConnectionParams set_ptr {
+            return this.connectionParams;
         }
     }
 
@@ -146,30 +173,6 @@ import "libmysqlclient.so.21";
         class Result {}
         def Row: alias ptr[array[CharsPtr]];
 
-        /* class Field {
-            def name: CharsPtr;
-            def orgName: CharsPtr;
-            def table: CharsPtr;
-            def orgTable: CharsPtr;
-            def db: CharsPtr;
-            def catalog: CharsPtr;
-            def define: CharsPtr;
-            def length: ArchWord;
-            def maxLength: ArchWord;
-            def nameLength: Word;
-            def orgNameLength: Word;
-            def tableLength: Word;
-            def orgTableLength: Word;
-            def dbLength: Word;
-            def catalogLength: Word;
-            def defLength: Word;
-            def flags: Word;
-            def decimals: Word;
-            def charsetnr: Word;
-            def fieldType: Int;
-            def extension: ptr;
-        } */
-
         @expname[mysql_init]
         func init(conn: ptr[Connection] ): ptr[Connection];
 
@@ -194,9 +197,6 @@ import "libmysqlclient.so.21";
         @expname[mysql_num_fields]
         func numFields(res: ptr[Result]): Word;
 
-        // @expname[mysql_fetch_field_direct]
-        // func fetchFieldDirect(res: ptr[Result], index: Word): ptr[Field];
-
         @expname[mysql_fetch_row]
         func fetchRow(res: ptr[Result]): Row;
 
@@ -205,6 +205,20 @@ import "libmysqlclient.so.21";
 
         @expname[mysql_error]
         func error(conn: ptr[Connection]): CharsPtr;
+
+        @expname[mysql_errno]
+        func errno(conn: ptr[Connection]): Int;
+
+        module ErrorCodes {
+            def UNKNOWN_ERROR: 2000;
+            def CONNECTION_ERROR: 2002;
+            def CONN_HOST_ERROR: 2003;
+            def SERVER_GONE_ERROR: 2006;
+            def LOCALHOST_CONNECTION: 2010;
+            def TCP_CONNECTION: 2011;
+            def SERVER_HANDSHAKE_ERR: 2012;
+            def SERVER_LOST: 2013;
+        }
     }
 }
 

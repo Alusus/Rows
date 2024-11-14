@@ -21,6 +21,11 @@
     نـظام.فشل(1, نـص("فشل الاتصال بقاعدة البيانات: ") + قب.هات_آخر_خطأ())؛
 }
 
+قب.نفذ("drop table if exists properties")؛
+قب.نفذ("drop table if exists %n"، "عقارات")؛
+قب.نفذ("drop table if exists roles")؛
+قب.نفذ("drop table if exists users")؛
+
 إذا !!قب.نفذ(إنـشاء_جدول().{
     الاسم = نـص("users")؛
     جديد_فقط = 1؛

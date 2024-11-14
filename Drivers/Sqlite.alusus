@@ -74,6 +74,10 @@ import "libsqlite3.so.0";
             return this.connectionState == CONNECTION_SUCCESSFUL;
         }
 
+        handler (this:Driver).isConnectionEstablished(): Bool set_ptr {
+            return this.connection != null;
+        }
+
         handler (this:Driver).exec(sql: CharsPtr, forSelect: Bool): Bool set_ptr {
             if forSelect {
                 return Sqlite.prepare_v3(this.connection, sql, -1, 0, this.stmt, 0) == Sqlite.Result.OK;
@@ -113,6 +117,10 @@ import "libsqlite3.so.0";
 
         handler (this:Driver).mapDataType(dataType: String): String set_ptr {
             return sqliteDataTypeMap(dataType);
+        }
+        
+        handler (this:Driver).getConnectionParams(): ConnectionParams set_ptr {
+            return this.connectionParams;
         }
     }
 
