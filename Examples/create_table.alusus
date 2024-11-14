@@ -13,6 +13,11 @@ if !db.driver.isConnected() {
     System.fail(1, String("Error connecting to DB: ") + db.getLastError());
 }
 
+db.exec("drop table if exists properties");
+db.exec("drop table if exists %n", "عقارات");
+db.exec("drop table if exists roles");
+db.exec("drop table if exists users");
+
 if !!db.exec(CreateTable().{
     name = String("users");
     notExists = true;

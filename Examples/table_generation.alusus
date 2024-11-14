@@ -44,5 +44,7 @@ if !db.driver.isConnected() {
     System.fail(1, String("Error connecting to DB: ") + db.getLastError());
 }
 
+db.exec("drop table if exists properties");
+
 db.schemaBuilder[Property].create();
 

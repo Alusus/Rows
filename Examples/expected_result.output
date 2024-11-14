@@ -1,6 +1,14 @@
 >>>>>> create_table.alusus
 
 [32m>> Executing SQL:[0m
+drop table if exists properties
+[32m>> Executing SQL:[0m
+drop table if exists "عقارات"
+[32m>> Executing SQL:[0m
+drop table if exists roles
+[32m>> Executing SQL:[0m
+drop table if exists users
+[32m>> Executing SQL:[0m
 CREATE TABLE IF NOT EXISTS "users"(
 "id" INT NOT NULL UNIQUE,
 "name" VARCHAR(90) NOT NULL UNIQUE DEFAULT 'me',
@@ -55,8 +63,8 @@ FROM users
 SELECT *
 FROM unknown_table
 [31m>> SQL Error:[0m
-Table 'alusus.unknown_table' doesn't exist
-Error: Query failed: Table 'alusus.unknown_table' doesn't exist
+Error 1146: Table 'alusus.unknown_table' doesn't exist
+Error: Query failed: Error 1146: Table 'alusus.unknown_table' doesn't exist
 
 
 
@@ -82,8 +90,8 @@ FROM users
 SELECT *
 FROM unknown_table
 [31m>> SQL Error:[0m
-Table 'alusus.unknown_table' doesn't exist
-Error: Query failed: Table 'alusus.unknown_table' doesn't exist
+Error 1146: Table 'alusus.unknown_table' doesn't exist
+Error: Query failed: Error 1146: Table 'alusus.unknown_table' doesn't exist
 
 
 
@@ -134,6 +142,8 @@ select * from users where name in ('sarmad','abdullah')
 >>>>>> table_generation.alusus
 
 [32m>> Executing SQL:[0m
+drop table if exists properties
+[32m>> Executing SQL:[0m
 CREATE TABLE IF NOT EXISTS "properties"(
 "id" INT NOT NULL DEFAULT 10,
 "ssd" INT,
@@ -148,6 +158,8 @@ FOREIGN KEY ("userId") REFERENCES "users"("id")
 
 >>>>>> sql_injection.alusus
 
+[32m>> Executing SQL:[0m
+drop table if exists books
 [32m>> Executing SQL:[0m
 CREATE TABLE IF NOT EXISTS "books"(
 "id" INT NOT NULL,
@@ -188,6 +200,8 @@ FROM books
 
 >>>>>> orm_mysql.alusus
 
+[32m>> Executing SQL:[0m
+drop table if exists cars
 [32m>> Executing SQL:[0m
 CREATE TABLE IF NOT EXISTS "cars"(
 "id" INT NOT NULL,
@@ -407,6 +421,8 @@ WHERE "fullName" is not null
 
 >>>>>> orm_postgresql.alusus
 
+[32m>> Executing SQL:[0m
+drop table if exists cars
 [32m>> Executing SQL:[0m
 CREATE TABLE IF NOT EXISTS "cars"(
 "id" integer NOT NULL,
@@ -632,6 +648,8 @@ WHERE "fullName" is not null
 
 >>>>>> orm_sqlite.alusus
 
+[32m>> Executing SQL:[0m
+drop table if exists cars
 [32m>> Executing SQL:[0m
 CREATE TABLE IF NOT EXISTS "cars"(
 "id" INTEGER NOT NULL,
@@ -872,6 +890,14 @@ ORDER BY "price" DESC, "id" DESC
 >>>>>> إنشاء_جدول.أسس
 
 [32m>> Executing SQL:[0m
+drop table if exists properties
+[32m>> Executing SQL:[0m
+drop table if exists "عقارات"
+[32m>> Executing SQL:[0m
+drop table if exists roles
+[32m>> Executing SQL:[0m
+drop table if exists users
+[32m>> Executing SQL:[0m
 CREATE TABLE IF NOT EXISTS "users"(
 "id" INT NOT NULL UNIQUE,
 "name" VARCHAR(90) NOT NULL UNIQUE DEFAULT 'me',
@@ -964,6 +990,8 @@ DELETE FROM users WHERE id=153;
 >>>>>> توليد_تلقائي_لجدول.أسس
 
 [32m>> Executing SQL:[0m
+drop table if exists "سيارات"
+[32m>> Executing SQL:[0m
 CREATE TABLE IF NOT EXISTS "عقارات"(
 "المعرف" INT NOT NULL,
 "ابت" INT,
@@ -978,6 +1006,8 @@ FOREIGN KEY ("معرف_المستخدم") REFERENCES "users"("id")
 
 >>>>>> مطابقة_مايسكويل.أسس
 
+[32m>> Executing SQL:[0m
+drop table if exists "سيارات"
 [32m>> Executing SQL:[0m
 CREATE TABLE IF NOT EXISTS "سيارات"(
 "المعرف" INT NOT NULL,
@@ -1190,6 +1220,8 @@ ORDER BY "سعر_السيارة" DESC, "المعرف" DESC
 
 >>>>>> مطابقة_بوستغرس.أسس
 
+[32m>> Executing SQL:[0m
+drop table if exists "سيارات"
 [32m>> Executing SQL:[0m
 CREATE TABLE IF NOT EXISTS "سيارات"(
 "المعرف" integer NOT NULL,
@@ -1407,6 +1439,8 @@ ORDER BY "سعر_السيارة" DESC, "المعرف" DESC
 
 >>>>>> مطابقة_سكويلايت.أسس
 
+[32m>> Executing SQL:[0m
+drop table if exists "سيارات"
 [32m>> Executing SQL:[0m
 CREATE TABLE IF NOT EXISTS "سيارات"(
 "المعرف" INTEGER NOT NULL,

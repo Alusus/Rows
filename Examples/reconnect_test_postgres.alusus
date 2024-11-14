@@ -1,0 +1,63 @@
+import "Apm";
+Apm.importFile("Alusus/Rows", { "Rows.alusus", "Drivers/Postgresql.alusus" });
+use Srl;
+use Rows;
+
+@model["cars"]
+class Car {
+    define_model_essentials[];
+
+    @notNull
+    @primaryKey
+    @Integer
+    @column
+    def id: Int;
+
+    @VarChar["50"]
+    @defult["My Car"]
+    @column
+    def name: String;
+
+    @Float
+    @column
+    def price: Nullable[Float];
+
+    @VarChar["50"]
+    @column
+    def fullName: Nullable[String];
+
+    @Boolean
+    @column
+    def electrical: Bool;
+}
+
+def db: Db(PostgresqlDriver(ConnectionParams().{
+    dbName = "alusus";
+    userName = "alusus";
+    password = "alusus";
+    host = "0.0.0.0";
+    port = 5432;
+}));
+if !db.isConnected() {
+    System.fail(1, String("Error connecting to DB: ") + db.getLastError());
+}
+db.exec("drop table if exists cars");
+
+db.schemaBuilder[Car].create();
+
+db.from[Car].delete();
+
+def c: Car;
+c.id = 1
+c.name = String("Car 1");
+c.price = 200.0
+db.save[Car](c);
+
+Console.print("\n");
+while 1 {
+    System.sleep(2000000);
+    db.from[Car].where[id == 1].select().{
+        if not this Console.print("Error reading from DB.\n")
+        else Console.print("Car.name: %s, Car.price: %d\n", this(0).name.buf, this(0).price~cast[Int])
+    }
+}

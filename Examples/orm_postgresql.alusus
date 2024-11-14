@@ -46,6 +46,8 @@ if !db.isConnected() {
     System.fail(1, String("Error connecting to DB: ") + db.getLastError());
 }
 
+db.exec("drop table if exists cars");
+
 db.schemaBuilder[Car].create();
 
 db.from[Car].delete();
