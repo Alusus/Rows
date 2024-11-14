@@ -3,7 +3,7 @@ Apm.importFile("Alusus/Rows", { "Rows.alusus", "Drivers/Postgresql.alusus" });
 use Srl;
 use Rows;
 
-@model["cars"]
+@model["cars", 1]
 class Car {
     define_model_essentials[];
 
@@ -41,9 +41,10 @@ def db: Db(PostgresqlDriver(ConnectionParams().{
 if !db.isConnected() {
     System.fail(1, String("Error connecting to DB: ") + db.getLastError());
 }
-db.exec("drop table if exists cars");
 
-db.schemaBuilder[Car].create();
+db.exec("drop table if exists table_versions");
+db.exec("drop table if exists cars");
+db.schemaBuilder[Car].migrate();
 
 db.from[Car].delete();
 
