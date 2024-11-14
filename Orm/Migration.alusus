@@ -1,0 +1,13 @@
+@merge module Rows {
+    class Migration {
+        handler this~init() {}
+        Spp.astMgr.insertCopyHandlers[];
+
+        def migrate: ptr[func (ref[Db]) => SrdRef[Error]];
+        def tableName: String;
+        def fromVersion: Int;
+        def toVersion: Int;
+        def tableDependencies: Map[String, Int];
+        def migrationDependencies: Array[Int];
+    }
+}

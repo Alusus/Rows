@@ -21,6 +21,7 @@ Apm.importFile("Alusus/Threading");
     use Core.Data.Ast;
 
     def TioSrdRef: alias SrdRef[Core.Basic.TiObject];
+    def AstTemplateMap: alias Map[String, ref[TiObject]];
 
     @expname[atof] func parseFloat(CharsPtr): Float[64];
     @expname[atoi] func parseInt(CharsPtr): Int;
@@ -47,6 +48,8 @@ import "Orm/ast_helpers";
 import "Orm/object_mapping";
 import "Orm/schema_generation";
 import "Orm/Query";
+import "Orm/Migration";
+import "Orm/migration_helpers";
 import "Orm/SchemaBuilder";
 
 import "Utils/escaping";

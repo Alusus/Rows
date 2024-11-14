@@ -183,7 +183,7 @@ use Srl;
 use Rows;
 
 // a modifier that define a model with the name cars
-@model["cars"]
+@model["cars", 1]
 class Car {
     define_model_essentials[];
 
@@ -218,7 +218,7 @@ if !db.isConnected() {
 
 // call schemaBuilder on the previous object to build the model
 // based what we specified with the modifiers
-db.schemaBuilder[Car].create();
+db.schemaBuilder[Car].migrate();
 
 // delete any previous rows in the model (from a previous execution of the code)
 db.from[Car].delete();
@@ -254,7 +254,8 @@ Rows library provides an ORM functionality by allowing DB talbes to be defined a
 and automatically mapping class objects to table rows for reading and writing to the DB. To enable
 this the user needs to make the following additions to the classes:
 
-* Add the modifier `@model` and specify the table name as a modifier arg.
+* Add the modifier `@model` and specify the table name as a modifier arg and the table version as
+  a second arg.
 * Add `define_model_essentials[]` to the beginning of the class.
 * Add `@column` to each variable that maps to a table field and specify the field name as modifier arg.
 * Add DB type modifiers to the variables.
@@ -263,7 +264,7 @@ this the user needs to make the following additions to the classes:
 Example
 
 ```
-@model["cars"]
+@model["cars", 1]
 class Car {
     define_model_essentials[];
 
@@ -289,7 +290,7 @@ class Car {
 ```
 
 After making these changes to the class then class will be useable in functions like `Db.from`
-or `Db.save` or `SchemaBuilder.create`.
+or `Db.save` or `SchemaBuilder.migrate`.
 
 ### Tables and Columns Modifiers
 
@@ -544,20 +545,58 @@ db.from[User].where[name = arg1].update[address = arg2];
 ### SchemaBuilder class
 
 ```
-class SchemaBuilder [Model: type] {
-    handler this.create(): Possible[Int];
+class SchemaBuilder [schema: ast_ref] {
+    handler this.migrate(): SrdRef[Error];
 }
 ```
 
-This class is used as a template to create the table. The template arg must be a class with the
-correct decorations as specified in the Object Relational Mapping section above.
+This template class is used to migrate the database. The template arg must be a reference to
+a model class or a comma separated list of all model classes constituting the DB schema. The class
+will take care of building the database from the schema, or migrating it to the latest version
+by determining what migration functions are needed and running them.
 
-`create` Creates the DB table from the provided class.
+`migrate` Migrates the DB to the current version, or builds it from scratch if it doesn't exist.
+
+When a table is not found in the DB, SchemaBuilder will generate that table from the model
+definition. When the table already exists, it looks at the version of the model defined in
+the source code and compares it against the one in the DB. If the version of the table is
+not up to date SchemaBuilder looks for migration functions defined within the model for
+migrating the table from the current version to the latest version. Those migration
+functions have the following signature:
+
+```
+    @migration[1, 2]
+    function migrateFromV1ToV2(db: ref[Db]): SrdRef[Error];
+```
+
+The upper migrator migrates from version 1 to version 2. You can also specify dependencies
+in those migrations to make sure they are run in a specific order. For example:
+
+```
+    @migration[1, 2, { User: 3 }]
+    function migrateFromV1ToV2(db: ref[Db]): SrdRef[Error];
+```
+
+The upper example tells `SchemaBuilder` to run this migration when the `User` model is
+at version 3. This makes sure that this migration is delayed until User is migrated to
+version 3, and it also makes sure any migration that migrates User from version 3 is
+delayed until this migration is executed. If multiple migrations are needed on a single
+table before it reaches the latest version then `SchemaBuilder` will make sure to run
+all those migrations, and run them in the correct order.
+
+If a model defines a migration that migrates from version 0, then `SchemaBuilder` will
+not generate the table automatically from the model if the table doesn't exist and will
+instead depend on running the migration, effectively allowing the user to create the
+table manually on a new database instead of depending on the default table creator.
 
 ### Db class
 
 ```
 class Db {
+    def logging: Bool = true;
+    def reconnectionDelay: Word = 2000000; // 2 seconds
+    def reconnectionAttemptCount: Int = 3;
+
     handler this~init(d: SrdRef[Driver]);
     handler this~init(initializer: closure(ref[SrdRef[Driver]]));
     handler this.init(d: SrdRef[Driver]);
@@ -570,6 +609,7 @@ class Db {
     handler this.exec(delete: ref[Delete]): Possible[Int];
     handler this.exec(createTable: ref[CreateTable]): Possible[Int];
     handler this.exec(statement: CharsPtr, args: ...any): Possible[Int];
+    handler this.execSelect(statement: CharsPtr, args: ...any): Possible[Array[Array[Nullable[String]]]];
     handler [Model: type] this.from: Query[Model];
     handler [Model: type] this.save(model: ref[Model]);
     handler [Model: type] this.schemaBuilder: SchemaBuilder[Model];
@@ -577,6 +617,14 @@ class Db {
 ```
 
 This class is used to manage the access to the database and executing many queries on it.
+
+`logging` when set to true the library will print the executed SQL statements to the console.
+
+`reconnectionDelay` the delay in microseconds that the library will wait after the connection
+to the server is lost before trying to reconnect.
+
+`reconnectionAttemptCount` The max number of reconnection retries before the library gives up
+and returns an error.
 
 `init` used to initialize the database with the given driver. The closure version of the `init`
 function and constructor are used for supporting multi-threading, i.e. using the same `Db` object
@@ -591,6 +639,7 @@ that uses the `Db` object.
 addition to an overload for executing raw SQL statements. The version for raw SQL splits the SQL
 structure from the data, which are passed as extra args to the function similar to printf. The
 following types of data params are supported by this function:
+* CharsPtr for field or table name: %n
 * String: %s
 * CharsPtr: %p
 * Int: %i
@@ -603,6 +652,9 @@ following types of data params are supported by this function:
 * Array[Int[64]]: %al
 * Array[Float]: %af
 * Array[Float[64]]: %ad
+
+`execSelect` is similar to the `exec` version that uses raw SQL statement, except that it's used
+for SQL statements that fetches data.
 
 For write queries (inset, update, delete) the `exec` function returns the number od affected rows.
 

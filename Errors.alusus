@@ -22,5 +22,30 @@
         func connectionMissing(): SrdRef[GenericError] {
             return GenericError.new(CONNECTION_MISSING, CONNECTION_MISSING_MSG);
         }
+
+        def MIGRATION_MISSING: "rows_migration_missing";
+        def MIGRATION_MISSING_MSG: "No migration was found for migrating table %s from version %i.";
+        func migrationMissing(tableName: CharsPtr, version: Int): SrdRef[GenericError] {
+            return GenericError.new(
+                String(MIGRATION_MISSING),
+                String.format(MIGRATION_MISSING_MSG, tableName, version)
+            );
+        }
+
+        def MIGRATION_DEPENDENCY_MISSING: "rows_migration_dependency_missing";
+        def MIGRATION_DEPENDENCY_MISSING_MSG:
+            "Migration for table %s from version %i to version %i has unmet dependencies.";
+        func migrationDependencyMissing(tableName: CharsPtr, fromVersion: Int, toVersion: Int): SrdRef[GenericError] {
+            return GenericError.new(
+                String(MIGRATION_MISSING),
+                String.format(MIGRATION_DEPENDENCY_MISSING_MSG, tableName, fromVersion, toVersion)
+            );
+        }
+
+        def MIGRATION_DEPENDENCY_CYCLE: "rows_migration_dependency_cycle";
+        def MIGRATION_DEPENDENCY_CYCLE_MSG: "A cycle is detected in migration dependencies";
+        func migrationDependencyCycle(): SrdRef[GenericError] {
+            return GenericError.new(MIGRATION_DEPENDENCY_CYCLE, MIGRATION_DEPENDENCY_CYCLE_MSG);
+        }
     }
 }

@@ -1,0 +1,387 @@
+import "Apm";
+Apm.importFile("Alusus/Rows", { "Rows.alusus", "Drivers/Postgresql.alusus" });
+use Srl;
+use Rows;
+
+def db: Db(PostgresqlDriver(ConnectionParams().{
+    dbName = "alusus";
+    userName = "alusus";
+    password = "alusus";
+    host = "0.0.0.0";
+    port = 5432;
+}));
+if !db.isConnected() {
+    System.fail(1, String("Error connecting to DB: ") + db.getLastError());
+}
+
+function resetDb() {
+    db.exec("drop table if exists table_versions");
+    db.exec("drop table if exists vehicles");
+    db.exec("drop table if exists prices");
+}
+
+function dumpData(sql: CharsPtr) {
+    def result: Possible[Array[Array[Nullable[String]]]] = db.execSelect(sql);
+    def i: Int;
+    for i = 0, i < result.getLength(), ++i {
+        def j: Int;
+        for j = 0, j < result(i).getLength(), ++j {
+            Console.print(result(i)(j));
+            Console.print("\t\t");
+        }
+        Console.print("\n");
+    }
+}
+
+resetDb();
+
+Console.print("\n\n<<< TEST 1 >>>\n\n");
+
+module Test1 {
+    @model["vehicles", 1]
+    class Vehicle {
+        define_model_essentials[];
+
+        @notNull
+        @primaryKey
+        @Integer
+        @column
+        def id: int;
+
+        @VarChar["50"]
+        @defult["My Car"]
+        @column
+        def name: String;
+
+        @Float
+        @column["the_price"]
+        def price: Float;
+    }
+}
+
+def schema1: Test1.Vehicle;
+db.schemaBuilder[schema1].migrate().{
+    if not this.isNull() {
+        System.fail(1, this.getMessage());
+    }
+};
+
+def i: Int;
+for i = 1, i < 5, i = i+1 {
+    def c: Test1.Vehicle;
+    c.id = i
+    c.name = String("Vehicle ") + i
+    c.price = 200.0 * i
+    db.save[Test1.Vehicle](c);
+}
+
+dumpData("select * from table_versions");
+dumpData("select * from vehicles");
+
+Console.print("\n\n<<< TEST 2 >>>\n\n");
+
+module Test2 {
+    @model["vehicles", 2]
+    class Vehicle {
+        define_model_essentials[];
+
+        @notNull
+        @primaryKey
+        @Integer
+        @column
+        def id: int;
+
+        @VarChar["50"]
+        @defult["My Car"]
+        @column
+        def name: String;
+
+        @Float
+        @column["the_price"]
+        def price: Float;
+
+        @Integer
+        @column["year"]
+        def year: Int;
+
+        @migration[1, 2]
+        function migrate1To2(db: ref[Db]): SrdRef[Error] {
+            return db.exec("alter table vehicles add column year integer").error;
+        }
+    }
+}
+
+def schema2: Test2.Vehicle;
+db.schemaBuilder[schema2].migrate().{
+    if not this.isNull() {
+        System.fail(1, this.getMessage());
+    }
+};
+
+db.from[Test2.Vehicle].where[id == 2].update[year = 2012];
+
+dumpData("select * from table_versions");
+dumpData("select * from vehicles");
+
+Console.print("\n\n<<< TEST 3 >>>\n\n");
+
+module Test3 {
+    @model["vehicles", 4]
+    class Vehicle {
+        define_model_essentials[];
+
+        @notNull
+        @primaryKey
+        @Integer
+        @column
+        def id: int;
+
+        @VarChar["50"]
+        @defult["My Car"]
+        @column
+        def name: String;
+
+        @Integer
+        @column["year"]
+        def year: Int;
+
+        @migration[2, 3, { Price: 1 }]
+        function migrate2To3(db: ref[Db]): SrdRef[Error] {
+            return db.exec("insert into prices select id as price_id, the_price as price from vehicles").error;
+        }
+
+        @migration[3, 4]
+        function migrate3To4(db: ref[Db]): SrdRef[Error] {
+            return db.exec("alter table vehicles drop column the_price").error;
+        }
+    }
+
+    @model["prices", 1]
+    class Price {
+        define_model_essentials[];
+
+        @notNull
+        @primaryKey
+        @Integer
+        @column["price_id"]
+        def priceId: int;
+
+        @Float
+        @column["price"]
+        def price: Float;
+    }
+}
+
+def schema3: { Test3.Vehicle, Test3.Price };
+db.schemaBuilder[schema3].migrate().{
+    if not this.isNull() {
+        System.fail(1, this.getMessage());
+    }
+};
+
+dumpData("select * from table_versions");
+dumpData("select * from vehicles");
+dumpData("select * from prices");
+
+Console.print("\n\n<<< TEST 4 >>>\n\n");
+
+module Test4 {
+    @model["vehicles", 4]
+    class Vehicle {
+        define_model_essentials[];
+
+        @notNull
+        @primaryKey
+        @Integer
+        @column
+        def id: int;
+
+        @VarChar["50"]
+        @defult["My Car"]
+        @column
+        def name: String;
+
+        @Integer
+        @column["year"]
+        def year: Int;
+
+        @migration[2, 3, { Price: 1 }]
+        function migrate2To3(db: ref[Db]): SrdRef[Error] {
+            return db.exec("insert into prices select id as price_id, the_price as price from vehicles").error;
+        }
+
+        @migration[3, 4]
+        function migrate3To4(db: ref[Db]): SrdRef[Error] {
+            return db.exec("alter table vehicles drop column the_price").error;
+        }
+    }
+
+    @model["prices", 1]
+    class Price {
+        define_model_essentials[];
+
+        @notNull
+        @primaryKey
+        @Integer
+        @column["price_id"]
+        def priceId: int;
+
+        @Float
+        @column["price"]
+        def price: Float;
+    }
+
+    @model["price_update", 1]
+    class PriceUpdate {
+        @migration[0, 1, { Vehicle: 2 }]
+        function migrate0To1(db: ref[Db]): SrdRef[Error] {
+            return db.exec("update vehicles set the_price=the_price + 50").error;
+        }
+    }
+}
+
+resetDb();
+db.schemaBuilder[schema2].migrate();
+for i = 1, i < 5, i = i+1 {
+    def c: Test2.Vehicle;
+    c.id = i
+    c.name = String("Vehicle ") + i
+    c.price = 200.0 * i
+    db.save[Test2.Vehicle](c);
+}
+
+def schema4: { Test4.Vehicle, Test4.Price, Test4.PriceUpdate };
+db.schemaBuilder[schema4].migrate().{
+    if not this.isNull() {
+        System.fail(1, this.getMessage());
+    }
+};
+
+dumpData("select * from table_versions");
+dumpData("select * from vehicles");
+dumpData("select * from prices");
+
+Console.print("\n\n<<< TEST 5 >>>\n\n");
+
+resetDb();
+db.schemaBuilder[schema3].migrate().{
+    if not this.isNull() {
+        System.fail(1, this.getMessage());
+    }
+};
+
+Console.print("\n\n<<< ERRORS TEST 1 >>>\n\n");
+
+module Test5 {
+    @model["vehicles", 5]
+    class Vehicle {
+        define_model_essentials[];
+
+        @notNull
+        @primaryKey
+        @Integer
+        @column
+        def id: int;
+
+        @VarChar["50"]
+        @defult["My Car"]
+        @column
+        def name: String;
+
+        @Integer
+        @column["year"]
+        def year: Int;
+
+        @migration[2, 3, { Price: 1 }]
+        function migrate2To3(db: ref[Db]): SrdRef[Error] {
+            return db.exec("insert into prices select id as price_id, the_price as price from vehicles").error;
+        }
+
+        @migration[3, 4]
+        function migrate3To4(db: ref[Db]): SrdRef[Error] {
+            return db.exec("alter table vehicles drop column the_price").error;
+        }
+    }
+
+    @model["prices", 1]
+    class Price {
+        define_model_essentials[];
+
+        @notNull
+        @primaryKey
+        @Integer
+        @column["price_id"]
+        def priceId: int;
+
+        @Float
+        @column["price"]
+        def price: Float;
+    }
+}
+
+def schema5: { Test5.Vehicle, Test5.Price };
+db.schemaBuilder[schema5].migrate().{
+    if not this.isNull() {
+        Console.print(String("Error: ") + this.getMessage() + "\n");
+    }
+};
+
+dumpData("select * from table_versions");
+
+Console.print("\n\n<<< ERRORS TEST 2 >>>\n\n");
+
+module Test6 {
+    @model["vehicles", 5]
+    class Vehicle {
+        define_model_essentials[];
+
+        @notNull
+        @primaryKey
+        @Integer
+        @column
+        def id: int;
+
+        @VarChar["50"]
+        @defult["My Car"]
+        @column
+        def name: String;
+
+        @Integer
+        @column["year"]
+        def year: Int;
+
+        @migration[4, 5, { Price: 2 }]
+        function migrate4To5(db: ref[Db]): SrdRef[Error] {
+            return db.exec("select 1").error;
+        }
+    }
+
+    @model["prices", 2]
+    class Price {
+        define_model_essentials[];
+
+        @notNull
+        @primaryKey
+        @Integer
+        @column["price_id"]
+        def priceId: int;
+
+        @Float
+        @column["price"]
+        def price: Float;
+
+        @migration[1, 2, { Vehicle: 5 }]
+        function migrate1To2(db: ref[Db]): SrdRef[Error] {
+            return db.exec("select 1").error;
+        }
+    }
+}
+
+def schema6: { Test6.Vehicle, Test6.Price };
+db.schemaBuilder[schema6].migrate().{
+    if not this.isNull() {
+        Console.print(String("Error: ") + this.getMessage() + "\n");
+    }
+};
+
+dumpData("select * from table_versions");

@@ -1,5 +1,5 @@
 @merge module Rows {
-    class SchemaBuilder [Model: type] {
+    class SchemaBuilder [schema: ast_ref] {
         def db: ref[Db];
 
         handler this~init(db: ref[Db]) {
@@ -10,19 +10,96 @@
             this.db~no_deref = value.db;
         }
 
-        handler this.create(): Possible[Int] {
-            return this.db.exec(
-                preprocess {
-                    // Pre-generate classes to avoid circular dependencies during code generation.
-                    ref[Core.Data.Ast.Identifier]();
-                    ref[Core.Data.Ast.Definition]();
+        handler this.migrate(): SrdRef[Error] {
+            def migrations: Array[Migration]({ preprocess { generateMigrationsList() } });
+            def modelVersions: Map[String, Int](preprocess { generateModelVersionsMap() });
+            this.createVersionsTableIfNeeded().{
+                if not this.isNull() return this
+            };
+            def tableVersions: Map[String, Int];
+            this.getTableVersions().{
+                if not this return this.error
+                else tableVersions = this
+            };
+            pickNeededMigrations(tableVersions, modelVersions, migrations).{
+                if not this return this.error
+                else migrations = this
+            };
+            populateMigrationsDependencies(tableVersions, migrations).{
+                if not this.isNull() return this
+            };
+            sortMigrations(migrations).{
+                if not this return this.error
+                else migrations = this
+            };
+            return this.runMigrations(tableVersions, migrations);
+        }
 
-                    if !Spp.astMgr.insertAst(generateTable(Model~ast).obj) {
-                        System.fail(1, "Unexpected error in SchemaBuilder.create.\n");
-                    }
+        function generateMigrationsList() {
+            Rows.generateMigrationsList(schema~ast);
+        }
+
+        function generateModelVersionsMap() {
+            def result: TioSrdRef = Spp.astMgr.buildAst((ast Map[String, Int]()), AstTemplateMap());
+            result = buildModelVersionsMapSetStatements(result, schema~ast);
+            Spp.astMgr.insertAst(result.obj);
+        }
+
+        handler this.runMigrations(
+            tableVersions: ref[Map[String, Int]], migrations: ref[Array[Migration]]
+        ): SrdRef[Error] {
+            def i: Int;
+            for i = 0, i < migrations.getLength(), ++i {
+                migrations(i).migrate(this.db).{
+                    if not this.isNull() return this;
                 }
-            );
+                this.updateTableVersion(tableVersions, migrations(i).tableName, migrations(i).toVersion).{
+                    if not this.isNull() return this;
+                };
+            }
+            return SrdRef[Error]();
+        }
+
+        handler this.updateTableVersion(
+            tableVersions: ref[Map[String, Int]], tableName: String, newVersion: Int
+        ): SrdRef[Error] {
+            if tableVersions.findPos(tableName) == -1 {
+                def sql: "INSERT INTO table_versions(name, version) VALUES (%s, %i)";
+                this.db.exec(sql, tableName, newVersion).{
+                    if not this return this.error;
+                }
+            } else {
+                def sql: "UPDATE table_versions SET version = %i WHERE name = %s";
+                this.db.exec(sql, newVersion, tableName).{
+                    if not this return this.error;
+                }
+            }
+            tableVersions(tableName) = newVersion;
+            return SrdRef[Error]();
+        }
+
+        handler this.getTableVersions(): Possible[Map[String, Int]] {
+            def sql: "SELECT name, version FROM table_versions";
+            def rows: Array[Array[Nullable[String]]];
+            this.db.execSelect(sql).{
+                if not this return Possible[Map[String, Int]].failure(this.error)
+                else rows = this
+            }
+            def tableVersions: Map[String, Int];
+            def i: Int;
+            for i = 0, i < rows.getLength(), ++i {
+                tableVersions(rows(i)(0)) = String.parseInt(rows(i)(1));
+            }
+            return Possible[Map[String, Int]].success(tableVersions);
+        }
+
+        handler this.createVersionsTableIfNeeded(): SrdRef[Error] {
+            def sql:
+                "CREATE TABLE IF NOT EXISTS table_versions ("
+                    "name VARCHAR(256) PRIMARY KEY,"
+                    "version INTEGER NOT NULL"
+                ")";
+            return this.db.exec(sql).error;
         }
     }
 }
-

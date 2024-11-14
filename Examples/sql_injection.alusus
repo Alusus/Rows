@@ -3,7 +3,7 @@ Apm.importFile("Alusus/Rows", { "Rows.alusus", "Drivers/Mysql.alusus" });
 use Srl;
 use Rows;
 
-@model["books"]
+@model["books", 1]
 class Book {
     define_model_essentials[];
 
@@ -28,9 +28,9 @@ if !db.isConnected() {
     System.fail(1, String("Error connecting to DB: ") + db.getLastError());
 }
 
+db.exec("drop table if exists table_versions");
 db.exec("drop table if exists books");
-
-db.schemaBuilder[Book].create();
+db.schemaBuilder[Book].migrate();
 
 db.from[Book].delete();
 

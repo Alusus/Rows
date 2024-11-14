@@ -31,6 +31,8 @@ def files: Array[String]({
     String("مطابقة_مايسكويل.أسس"),
     String("مطابقة_بوستغرس.أسس"),
     String("مطابقة_سكويلايت.أسس"),
+    String("migrations.alusus"),
+    String("مواكبات.أسس"),
 });
 
 def i: Int;
