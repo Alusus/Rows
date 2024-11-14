@@ -28,6 +28,8 @@ if !db.isConnected() {
     System.fail(1, String("Error connecting to DB: ") + db.getLastError());
 }
 
+db.exec("drop table if exists books");
+
 db.schemaBuilder[Book].create();
 
 db.from[Book].delete();
