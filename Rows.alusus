@@ -23,8 +23,6 @@ Apm.importFile("Alusus/Threading");
     def TioSrdRef: alias SrdRef[Core.Basic.TiObject];
     def AstTemplateMap: alias Map[String, ref[TiObject]];
 
-    @expname[atof] func parseFloat(CharsPtr): Float[64];
-    @expname[atoi] func parseInt(CharsPtr): Int;
     func parseBool(v: CharsPtr): Bool {
         return v != 0 and (v~cnt(0) == 't' or v~cnt(0) == 'T' or v~cnt(0) == '1');
     }

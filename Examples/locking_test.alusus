@@ -1,0 +1,90 @@
+import "Apm";
+Apm.importFile("Alusus/Rows", { "Rows.alusus", "Drivers/Postgresql.alusus" });
+Apm.importFile("Alusus/Threading");
+use Srl;
+use Rows;
+
+@model["cars"]
+class Car {
+    define_model_essentials[];
+
+    @notNull
+    @primaryKey
+    @Integer
+    @column
+    def id: int;
+
+    @VarChar["50"]
+    @defult["My Car"]
+    @column
+    def name: String;
+
+    @Float
+    @column["the_price"]
+    def price: Float;
+
+    @VarChar["50"]
+    @column
+    def fullName: Nullable[String];
+
+    @Boolean
+    @column
+    def electrical: Nullable[Bool];
+
+    @DateTime
+    @column
+    def createdAt: Nullable[String];
+}
+
+def db: Db(closure(d: ref[SrdRef[Rows.Driver]]) {
+    d = PostgresqlDriver(ConnectionParams().{
+        dbName = "alusus";
+        userName = "alusus";
+        password = "alusus";
+        host = "0.0.0.0";
+        port = 5432;
+    })
+});
+if !db.isConnected() {
+    System.fail(1, String("Error connecting to DB: ") + db.getLastError());
+}
+db.logging = false;
+
+db.schemaBuilder[Car].migrate();
+
+db.from[Car].delete();
+
+def c: Car;
+c.{
+    id = 1;
+    name = "BMW";
+    price = 500;
+    electrical = 0;
+};
+db.save[Car](c);
+
+func testLock (p: ptr): ptr {
+    def res: Possible[Int] = db.from[Car].where[id == 1 and electrical == 0].update[electrical = 1];
+    Console.print("updated: %d\n", res~cast[Int]);
+    return 0;
+}
+
+func testParallelLocks {
+    use Threading;
+
+    def pthread1: Thread;
+    def pthread2: Thread;
+
+    createThread(pthread1~ptr, 0, testLock~ptr, "thread1");
+    createThread(pthread2~ptr, 0, testLock~ptr, "thraed2");
+
+    joinThread(pthread1, 0);
+    joinThread(pthread2, 0);
+}
+
+def i: Int;
+for i = 0, i < 100, ++i {
+    testParallelLocks();
+    db.from[Car].where[id == 1].update[electrical = 0];
+    Console.print("\n\n");
+}

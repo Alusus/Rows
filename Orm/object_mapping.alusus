@@ -368,17 +368,17 @@
             } else if varType~ptr == nullableBoolType~ptr {
                 generateParseBlock[Srl.Nullable[Root.Bool], Rows.parseBool];
             } else if varType.getMyTypeInfo().typeName == "IntegerType" {
-                generateParseBlock[Root.Int[64], Rows.parseInt];
+                generateParseBlock[Root.Int[64], String.parseInt];
             } else if varType~ptr == nullableInt32Type~ptr {
-                generateParseBlock[Srl.Nullable[Root.Int[32]], Rows.parseInt];
+                generateParseBlock[Srl.Nullable[Root.Int[32]], String.parseInt];
             } else if varType~ptr == nullableInt64Type~ptr {
-                generateParseBlock[Srl.Nullable[Root.Int[64]], Rows.parseInt];
+                generateParseBlock[Srl.Nullable[Root.Int[64]], String.parseInt];
             } else if varType.getMyTypeInfo().typeName == "FloatType" {
-                generateParseBlock[Root.Float[64], Rows.parseFloat];
+                generateParseBlock[Root.Float[64], String.parseFloat];
             } else if varType~ptr == nullableFloat32Type~ptr {
-                generateParseBlock[Srl.Nullable[Root.Float[32]], Rows.parseFloat];
+                generateParseBlock[Srl.Nullable[Root.Float[32]], String.parseFloat];
             } else if varType~ptr == nullableFloat64Type~ptr {
-                generateParseBlock[Srl.Nullable[Root.Float[64]], Rows.parseFloat];
+                generateParseBlock[Srl.Nullable[Root.Float[64]], String.parseFloat];
             } else {
                 Spp.buildMgr.raiseBuildNotice("ROWS1002", 1, varElements(i));
             }
