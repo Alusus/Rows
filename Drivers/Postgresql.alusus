@@ -58,7 +58,7 @@ import "libpq.so.5";
             if params.host != "" {
                 hostString=String.format("host=%s", params.host.buf);
             }
-            if params.port !=0 {
+            if params.port != 0 {
                 portString=String.format("port=%i", params.port);
             }
             this.connection = Postgresql.connectdb(
@@ -101,7 +101,7 @@ import "libpq.so.5";
         }
 
         handler (this:Driver).getAffectedRowCount(): Int set_ptr {
-            return parseInt(Postgresql.cmdTuples(this.result));
+            return String.parseInt(Postgresql.cmdTuples(this.result));
         }
 
         handler (this:Driver).getColumnCount(): Int set_ptr {

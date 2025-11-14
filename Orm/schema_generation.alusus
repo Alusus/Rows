@@ -2,10 +2,6 @@
     func createTableForModel[Model: type](db: ref[Db]): SrdRef[Error] {
         return db.exec(
             preprocess {
-                // Pre-generate classes to avoid circular dependencies during code generation.
-                ref[Core.Data.Ast.Identifier]();
-                ref[Core.Data.Ast.Definition]();
-
                 if !Spp.astMgr.insertAst(generateTable(Model~ast).obj) {
                     System.fail(1, "Unexpected error in SchemaBuilder.create.\n");
                 }

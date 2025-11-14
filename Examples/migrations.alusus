@@ -247,6 +247,7 @@ for i = 1, i < 5, i = i+1 {
     c.id = i
     c.name = String("Vehicle ") + i
     c.price = 200.0 * i
+    c.year = 0;
     db.save[Test2.Vehicle](c);
 }
 
