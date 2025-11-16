@@ -44,6 +44,10 @@ import "libsqlite3.so.0";
             this.disconnect();
         }
 
+        handler (this:Driver).getDriverName(): String set_ptr {
+            return String(1, "sqlite");
+        }
+
         handler (this:Driver).connect(params: ref[ConnectionParams]): Bool set_ptr {
             this.disconnect();
 
@@ -66,16 +70,16 @@ import "libsqlite3.so.0";
             this.connectionState = "";
         }
 
-        handler (this:Driver).getDriverName(): String set_ptr {
-            return String(1, "sqlite");
-        }
-
         handler (this:Driver).isConnected(): Bool set_ptr {
             return this.connectionState == CONNECTION_SUCCESSFUL;
         }
 
         handler (this:Driver).isConnectionEstablished(): Bool set_ptr {
             return this.connection != null;
+        }
+
+        handler (this:Driver).getConnectionParams(): ConnectionParams set_ptr {
+            return this.connectionParams;
         }
 
         handler (this:Driver).exec(sql: CharsPtr, forSelect: Bool): Bool set_ptr {
@@ -117,10 +121,6 @@ import "libsqlite3.so.0";
 
         handler (this:Driver).mapDataType(dataType: String): String set_ptr {
             return sqliteDataTypeMap(dataType);
-        }
-        
-        handler (this:Driver).getConnectionParams(): ConnectionParams set_ptr {
-            return this.connectionParams;
         }
     }
 

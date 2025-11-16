@@ -11,6 +11,14 @@
     }
 
     عرف مـشغل: لقب Driver؛
+    @دمج صنف مـشغل {
+        عرف اتصل: لقب connect؛
+        عرف افصل: لقب disconnect؛
+        عرف أمتصل: لقب isConnected؛
+        عرف هل_بدئ_الاتصال: لقب isConnectionEstablished؛
+        عرف هات_معطيات_الاتصال: لقب getConnectionParams؛
+        عرف هات_آخر_خطأ: لقب getLastError؛
+    }
 
     عرف قـيمة: لقب Value؛
 

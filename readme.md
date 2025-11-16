@@ -589,6 +589,24 @@ not generate the table automatically from the model if the table doesn't exist a
 instead depend on running the migration, effectively allowing the user to create the
 table manually on a new database instead of depending on the default table creator.
 
+### Driver class
+
+This is the base class for all DB drivers, which are responsible for all communication
+with the database. It has many abstract methods used by `Db` class and the user mostly
+won't need to deal with any of the methods of this class other than connection related
+methods.
+
+```
+class Driver {
+    handler this.connect(parmas: ref[ConnectionParams]): Bool as_ptr;
+    handler this.disconnect() as_ptr;
+    handler this.isConnected(): Bool as_ptr;
+    handler this.isConnectionEstablished(): Bool as_ptr;
+    handler this.getConnectionParams(): ConnectionParams as_ptr;
+    handler this.getLastError(): String as_ptr;
+}
+```
+
 ### Db class
 
 ```

@@ -45,6 +45,10 @@ import "libpq.so.5";
             this.disconnect();
         }
 
+        handler (this:Driver).getDriverName(): String set_ptr {
+            return String(1, "postgresql");
+        }
+
         handler (this:Driver).connect(params: ref[ConnectionParams]): Bool set_ptr {
             this.disconnect();
 
@@ -80,10 +84,6 @@ import "libpq.so.5";
             this.connection = null;
         }
 
-        handler (this:Driver).getDriverName(): String set_ptr {
-            return String(1, "postgresql");
-        }
-
         handler (this:Driver).isConnected(): Bool set_ptr {
             this.connectionState = Postgresql.status(this.connection);
             return this.connectionState == Postgresql.ConnectionStatus.OK;
@@ -91,6 +91,10 @@ import "libpq.so.5";
 
         handler (this:Driver).isConnectionEstablished(): Bool set_ptr {
             return this.connection != null;
+        }
+
+        handler (this:Driver).getConnectionParams(): ConnectionParams set_ptr {
+            return this.connectionParams;
         }
 
         handler (this:Driver).exec(sql: CharsPtr, forSelect: Bool): Bool set_ptr {
@@ -132,10 +136,6 @@ import "libpq.so.5";
 
         handler (this:Driver).mapDataType(dataType: String): String set_ptr {
             return postgresqlDataTypeMap(dataType);
-        }
-        
-        handler (this:Driver).getConnectionParams(): ConnectionParams set_ptr {
-            return this.connectionParams;
         }
     }
 

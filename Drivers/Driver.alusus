@@ -1,9 +1,11 @@
 @merge module Rows {
     class Driver {
+        handler this.getDriverName(): String as_ptr;
         handler this.connect(parmas: ref[ConnectionParams]): Bool as_ptr;
         handler this.disconnect() as_ptr;
-        handler this.getDriverName(): String as_ptr;
         handler this.isConnected(): Bool as_ptr;
+        handler this.isConnectionEstablished(): Bool as_ptr;
+        handler this.getConnectionParams(): ConnectionParams as_ptr;
         handler this.exec(sql: CharsPtr, forSelect: Bool): Bool as_ptr;
         handler this.getAffectedRowCount(): Int as_ptr;
         handler this.getColumnCount(): Int as_ptr;
@@ -13,8 +15,6 @@
         handler this.releaseResult() as_ptr;
         handler this.getLastError(): String as_ptr;
         handler this.mapDataType(dataType: String): String as_ptr;
-        handler this.getConnectionParams(): ConnectionParams as_ptr;
-        handler this.isConnectionEstablished(): Bool as_ptr;
     }
 }
 
