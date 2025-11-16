@@ -89,8 +89,10 @@
         if modifiers~ptr != 0 {
             for i = 0, i < modifiers.getElementCount()~cast[Int], ++i {
                 def kwd: String = Spp.astMgr.getModifierKeyword(modifiers.getElement(i));
-                def translatedKwd: String = modifierKeywordTranslations(kwd);
-                if translatedKwd == "" translatedKwd = kwd;
+                def translationIndex: ArchInt = modifierKeywordTranslations.findPos(kwd);
+                def translatedKwd: String;
+                if translationIndex == -1 translatedKwd = kwd
+                else translatedKwd = modifierKeywordTranslations.valAt(translationIndex);
                 results.add(translatedKwd);
             }
         }
