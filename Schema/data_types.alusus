@@ -196,7 +196,7 @@
 
     class Text {
         @injection def dataType: DataType;
-        def length: int = 50;
+        def length: int = -1;
 
         handler this~init() {}
 
@@ -209,7 +209,14 @@
         }
 
         handler (this:DataType).generateSqlString(driver: ref[Driver]): String set_ptr {
-            return driver.mapDataType(String(1, "Text")) + "(" + this.length + ")";
+            if this.length == -1 return driver.mapDataType(String(1, "Text"))
+            else return driver.mapDataType(String(1, "Text")) + "(" + this.length + ")";
+        }
+
+        handler this_type(): SrdRef[DataType] {
+            def d: SrdRef[Text];
+            d.construct();
+            return castSrdRef[d, DataType];
         }
 
         handler this_type(length: int): SrdRef[DataType] {

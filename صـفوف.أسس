@@ -18,6 +18,7 @@
         عرف هل_بدئ_الاتصال: لقب isConnectionEstablished؛
         عرف هات_معطيات_الاتصال: لقب getConnectionParams؛
         عرف هات_آخر_خطأ: لقب getLastError؛
+        عرف نفذ: لقب exec؛
     }
 
     عرف قـيمة: لقب Value؛
