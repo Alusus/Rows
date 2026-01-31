@@ -1,5 +1,5 @@
 # Rows
-[[عربي]](readme.ar.md)
+[[عربي]](README.ar.md)
 
 An ORM (object relational mapping) library for Alusus.
 
