@@ -718,3 +718,12 @@ The `Errors` submodule contains error codes for all errors that can be returned 
     - [ ] Associating and unassociating records.
 - [ ] Add support for async operations.
 - [ ] Add support for error codes for DB errors.
+
+---
+
+## License
+
+Copyright (C) 2026 Sarmad Abdullah
+
+This project is licensed under the GNU Lesser General Public License v3.0 (LGPL-3.0). See the `COPYING` and `COPYING.LESSER` files for details.
+
