@@ -114,3 +114,18 @@ Console.print("\n");
 
 d = db.from[Car].where[fullName != Nullable[String]()].select();
 printRows(d);
+
+
+d = db.from[Car].where[name :: "Car 1%"].order[(-price, -id)].select();
+printRows(d);
+
+for i = 1, i < 10, i = i+1 {
+    def c: Car;
+    c.id = 30 + i
+    c.name = String("Car %") + i;
+    c.price = 200.0 * i
+    db.save[Car](c);
+}
+
+d = db.from[Car].where[(name :: "Car \\%%") and id > 35].order[(-price, -id)].select();
+printRows(d);

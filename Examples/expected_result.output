@@ -186,7 +186,7 @@ INSERT INTO table_versions(name, version) VALUES ('books', 1)
 DELETE FROM books
 [32m>> Executing SQL:[0m
 INSERT INTO books("id", "name")
-VALUES (1, 'Book 1\'), (2, \'Book 2')
+VALUES (1, 'Book 1''), (2, ''Book 2')
 
 [32m>> Executing SQL:[0m
 SELECT "id", "name"
@@ -196,7 +196,7 @@ FROM books
 [32m>> Executing SQL:[0m
 SELECT "id", "name"
 FROM books
-WHERE "name" = 'Book 1\' or name = \'Book 2'
+WHERE "name" = 'Book 1'' or name = ''Book 2'
 
 [32m>> Executing SQL:[0m
 SELECT "id", "name"
@@ -204,7 +204,7 @@ FROM books
 WHERE "id" = 1
 [32m>> Executing SQL:[0m
 UPDATE books
-SET "id" = 1, "name" = 'Book 2u\', id=\'3'
+SET "id" = 1, "name" = 'Book 2u'', id=''3'
 WHERE "id" = 1
 [32m>> Executing SQL:[0m
 SELECT "id", "name"
