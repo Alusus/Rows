@@ -510,14 +510,14 @@ class Query [Model: type] {
 
 parameters:
 
-* `this` a pointer to an Query object.
+* `this` a pointer to a Query object.
 * `condition` the condition we want to set.
 
 `update` a macro to apply an update query on the model.
 
 parameters:
 
-* `this` a pointer to an Query object.
+* `this` a pointer to a Query object.
 * `expression` the update expression.
 
 `select` used to retrieve rows from a model.
@@ -541,6 +541,27 @@ For example:
 ```
 db.from[User].where[name = arg1].update[address = arg2];
 ```
+
+#### Partial Matching (LIKE)
+
+To perform a partial match (equivalent to SQL's `LIKE` clause), use the `::` operator in the
+`where` condition. The pattern follows SQL LIKE syntax, where `%` matches any sequence of
+characters, and the `!` character is used to esccape the special characters (%, _, and !)
+when you actually want to search for those characters within a partial match operand.
+
+```
+d = db.from[Car].where[name :: "Car %"].select();
+```
+
+Note: Due to operator priority in Alusus, parentheses are required around the `::` expression
+when combining it with other conditions in a `where` statement, as in this example:
+
+```
+d = db.from[Car].where[(name :: "Car %") and price < maxPrice].select();
+```
+
+Without the parenthesis around the :: operator you'll get a compilation error because the compiler
+will try to compute the `and` operation first.
 
 ### SchemaBuilder class
 

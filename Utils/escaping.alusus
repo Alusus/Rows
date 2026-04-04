@@ -21,7 +21,7 @@
     func getEscapedStringLength (input: ptr[Char], stopAtPlaceholder: Bool): ArchInt {
         def count: ArchInt = 0;
         while input~cnt != 0 {
-            if input~cnt == '\'' or input~cnt == '\"' or input~cnt == '\\' or input~cnt == '\n' or input~cnt == '\r' {
+            if input~cnt == '\'' {
                 ++count;
             } else if input~cnt == 0x1Aui8 {
                 // Skip the sub ascii character.
@@ -44,8 +44,8 @@
 
     func escapeString (input: ptr[Char], output: ptr[Char], stopAtPlaceholder: Bool): ptr[Char] {
         while input~cnt != 0 {
-            if input~cnt == '\'' or input~cnt == '\"' or input~cnt == '\\' or input~cnt == '\n' or input~cnt == '\r' {
-                output~cnt = '\\';
+            if input~cnt == '\'' {
+                output~cnt = '\''
                 output = output + 1;
             } else if input~cnt == 0x1Aui8 {
                 // Skip the sub ascii character.
@@ -61,9 +61,7 @@
                     break;
                 }
             }
-            if input~cnt == '\n' output~cnt = 'n'
-            else if input~cnt == '\r' output~cnt = 'r'
-            else output~cnt = input~cnt;
+            output~cnt = input~cnt;
             output = output + 1;
             input = input + 1;
         }
