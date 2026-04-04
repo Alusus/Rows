@@ -467,7 +467,8 @@ INSERT INTO cars("id", "name", "price", "fullName", "electrical")
 VALUES (33, 'Car %3!', 600.000000, null, '1')
 [32m>> Executing SQL:[0m
 INSERT INTO cars("id", "name", "price", "fullName", "electrical")
-VALUES (34, 'Car %4!', 800.000000, null, '1')
+VALUES (34, 'Car %4
+!', 800.000000, null, '1')
 [32m>> Executing SQL:[0m
 INSERT INTO cars("id", "name", "price", "fullName", "electrical")
 VALUES (35, 'Car %5', 1000.000000, null, '1')
@@ -488,19 +489,28 @@ SELECT "id", "name", "price", "fullName", "electrical"
 FROM cars
 WHERE ("name" LIKE 'Car !%%' ESCAPE '!') and "id" > 35
 ORDER BY "price" DESC, "id" DESC
-39				1800.000000		electrical
-38				1600.000000		electrical
-37				1400.000000		electrical
-36				1200.000000		electrical
+39		Car %9		1800.000000		electrical
+38		Car %8		1600.000000		electrical
+37		Car %7		1400.000000		electrical
+36		Car %6		1200.000000		electrical
 [32m>> Executing SQL:[0m
 SELECT "id", "name", "price", "fullName", "electrical"
 FROM cars
 WHERE "name" LIKE 'Car %!!' ESCAPE '!'
 ORDER BY "price" DESC, "id" DESC
-34		Car %4!		800.000000		electrical
+34		Car %4
+!		800.000000		electrical
 33		Car %3!		600.000000		electrical
 32		Car %2!		400.000000		electrical
 31		Car %1!		200.000000		electrical
+[32m>> Executing SQL:[0m
+SELECT "id", "name", "price", "fullName", "electrical"
+FROM cars
+WHERE "name" LIKE 'Car %
+!!' ESCAPE '!'
+ORDER BY "price" DESC, "id" DESC
+34		Car %4
+!		800.000000		electrical
 
 
 
@@ -763,7 +773,8 @@ INSERT INTO cars("id", "name", "the_price", "fullName", "electrical", "createdAt
 VALUES (33, 'Car %3!', 600.000000, null, null, null)
 [32m>> Executing SQL:[0m
 INSERT INTO cars("id", "name", "the_price", "fullName", "electrical", "createdAt")
-VALUES (34, 'Car %4!', 800.000000, null, null, null)
+VALUES (34, 'Car %4
+!', 800.000000, null, null, null)
 [32m>> Executing SQL:[0m
 INSERT INTO cars("id", "name", "the_price", "fullName", "electrical", "createdAt")
 VALUES (35, 'Car %5', 1000.000000, null, null, null)
@@ -784,19 +795,28 @@ SELECT "id", "name", "the_price", "fullName", "electrical", "createdAt"
 FROM cars
 WHERE ("name" LIKE 'Car !%%' ESCAPE '!') and "id" > 35
 ORDER BY "the_price" DESC, "id" DESC
-39				1800.000000		not known
-38				1600.000000		not known
-37				1400.000000		not known
-36				1200.000000		not known
+39		Car %9		1800.000000		not known
+38		Car %8		1600.000000		not known
+37		Car %7		1400.000000		not known
+36		Car %6		1200.000000		not known
 [32m>> Executing SQL:[0m
 SELECT "id", "name", "the_price", "fullName", "electrical", "createdAt"
 FROM cars
 WHERE "name" LIKE 'Car %!!' ESCAPE '!'
 ORDER BY "the_price" DESC, "id" DESC
-34		Car %4!		800.000000		not known
+34		Car %4
+!		800.000000		not known
 33		Car %3!		600.000000		not known
 32		Car %2!		400.000000		not known
 31		Car %1!		200.000000		not known
+[32m>> Executing SQL:[0m
+SELECT "id", "name", "the_price", "fullName", "electrical", "createdAt"
+FROM cars
+WHERE "name" LIKE 'Car %
+!!' ESCAPE '!'
+ORDER BY "the_price" DESC, "id" DESC
+34		Car %4
+!		800.000000		not known
 
 
 
@@ -1045,7 +1065,8 @@ INSERT INTO cars("id", "name", "price")
 VALUES (33, 'Car %3!', 600.000000)
 [32m>> Executing SQL:[0m
 INSERT INTO cars("id", "name", "price")
-VALUES (34, 'Car %4!', 800.000000)
+VALUES (34, 'Car %4
+!', 800.000000)
 [32m>> Executing SQL:[0m
 INSERT INTO cars("id", "name", "price")
 VALUES (35, 'Car %5', 1000.000000)
@@ -1075,10 +1096,19 @@ SELECT "id", "name", "price"
 FROM cars
 WHERE "name" LIKE 'Car %!!' ESCAPE '!'
 ORDER BY "price" DESC, "id" DESC
-34		Car %4!		800.000000
+34		Car %4
+!		800.000000
 33		Car %3!		600.000000
 32		Car %2!		400.000000
 31		Car %1!		200.000000
+[32m>> Executing SQL:[0m
+SELECT "id", "name", "price"
+FROM cars
+WHERE "name" LIKE 'Car %
+!!' ESCAPE '!'
+ORDER BY "price" DESC, "id" DESC
+34		Car %4
+!		800.000000
 
 
 
@@ -1110,7 +1140,8 @@ ORDER BY "price" DESC, "id" DESC
 31	Car %1!	200				
 32	Car %2!	400				
 33	Car %3!	600				
-34	Car %4!	800				
+34	Car %4
+!	800				
 35	Car %5	1000				
 36	Car %6	1200				
 37	Car %7	1400				

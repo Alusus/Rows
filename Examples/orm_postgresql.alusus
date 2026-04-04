@@ -69,7 +69,7 @@ func printRows (r: Array[SrdRef[Car]]) {
     for k = 0, k < r.getLength(), k = k+1 {
         Console.print(r(k).id);
         Console.print("\t\t");
-        Console.print(r(k).name);
+        Console.print("%s", r(k).name.buf);
         Console.print("\t\t");
         Console.print(r(k).price);
         Console.print("\t\t");
@@ -142,6 +142,7 @@ for i = 1, i < 10, i = i+1 {
     def c: Car;
     c.id = 30 + i
     c.name = String("Car %") + i;
+    if i == 4 c.name += "\n";
     if i < 5 c.name += "!";
     c.price = 200.0 * i
     db.save[Car](c);
@@ -151,4 +152,7 @@ d = db.from[Car].where[(name :: "Car !%%") and id > 35].order[(-price, -id)].sel
 printRows(d);
 
 d = db.from[Car].where[name :: "Car %!!"].order[(-price, -id)].select();
+printRows(d);
+
+d = db.from[Car].where[name :: "Car %\n!!"].order[(-price, -id)].select();
 printRows(d);
