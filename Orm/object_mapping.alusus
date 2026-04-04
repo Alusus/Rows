@@ -164,7 +164,7 @@
                             def v: Rows.Value(_this.validationBuffer.name~use_in(_buffer) no_injection { _buffer = val })
                             if v.valueType == Rows.Value.Type.NULL this = " is null"
                             else this = String(" LIKE ") + v.toString();
-                        } + Srl.String(" ESCAPE '\\'")
+                        } + Srl.String(" ESCAPE '!'")
                     },
                     AstTemplateMap()
                         .set(String("name"), mapContaining.getElement("first"))

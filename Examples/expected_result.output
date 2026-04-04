@@ -440,6 +440,67 @@ SELECT "id", "name", "price", "fullName", "electrical"
 FROM cars
 WHERE "fullName" is not null
 20		BMW		NULL		electrical		BMW X5
+[32m>> Executing SQL:[0m
+SELECT "id", "name", "price", "fullName", "electrical"
+FROM cars
+WHERE "name" LIKE 'Car 1%' ESCAPE '!'
+ORDER BY "price" DESC, "id" DESC
+19		Car 19		3800.000000		electrical
+18		Car 18		3600.000000		electrical
+17		Car 17		3400.000000		electrical
+16		Car 16		3200.000000		electrical
+15		Car 15		3000.000000		traditional
+14		Car 14		2800.000000		traditional
+13		Car 13		2600.000000		traditional
+12		Car 12		2400.000000		traditional
+11		Car 11		2200.000000		traditional
+10		Car 10		2000.000000		traditional
+1		Car 1		200.000000		traditional
+[32m>> Executing SQL:[0m
+INSERT INTO cars("id", "name", "price", "fullName", "electrical")
+VALUES (31, 'Car %1!', 200.000000, null, '1')
+[32m>> Executing SQL:[0m
+INSERT INTO cars("id", "name", "price", "fullName", "electrical")
+VALUES (32, 'Car %2!', 400.000000, null, '1')
+[32m>> Executing SQL:[0m
+INSERT INTO cars("id", "name", "price", "fullName", "electrical")
+VALUES (33, 'Car %3!', 600.000000, null, '1')
+[32m>> Executing SQL:[0m
+INSERT INTO cars("id", "name", "price", "fullName", "electrical")
+VALUES (34, 'Car %4!', 800.000000, null, '1')
+[32m>> Executing SQL:[0m
+INSERT INTO cars("id", "name", "price", "fullName", "electrical")
+VALUES (35, 'Car %5', 1000.000000, null, '1')
+[32m>> Executing SQL:[0m
+INSERT INTO cars("id", "name", "price", "fullName", "electrical")
+VALUES (36, 'Car %6', 1200.000000, null, '1')
+[32m>> Executing SQL:[0m
+INSERT INTO cars("id", "name", "price", "fullName", "electrical")
+VALUES (37, 'Car %7', 1400.000000, null, '1')
+[32m>> Executing SQL:[0m
+INSERT INTO cars("id", "name", "price", "fullName", "electrical")
+VALUES (38, 'Car %8', 1600.000000, null, '1')
+[32m>> Executing SQL:[0m
+INSERT INTO cars("id", "name", "price", "fullName", "electrical")
+VALUES (39, 'Car %9', 1800.000000, null, '1')
+[32m>> Executing SQL:[0m
+SELECT "id", "name", "price", "fullName", "electrical"
+FROM cars
+WHERE ("name" LIKE 'Car !%%' ESCAPE '!') and "id" > 35
+ORDER BY "price" DESC, "id" DESC
+39				1800.000000		electrical
+38				1600.000000		electrical
+37				1400.000000		electrical
+36				1200.000000		electrical
+[32m>> Executing SQL:[0m
+SELECT "id", "name", "price", "fullName", "electrical"
+FROM cars
+WHERE "name" LIKE 'Car %!!' ESCAPE '!'
+ORDER BY "price" DESC, "id" DESC
+34		Car %4!		800.000000		electrical
+33		Car %3!		600.000000		electrical
+32		Car %2!		400.000000		electrical
+31		Car %1!		200.000000		electrical
 
 
 
@@ -675,6 +736,67 @@ SELECT "id", "name", "the_price", "fullName", "electrical", "createdAt"
 FROM cars
 WHERE "fullName" is not null
 19		Car 19		3800.000000		electrical		BMW X5
+[32m>> Executing SQL:[0m
+SELECT "id", "name", "the_price", "fullName", "electrical", "createdAt"
+FROM cars
+WHERE "name" LIKE 'Car 1%' ESCAPE '!'
+ORDER BY "the_price" DESC, "id" DESC
+19		Car 19		3800.000000		electrical		BMW X5
+18		Car 18		3600.000000		electrical
+17		Car 17		3400.000000		electrical
+16		Car 16		3200.000000		electrical
+15		Car 15		3000.000000		traditional
+14		Car 14		2800.000000		traditional
+13		Car 13		2600.000000		traditional
+12		Car 12		2400.000000		traditional
+11		Car 11		2200.000000		traditional
+10		Car 10		2000.000000		traditional
+1		Car 1		200.000000		not known		2023-02-18 10:57:33
+[32m>> Executing SQL:[0m
+INSERT INTO cars("id", "name", "the_price", "fullName", "electrical", "createdAt")
+VALUES (31, 'Car %1!', 200.000000, null, null, null)
+[32m>> Executing SQL:[0m
+INSERT INTO cars("id", "name", "the_price", "fullName", "electrical", "createdAt")
+VALUES (32, 'Car %2!', 400.000000, null, null, null)
+[32m>> Executing SQL:[0m
+INSERT INTO cars("id", "name", "the_price", "fullName", "electrical", "createdAt")
+VALUES (33, 'Car %3!', 600.000000, null, null, null)
+[32m>> Executing SQL:[0m
+INSERT INTO cars("id", "name", "the_price", "fullName", "electrical", "createdAt")
+VALUES (34, 'Car %4!', 800.000000, null, null, null)
+[32m>> Executing SQL:[0m
+INSERT INTO cars("id", "name", "the_price", "fullName", "electrical", "createdAt")
+VALUES (35, 'Car %5', 1000.000000, null, null, null)
+[32m>> Executing SQL:[0m
+INSERT INTO cars("id", "name", "the_price", "fullName", "electrical", "createdAt")
+VALUES (36, 'Car %6', 1200.000000, null, null, null)
+[32m>> Executing SQL:[0m
+INSERT INTO cars("id", "name", "the_price", "fullName", "electrical", "createdAt")
+VALUES (37, 'Car %7', 1400.000000, null, null, null)
+[32m>> Executing SQL:[0m
+INSERT INTO cars("id", "name", "the_price", "fullName", "electrical", "createdAt")
+VALUES (38, 'Car %8', 1600.000000, null, null, null)
+[32m>> Executing SQL:[0m
+INSERT INTO cars("id", "name", "the_price", "fullName", "electrical", "createdAt")
+VALUES (39, 'Car %9', 1800.000000, null, null, null)
+[32m>> Executing SQL:[0m
+SELECT "id", "name", "the_price", "fullName", "electrical", "createdAt"
+FROM cars
+WHERE ("name" LIKE 'Car !%%' ESCAPE '!') and "id" > 35
+ORDER BY "the_price" DESC, "id" DESC
+39				1800.000000		not known
+38				1600.000000		not known
+37				1400.000000		not known
+36				1200.000000		not known
+[32m>> Executing SQL:[0m
+SELECT "id", "name", "the_price", "fullName", "electrical", "createdAt"
+FROM cars
+WHERE "name" LIKE 'Car %!!' ESCAPE '!'
+ORDER BY "the_price" DESC, "id" DESC
+34		Car %4!		800.000000		not known
+33		Car %3!		600.000000		not known
+32		Car %2!		400.000000		not known
+31		Car %1!		200.000000		not known
 
 
 
@@ -896,6 +1018,67 @@ ORDER BY "price" DESC, "id" DESC
 4		Car 4u		400.000000
 2		Car 2		400.000000
 1		Car 1		200.000000
+[32m>> Executing SQL:[0m
+SELECT "id", "name", "price"
+FROM cars
+WHERE "name" LIKE 'Car 1%' ESCAPE '!'
+ORDER BY "price" DESC, "id" DESC
+19		Car 19		3800.000000
+18		Car 18		3600.000000
+17		Car 17		3400.000000
+16		Car 16		3200.000000
+15		Car 15		3000.000000
+14		Car 14		2800.000000
+13		Car 13		2600.000000
+12		Car 12		2400.000000
+11		Car 11		2200.000000
+10		Car 10		2000.000000
+1		Car 1		200.000000
+[32m>> Executing SQL:[0m
+INSERT INTO cars("id", "name", "price")
+VALUES (31, 'Car %1!', 200.000000)
+[32m>> Executing SQL:[0m
+INSERT INTO cars("id", "name", "price")
+VALUES (32, 'Car %2!', 400.000000)
+[32m>> Executing SQL:[0m
+INSERT INTO cars("id", "name", "price")
+VALUES (33, 'Car %3!', 600.000000)
+[32m>> Executing SQL:[0m
+INSERT INTO cars("id", "name", "price")
+VALUES (34, 'Car %4!', 800.000000)
+[32m>> Executing SQL:[0m
+INSERT INTO cars("id", "name", "price")
+VALUES (35, 'Car %5', 1000.000000)
+[32m>> Executing SQL:[0m
+INSERT INTO cars("id", "name", "price")
+VALUES (36, 'Car %6', 1200.000000)
+[32m>> Executing SQL:[0m
+INSERT INTO cars("id", "name", "price")
+VALUES (37, 'Car %7', 1400.000000)
+[32m>> Executing SQL:[0m
+INSERT INTO cars("id", "name", "price")
+VALUES (38, 'Car %8', 1600.000000)
+[32m>> Executing SQL:[0m
+INSERT INTO cars("id", "name", "price")
+VALUES (39, 'Car %9', 1800.000000)
+[32m>> Executing SQL:[0m
+SELECT "id", "name", "price"
+FROM cars
+WHERE ("name" LIKE 'Car !%%' ESCAPE '!') and "id" > 35
+ORDER BY "price" DESC, "id" DESC
+39		Car %9		1800.000000
+38		Car %8		1600.000000
+37		Car %7		1400.000000
+36		Car %6		1200.000000
+[32m>> Executing SQL:[0m
+SELECT "id", "name", "price"
+FROM cars
+WHERE "name" LIKE 'Car %!!' ESCAPE '!'
+ORDER BY "price" DESC, "id" DESC
+34		Car %4!		800.000000
+33		Car %3!		600.000000
+32		Car %2!		400.000000
+31		Car %1!		200.000000
 
 
 
@@ -924,6 +1107,15 @@ ORDER BY "price" DESC, "id" DESC
 4	Car 4u	400				
 19	Car 19	3800	BMW X5	t		
 20	BMW	90		t		
+31	Car %1!	200				
+32	Car %2!	400				
+33	Car %3!	600				
+34	Car %4!	800				
+35	Car %5	1000				
+36	Car %6	1200				
+37	Car %7	1400				
+38	Car %8	1600				
+39	Car %9	1800				
 
 
 
