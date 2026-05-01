@@ -125,7 +125,8 @@ for i = 1, i < 10, i = i+1 {
     c.name = String("Car %") + i;
     if i == 4 c.name += "\n";
     if i < 5 c.name += "!";
-    c.price = 200.0 * i
+    c.price = 200.0 * i;
+    c.electrical = 1;
     db.save[Car](c);
 }
 
