@@ -1,5 +1,5 @@
 import "Apm";
-Apm.importFile("Alusus/Rows", { "Rows.alusus", "Drivers/Sqlite.alusus" });
+Apm.importPackage("Alusus/Rows@0.4", { "Rows.alusus", "Drivers/Sqlite.alusus" });
 use Srl;
 use Rows;
 

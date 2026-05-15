@@ -9,7 +9,7 @@ We can install this library using the following statements:
 
 ```
 import "Apm";
-Apm.importFile("Alusus/Rows", { "Rows.alusus", "<driver>" });
+Apm.importPackage("Alusus/Rows@0.4", { "Rows.alusus", "<driver>" });
 ```
 
 A driver name must be included in the second argument, unless if you are implementing your own DB
@@ -20,7 +20,7 @@ forces the user to install system dependencies that he might not need.
 ### PostgreSQL
 
 ```
-Apm.importFile("Alusus/Rows", { "Rows.alusus", "Drivers/Postgresql.alusus" });
+Apm.importPackage("Alusus/Rows@0.4", { "Rows.alusus", "Drivers/Postgresql.alusus" });
 use Rows;
 def db: Db(PostgresqlDriver(ConnectionParams().{
     dbName = "alusus";
@@ -33,7 +33,7 @@ def db: Db(PostgresqlDriver(ConnectionParams().{
 ### MySql
 
 ```
-Apm.importFile("Alusus/Rows", { "Rows.alusus", "Drivers/Mysql.alusus" });
+Apm.importPackage("Alusus/Rows@0.4", { "Rows.alusus", "Drivers/Mysql.alusus" });
 use Rows;
 def db: Db(MysqlDriver(ConnectionParams().{
     dbName = "alusus";
@@ -46,7 +46,7 @@ def db: Db(MysqlDriver(ConnectionParams().{
 ### Sqlite
 
 ```
-Apm.importFile("Alusus/Rows", { "Rows.alusus", "Drivers/Sqlite.alusus" });
+Apm.importPackage("Alusus/Rows@0.4", { "Rows.alusus", "Drivers/Sqlite.alusus" });
 use Rows;
 def db: Db(SqliteDriver(ConnectionParams().{
     dbName = "alusus.db";
@@ -59,7 +59,7 @@ def db: Db(SqliteDriver(ConnectionParams().{
 
 ```
 import "Apm";
-Apm.importFile("Alusus/Rows", { "Rows.alusus", "Drivers/Mysql.alusus" });
+Apm.importPackage("Alusus/Rows@0.4", { "Rows.alusus", "Drivers/Mysql.alusus" });
 use Srl;
 use Rows;
 
@@ -178,7 +178,7 @@ for i = 0, i < data.getLength(), i = i + 1 {
 
 ```
 import "Apm";
-Apm.importFile("Alusus/Rows", { "Rows.alusus", "Drivers/Mysql.alusus" });
+Apm.importPackage("Alusus/Rows@0.4", { "Rows.alusus", "Drivers/Mysql.alusus" });
 use Srl;
 use Rows;
 

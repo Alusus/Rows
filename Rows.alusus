@@ -12,7 +12,7 @@ import "Spp";
 import "Spp/Ast";
 
 import "Apm";
-Apm.importFile("Alusus/Threading");
+Apm.importPackage("Alusus/Threading@0.1");
 
 @merge module Rows {
     use Srl;

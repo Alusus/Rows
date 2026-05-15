@@ -11,14 +11,14 @@
 
 ```
 اشمل "مـحا"؛
-مـحا.اشمل_ملف("Alusus/Rows"، { "صـفوف.أسس"، "<المشغل>" })؛
+مـحا.اشمل_حزمة("Alusus/Rows@0.4"، { "صـفوف.أسس"، "<المشغل>" })؛
 ```
 
 </div>
 
 ```
 import "Apm";
-Apm.importFile("Alusus/Rows", { "Rows.alusus", "<driver>" });
+Apm.importPackage("Alusus/Rows@0.4", { "Rows.alusus", "<driver>" });
 ```
 
 اسماء الملفات في المعطى الثاني يجب أن تشمل اسم المشغل المطلوب لقاعدة البيانات الخاصة بك. ما لم تكن
@@ -32,7 +32,7 @@ Apm.importFile("Alusus/Rows", { "Rows.alusus", "<driver>" });
 <div dir=rtl>
 
 ```
-مـحا.اشمل_ملف("Alusus/Rows"، { "صـفوف.أسس"، "مـشغلات/بـوستغرس.أسس" })؛
+مـحا.اشمل_حزمة("Alusus/Rows@0.4"، { "صـفوف.أسس"، "مـشغلات/بـوستغرس.أسس" })؛
 استخدم صـفوف؛
 عرف قب: قـاعدة_بيانات(مـشغل_بوستغرس(مـعطيات_الاتصال().{
     اسم_قاعدة_البيانات = "alusus"؛
@@ -45,7 +45,7 @@ Apm.importFile("Alusus/Rows", { "Rows.alusus", "<driver>" });
 </div>
 
 ```
-Apm.importFile("Alusus/Rows", { "Rows.alusus", "Drivers/Postgresql.alusus" });
+Apm.importPackage("Alusus/Rows@0.4", { "Rows.alusus", "Drivers/Postgresql.alusus" });
 use Rows;
 def db: Db(PostgresqlDriver(ConnectionParams().{
     dbName = "alusus";
@@ -60,7 +60,7 @@ def db: Db(PostgresqlDriver(ConnectionParams().{
 <div dir=rtl>
 
 ```
-مـحا.اشمل_ملف("Alusus/Rows"، { "صـفوف.أسس"، "مـشغلات/مـايسكويل.أسس" })؛
+مـحا.اشمل_حزمة("Alusus/Rows@0.4"، { "صـفوف.أسس"، "مـشغلات/مـايسكويل.أسس" })؛
 استخدم صـفوف؛
 عرف قب: قـاعدة_بيانات(مـشغل_مايسكويل(مـعطيات_الاتصال().{
     اسم_قاعدة_البيانات = "alusus"؛
@@ -73,7 +73,7 @@ def db: Db(PostgresqlDriver(ConnectionParams().{
 </div>
 
 ```
-Apm.importFile("Alusus/Rows", { "Rows.alusus", "Drivers/Mysql.alusus" });
+Apm.importPackage("Alusus/Rows@0.4", { "Rows.alusus", "Drivers/Mysql.alusus" });
 use Rows;
 def db: Db(MysqlDriver(ConnectionParams().{
     dbName = "alusus";
@@ -88,7 +88,7 @@ def db: Db(MysqlDriver(ConnectionParams().{
 <div dir=rtl>
 
 ```
-مـحا.اشمل_ملف("Alusus/Rows"، { "صـفوف.أسس"، "مـشغلات/سـكويلايت.أسس" })؛
+مـحا.اشمل_حزمة("Alusus/Rows@0.4"، { "صـفوف.أسس"، "مـشغلات/سـكويلايت.أسس" })؛
 استخدم صـفوف؛
 عرف قب: قـاعدة_بيانات(مـشغل_سكويلايت(مـعطيات_الاتصال().{
     اسم_قاعدة_البيانات = "الأسس.قب"؛
@@ -98,7 +98,7 @@ def db: Db(MysqlDriver(ConnectionParams().{
 </div>
 
 ```
-Apm.importFile("Alusus/Rows", { "Rows.alusus", "Drivers/Sqlite.alusus" });
+Apm.importPackage("Alusus/Rows@0.4", { "Rows.alusus", "Drivers/Sqlite.alusus" });
 use Rows;
 def db: Db(SqliteDriver(ConnectionParams().{
     dbName = "alusus.db";
@@ -118,7 +118,7 @@ def db: Db(SqliteDriver(ConnectionParams().{
 اشمل "مـتم/تـطبيق"؛
 اشمل "مـتم/سندات"؛
 اشمل "مـحا"؛
-مـحا.اشمل_ملف("Alusus/Rows"، { "صـفوف.أسس"، "مـشغلات/مـايسكويل.أسس" })؛
+مـحا.اشمل_حزمة("Alusus/Rows@0.4"، { "صـفوف.أسس"، "مـشغلات/مـايسكويل.أسس" })؛
 استخدم مـتم؛
 استخدم صـفوف؛
 
@@ -242,7 +242,7 @@ def db: Db(SqliteDriver(ConnectionParams().{
 ```
 import "Srl/Possible";
 import "Apm";
-Apm.importFile("Alusus/Rows", { "Rows.alusus", "Drivers/Mysql.alusus" });
+Apm.importPackage("Alusus/Rows@0.4", { "Rows.alusus", "Drivers/Mysql.alusus" });
 use Srl;
 use Rows;
 
@@ -372,7 +372,7 @@ for i = 0, i < data.getLength(), i = i + 1 {
 اشمل "مـتم/نـظام"؛
 اشمل "مـتم/سندات"؛
 اشمل "مـحا"؛
-مـحا.اشمل_ملف("Alusus/Rows"، { "صـفوف.أسس"، "مـشغلات/مـايسكويل.أسس" })؛
+مـحا.اشمل_حزمة("Alusus/Rows@0.4"، { "صـفوف.أسس"، "مـشغلات/مـايسكويل.أسس" })؛
 استخدم مـتم؛
 استخدم صـفوف؛
 
@@ -453,7 +453,7 @@ for i = 0, i < data.getLength(), i = i + 1 {
 
 ```
 import "Apm";
-Apm.importFile("Alusus/Rows", { "Rows.alusus", "Drivers/Mysql.alusus" });
+Apm.importPackage("Alusus/Rows@0.4", { "Rows.alusus", "Drivers/Mysql.alusus" });
 use Srl;
 use Rows;
 
