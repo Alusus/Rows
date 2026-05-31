@@ -59,7 +59,7 @@ def db: Db(SqliteDriver(ConnectionParams().{
 
 ## Example
 
----
+
 
 ### Accessing the DB Manually
 
@@ -256,7 +256,7 @@ func printRows (r: Array[SrdRef[Car]]) {
 
 ## Object Relational Mapping
 
----
+
 
 Rows library provides an ORM functionality by allowing DB talbes to be defined as Alusus classes
 and automatically mapping class objects to table rows for reading and writing to the DB. To enable
@@ -344,11 +344,35 @@ class ConnectionParams {
 ```
 This class contains the required information to connect to the database.
 
-* `dbName` (`String`): The name of the database to connect to.
-* `userName` (`String`): The username for the database account.
-* `password` (`String`): The password for the database account.
-* `host` (`String`): The host address running the database.
-* `port` (`Int`): The port on the host to access the database through.
+#### dbName
+```
+def dbName: String = "";
+```
+The name of the database to connect to.
+
+#### userName
+```
+def userName: String = "";
+```
+The username for the database account.
+
+#### password
+```
+def password: String = "";
+```
+The password for the database account.
+
+#### host
+```
+def host: String = "";
+```
+The host address running the database.
+
+#### port
+```
+def port: int = 0;
+```
+The port on the host to access the database through.
 
 ### CreateTable class
 ```
@@ -363,11 +387,35 @@ class CreateTable {
 
 This class is used to create a model with a given information.
 
-* `name` (`String`): The model name.
-* `notExists` (`Bool`): Specify if the model should only be created if it doesn't already exist.
-* `columns` (`Map[String, SrdRef[Column]]`): A map between column name and its information.
-* `primaryKey` (`Array[String]`): The primary key of the model.
-* `foreignKeys` (`Array[SrdRef[ForeignKey]]`): The foreign keys of the model.
+#### name
+```
+handler this.name = String;
+```
+The model name.
+
+#### notExists
+```
+handler this.notExists = Bool;
+```
+Specify if the model should only be created if it doesn't already exist.
+
+#### columns
+```
+handler this.columns = Map[String, SrdRef[Column]];
+```
+A map between column name and its information.
+
+#### primaryKey
+```
+handler this.primaryKey = Array[String];
+```
+The primary key of the model.
+
+#### foreignKeys
+```
+handler this.foreignKeys = Array[SrdRef[ForeignKey]];
+```
+The foreign keys of the model.
 
 ### Delete class
 
@@ -380,8 +428,17 @@ class Delete {
 
 This class is used to delete rows from a model based on a condition.
 
-* `table` (`String`): The model name.
-* `condition` (`CharsPtr, ...any`): The condition a row must satisfy in order to delete it.
+#### table
+```
+handler this.table = String;
+```
+The model name.
+
+#### condition
+```
+handler this.condition(statement: CharsPtr, args: ...any);
+```
+The condition a row must satisfy in order to delete it.
 
 ### Value class
 ```
@@ -414,9 +471,23 @@ class Insert {
 
 This class is used to insert a row to the model.
 
-* `table` (`String`): The model name.
-* `data` (`Array[Value]`): The values of the row to add.
-* `columns` (`Array[String]`): The names of the columns that correspond to the values.
+#### table
+```
+handler this.table = String;
+```
+The model name.
+
+#### data
+```
+handler this.data = Array[Value];
+```
+The values of the row to add.
+
+#### columns
+```
+handler this.columns = Array[String];
+```
+The names of the columns that correspond to the values.
 
 ### Select class
 ```
@@ -430,10 +501,29 @@ class Select {
 
 This class is used to retrieve rows from the model.
 
-* `table` (`Array[String]`): The model name.
-* `fields` (`Array[String]`): The names of the columns to retrieve.
-* `condition` (`CharsPtr, ...any`): The condition a row must satisfy in order to select it.
-* `orderBy` (`Array[String]`): The order of the selected rows.
+#### table
+```
+handler this.table = Array[String];
+```
+The model name.
+
+#### fields
+```
+handler this.fields = Array[String];
+```
+The names of the columns to retrieve.
+
+#### condition
+```
+handler this.condition(statement: CharsPtr, args: ...any);
+```
+The condition a row must satisfy in order to select it.
+
+#### orderBy
+```
+handler this.orderBy = Array[String];
+```
+The order of the selected rows.
 
 ### Update class
 ```
@@ -446,10 +536,29 @@ class Update {
 ```
 This class is used to update a row, or a set of rows in a model.
 
-* `table` (`String`): The model name.
-* `data` (`Array[Value]`): The new values of the columns.
-* `columns` (`Array[String]`): The columns to update their values.
-* `condition` (`CharsPtr, ...any`): The condition a row must satisfy in order to update it.
+#### table
+```
+handler this.table = String;
+```
+The model name.
+
+#### data
+```
+handler this.data = Array[Value];
+```
+The new values of the columns.
+
+#### columns
+```
+handler this.columns = Array[String];
+```
+The columns to update their values.
+
+#### condition
+```
+handler this.condition(statement: CharsPtr, args: ...any);
+```
+The condition a row must satisfy in order to update it.
 
 ### Column class
 ```
@@ -464,11 +573,35 @@ class Column {
 
 This class holds the column information.
 
-* `dataType` (`SrdRef[DataType]`): The type of data to store in the column.
-* `notNull` (`Bool`): Specify if this column value is required, or it can be null.
-* `unique` (`Bool`): Specify if this column values are unique or not.
-* `default` (`String`): The default value for this column when no value is provided.
-* `check` (`CharsPtr, ...any`): The check to apply on the value before inserting it.
+#### dataType
+```
+handler this.dataType = SrdRef[DataType];
+```
+The type of data to store in the column.
+
+#### notNull
+```
+handler this.notNull = Bool;
+```
+Specify if this column value is required, or it can be null.
+
+#### unique
+```
+handler this.unique = Bool;
+```
+Specify if this column values are unique or not.
+
+#### default
+```
+handler this.default = String;
+```
+The default value for this column when no value is provided.
+
+#### check
+```
+handler this.check(statement: CharsPtr, args: ...any);
+```
+The check to apply on the value before inserting it.
 
 ### Query class
 ```
@@ -752,7 +885,7 @@ handler this.exec(statement: CharsPtr, args: ...any): Possible[Int]
 ```
 Execute a query. There is an overload for each type of query in addition to an overload for executing raw SQL statements. The version for raw SQL splits the SQL structure from the data, which are passed as extra args similar to printf. For write queries (insert, update, delete) returns the number of affected rows. The following data param types are supported:
 
-* `%n`: `CharsPtr` for field or table name
+* `%n`: `CharsPtr` 
 * `%s`: `String`
 * `%p`: `CharsPtr`
 * `%i`: `Int`
