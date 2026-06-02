@@ -1,5 +1,5 @@
-<div dir=rtl>
 # صـفوف (Rows)
+
 [[English]](README.md)
 
 مكتبة للتعامل مع قواعد البيانات وتحقيق ال ORM (ربط الأغراض العلائقي) للغة الأسس.
@@ -8,20 +8,20 @@
 
 يمكن تثبيت هذه المكتبة باستعمال التعليمات البرمجية التالية:
 
-
+<div dir=rtl>
 
 ```
 اشمل "مـحا"؛
 مـحا.اشمل_حزمة("Alusus/Rows@0.4"، { "صـفوف.أسس"، "<المشغل>" })؛
 ```
 
-<div dir=ltr>
+</div>
 
 ```
 import "Apm";
 Apm.importPackage("Alusus/Rows@0.4", { "Rows.alusus", "<driver>" });
 ```
-</div>
+
 اسماء الملفات في المعطى الثاني يجب أن تشمل اسم المشغل المطلوب لقاعدة البيانات الخاصة بك. ما لم تكن
 تنوي كتابة مشغلك الخاص فإنك ستحتاج لشمول أحد المشغلات المتوفرة في مكتبة صـفوف. مكتبة صـفوف لا تشمل
 المشغلات تلقائيًا لأن كل مشغل يتطلب المكتبة الخاصة بقاعدة البيانات المعنية. مثلا، مشغل بوستغريس
@@ -30,7 +30,7 @@ Apm.importPackage("Alusus/Rows@0.4", { "Rows.alusus", "<driver>" });
 
 ### قاعدة بيانات بوستغرس (PostgreSQL)
 
-
+<div dir=rtl>
 
 ```
 مـحا.اشمل_حزمة("Alusus/Rows@0.4"، { "صـفوف.أسس"، "مـشغلات/بـوستغرس.أسس" })؛
@@ -43,7 +43,7 @@ Apm.importPackage("Alusus/Rows@0.4", { "Rows.alusus", "<driver>" });
 }))؛
 ```
 
-<div dir=ltr>
+</div>
 
 ```
 Apm.importPackage("Alusus/Rows@0.4", { "Rows.alusus", "Drivers/Postgresql.alusus" });
@@ -55,11 +55,10 @@ def db: Db(PostgresqlDriver(ConnectionParams().{
     host = "0.0.0.0";
 }));
 ```
-</div>
 
 ### قاعدة بيانات مايسكويل (MySQL)
 
-
+<div dir=rtl>
 
 ```
 مـحا.اشمل_حزمة("Alusus/Rows@0.4"، { "صـفوف.أسس"، "مـشغلات/مـايسكويل.أسس" })؛
@@ -72,7 +71,7 @@ def db: Db(PostgresqlDriver(ConnectionParams().{
 }))؛
 ```
 
-<div dir=ltr>
+</div>
 
 ```
 Apm.importPackage("Alusus/Rows@0.4", { "Rows.alusus", "Drivers/Mysql.alusus" });
@@ -85,11 +84,9 @@ def db: Db(MysqlDriver(ConnectionParams().{
 }));
 ```
 
-</div>
-
 ### قاعدة بيانات سكويلايت (Sqlite)
 
-
+<div dir=rtl>
 
 ```
 مـحا.اشمل_حزمة("Alusus/Rows@0.4"، { "صـفوف.أسس"، "مـشغلات/سـكويلايت.أسس" })؛
@@ -99,7 +96,7 @@ def db: Db(MysqlDriver(ConnectionParams().{
 }))؛
 ```
 
-<div dir=ltr>
+</div>
 
 ```
 Apm.importPackage("Alusus/Rows@0.4", { "Rows.alusus", "Drivers/Sqlite.alusus" });
@@ -108,11 +105,12 @@ def db: Db(SqliteDriver(ConnectionParams().{
     dbName = "alusus.db";
 }));
 ```
-</div>
 
 ## مثال
 
 ### التعامل اليدوي مع قاعدة البيانات
+
+<div dir=rtl>
 
 ```
 اشمل "مـتم/نـظام"؛
@@ -240,7 +238,7 @@ def db: Db(SqliteDriver(ConnectionParams().{
 }
 ```
 
-<div dir=ltr>
+</div>
 
 ```
 import "Srl/Possible";
@@ -361,10 +359,10 @@ for i = 0, i < data.getLength(), i = i + 1 {
 }
 
 ```
-</div>
 
 ### استعمال خاصية المطابقة (ORM)
 
+<div dir=rtl>
 
 ```
 اشمل "مـتم/نـص"؛
@@ -539,8 +537,9 @@ func printRows (r: Array[SrdRef[Car]]) {
 * إضافة مبدل يقابل صنف بيانات الحقل للمتغيرات.
 * إضافة المبدلات المتعلقة بالفهرسة والقيمة المبدئية والحقول المطلوبة إن وجد.
 
-مثال
+مثال: 
 
+<div dir=rtl>
 
 ```
 @جدول["سيارات"، 1]
@@ -568,7 +567,7 @@ func printRows (r: Array[SrdRef[Car]]) {
 }
 ```
 
-<div dir=ltr>
+</div>
 
 ```
 @model["cars", 1]
@@ -595,7 +594,7 @@ class Car {
     def fullName: Nullable[String];
 }
 ```
-</div>
+
 بعد تعريف الصنف سيمكنك استخدامه في الدالات التي تتعامل مع الأصناف لقراءة وكتابة البيانات، مثل
 دالة `قـاعدة_البيانات.من` (`Db.from`) أو دالة `قـاعدة_بيانات.احفظ` (`Db.save`) أو
 دالة `مـهيكل.واكب` (`SchemaBuilder.migrate`).
@@ -632,7 +631,7 @@ class Car {
 
 ### الصنف مـعطيات_الاتصال (ConnectionParams)
 
-
+<div dir=rtl>
 
 ```
 صنف مـعطيات_الاتصال {
@@ -644,7 +643,7 @@ class Car {
 }
 ```
 
-<div dir=ltr>
+</div>
 
 ```
 class ConnectionParams {
@@ -655,78 +654,92 @@ class ConnectionParams {
     def port: int = 0;
 }
 ```
-</div>
+
 يحتوي هذا الصنف على المعلومات اللازمة للاتصال بقاعدة البيانات.
 
 ####  اسم_قاعدة_البيانات (dbName)
 
+<div dir=rtl>
+
 ```
 عرف اسم_قاعدة_البيانات: نـص = ""
 ```
-<div dir=ltr>
+
+</div>
 
 ```
 def userName: String = ""
 ```
-</div>
 
 اسم قاعدة البيانات التي نرغب بالاتصال بها.
+
 #### اسم_المستخدم (userName)
+
+<div dir=rtl>
 
 ```
 عرف اسم_المستخدم: نـص = ""
 ```
-<div dir=ltr>
+
+</div>
 
 ```
 def userName: String = ""
 ```
-</div>
 
- اسم المستخدم الخاص بحسابنا في قاعدة البيانات.
+اسم المستخدم الخاص بحسابنا في قاعدة البيانات.
+
 #### كلمة_السر (password)
+
+<div dir=rtl>
 
 ```
 عرف كلمة_السر: نـص = ""
 ```
-<div dir=ltr>
+
+</div>
 
 ```
 def password: String = ""
 ```
-</div>
 
- كلمة سر الحساب الخاص بنا في قاعدة البيانات.
+كلمة سر الحساب الخاص بنا في قاعدة البيانات.
+
 #### عنوان_الخادم (host) 
+
+<div dir=rtl>
 
 ```
   عرف عنوان_الخادم: نـص = ""
 ```
-<div dir=ltr>
+
+</div>
 
 ```
 def host: String = ""
 ```
-</div>
 
 عنوان الخادم الذي تعمل قاعدة البيانات عليه.
+
 ####  المنفذ (port)
+
+<div dir=rtl>
 
 ```
 عرف المنفذ: نـص = ""
 ```
-<div dir=ltr>
+
+</div>
 
 ```
 def port: int = 0
 ```
-</div>
 
- المنفذ في الخادم الذي عن طريقه يمكن الوصول إلى قاعدة البيانات.
+المنفذ في الخادم الذي عن طريقه يمكن الوصول إلى قاعدة البيانات.
 
 ### الصنف إنـشاء جدول (CreateTable)
 
-
+<div dir=rtl>
 
 ```
 صنف إنـشاء_جدول {
@@ -738,7 +751,7 @@ def port: int = 0
 }
 ```
 
-<div dir =ltr>
+</div>
 
 ```
 class CreateTable {
@@ -749,79 +762,84 @@ class CreateTable {
     handler this.foreignKeys = Array[SrdRef[ForeignKey]];
 }
 ```
-</div>
+
 صنف يستعمل لإنشاء جدول حسب المعلومات التي يحويها.
 
 #### الاسم (name)
 
+<div dir=rtl>
+
 ```
 عرف الاسم = نـص؛
 ```
-<div dir=ltr>
+</div>
 
 ```
 handler this.name = String;
 ```
-</div>
 
 اسم الجدول.
 
 #### جديد_فقط (notExists)
 
+<div dir=rtl>
+
 ```
 عرف جديد_فقط = ثـنائي؛
 ```
-<div dir=ltr>
+</div>
 
 ```
 handler this.notExists = Bool;
 ```
-</div>
 
 متغير يحدد فيما إذا كنا نريد إنشاء الجدول فقط في حال لم يكن موجود مسبقاً.
 
 #### الحقول (columns)
 
+<div dir=rtl>
+
 ```
 عرف الحقول = تـطبيق[نـص، سـندنا[حـقل]]؛
 ```
-<div dir=ltr>
+</div>
 
 ```
 handler this.columns = Map[String, SrdRef[Column]];
 ```
-</div>
 
 تـطبيق يربط بين اسم حقل و المعلومات الخاص به ضمن الصنف `Column`.
 
 #### الفهرس_الرئيسي (primaryKey)
 
+<div dir=rtl>
+
 ```
 عرف الفهرس_الرئيسي = مـصفوفة[نـص]؛
 ```
-<div dir=ltr>
+
+</div>
 
 ```
 handler this.primaryKey = Array[String];
 ```
-</div>
 
 الفهرس الرئيسي للجدول.
 
 #### فهارس_الوصل (foreignKeys)
 
+<div dir=rtl>
+
 ```
 عرف فهارس_الوصل = مصفوفة[سـندنا[فـهرس_وصل]]؛
 ```
-<div dir=ltr>
+</div>
 
 ```
 handler this.foreignKeys = Array[SrdRef[ForeignKey]];
 ```
-</div>
 
 فهارس الوصل و هي تعرف ارتباطات الجدول مع الجداول الأخرى.
-
 
 ### الصنف حـذف (Delete)
 
@@ -846,29 +864,31 @@ class Delete {
 
 #### الجدول (table)
 
+<div dir=rtl>
 ```
 عرف الجدول = نـص؛
 ```
-<div dir=ltr>
+</div>
 
 ```
 handler this.table = String;
 ```
-</div>
 
 اسم الجدول.
 
 #### الشرط (condition)
 
+<div dir=rtl>
+
 ```
 عرف الشرط(عبارة: مؤشر[مـحرف]، معطيات: ...أي_معطيات_أخرى)؛
 ```
-<div dir=ltr>
+
+</div>
 
 ```
 handler this.condition(statement: CharsPtr, args: ...any);
 ```
-</div>
 
 الشرط الذي تم الحذف على أساسه.
 
@@ -939,46 +959,51 @@ class Insert {
 
 #### الجدول (table)
 
+<div dir=rtl>
+
 ```
 عرف الجدول = نـص؛
 ```
-<div dir=ltr>
+
+</div>
 
 ```
 handler this.table = String;
 ```
-</div>
 
 اسم الجدول الذي نريد الإضافة إليه.
 
 #### البيانات (data)
 
+<div dir=rtl>
+
 ```
 عرف البيانات = مـصفوفة[قـيمة]؛
 ```
-<div dir=ltr>
+
+</div>
 
 ```
 handler this.data = Array[Value];
 ```
-</div>
 
 البيانات الخاصة بالسطر المراد إضافته.
 
 #### الحقول (columns)
 
+<div dir=rtl>
+
 ```
 عرف الحقول = مـصفوفة[نـص]؛
 ```
-<div dir=ltr>
+
+</div>
 
 ```
 handler this.columns = Array[String];
 ```
-</div>
 
 أسماء الأعمدة التي تتبع لها القيم في `البيانات`.
-
 
 ### الصنف جـلب (Select)
 
@@ -1007,57 +1032,64 @@ class Select {
 
 #### الجدول (table)
 
+<div dir=rtl>
+
 ```
 عرف الجدول = مـصفوفة[نـص]؛
 ```
-<div dir=ltr>
+
+</div>
 
 ```
 handler this.table = Array[String];
 ```
-</div>
 
 اسم الجدول المراد جلب البيانات منه.
 
 #### الحقول (fields)
 
+<div dir=rtl>
+
 ```
 عرف الحقول = مـصفوفة[نـص]؛
 ```
-<div dir=ltr>
+
+</div>
 
 ```
 handler this.fields = Array[String];
 ```
-</div>
 
 أسماء الأعمدة التي نرغب بجلب قيمها.
 
 #### الشرط (condition)
 
+<div dir=rtl>
+
 ```
 عرف الشرط(عبارة: مؤشر[مـحرف]، معطيات: ...أي_معطيات_أخرى)؛
 ```
-<div dir=ltr>
+</div>
 
 ```
 handler this.condition(statement: CharsPtr, args: ...any);
 ```
-</div>
 
 الشرط الذي نريد للأسطر أن تحققه حتى يتم جلبها.
 
 #### الترتيب (orderBy)
 
+<div dir=rtl>
+
 ```
 عرف الترتيب = مـصفوفة[نـص]؛
 ```
-<div dir=ltr>
+
+</div>
 
 ```
 handler this.orderBy = Array[String];
 ```
-</div>
 
 الترتيب المراد تطبيقه على الأسطر.
 
@@ -1089,57 +1121,64 @@ class Update {
 
 #### الجدول (table)
 
+<div dir=rtl>
+
 ```
 عرف الجدول = نـص؛
 ```
-<div dir=ltr>
+
+</div>
 
 ```
 handler this.table = String;
 ```
-</div>
 
 اسم الجدول المراد تحديث أسطر فيه.
 
 #### البيانات (data)
 
+<div dir=rtl>
+
 ```
 عرف البيانات = مـصفوفة[قـيمة]؛
 ```
-<div dir=ltr>
+
+</div>
 
 ```
 handler this.data = Array[Value];
 ```
-</div>
 
 القيم الجديدة التي نريد تحديث الأسطر بها.
 
 #### الحقول (columns)
 
+<div dir=rtl>
+
 ```
 عرف الحقول = مـصفوفة[نـص]؛
 ```
-<div dir=ltr>
+
+</div>
 
 ```
 handler this.columns = Array[String];
 ```
-</div>
 
 الأعمدة التي نريد تحديث قيمها حسب القيم في `البيانات`.
 
 #### الشرط (condition)
 
+<div dir=rtl>
+
 ```
 عرف الشرط(عبارة: مؤشر[مـحرف]، معطيات: ...أي_معطيات_أخرى)؛
 ```
-<div dir=ltr>
+</div>
 
 ```
 handler this.condition(statement: CharsPtr, args: ...any);
 ```
-</div>
 
 الشرط الذي يجب على السطر تحقيقه حتى يتم تحديثه.
 
@@ -1173,71 +1212,78 @@ class Column {
 
 #### الصنف (dataType)
 
+<div dir=rtl>
+
 ```
 عرف الصنف = سـندنا[نـمط_البيانات]؛
 ```
-<div dir=ltr>
+
+</div>
 
 ```
 handler this.dataType = SrdRef[DataType];
 ```
-</div>
 
 نمط البيانات التي سيتم تخزينها في هذا الحقل.
 
 #### إلزامي (notNull)
 
+<div dir=rtl>
+
 ```
 عرف إلزامي = ثـنائي؛
 ```
-<div dir=ltr>
+</div>
 
 ```
 handler this.notNull = Bool;
 ```
-</div>
 
 هل من الضروري وجود قيمة لهذا الحقل أم من الممكن أن يكون خالٍ.
 
 #### فريد (unique)
 
+<div dir=rtl>
+
 ```
 عرف فريد = ثـنائي؛
 ```
-<div dir=ltr>
+</div>
 
 ```
 handler this.unique = Bool;
 ```
-</div>
 
 هل قيم هذا الحقل يحب أن تكون فريدة أم من الممكن أن يحمل سطران نفس القيمة في هذا العمود.
 
 #### القيمة_الافتراضية (default)
 
+<div dir=rtl>
+
 ```
 عرف القيمة_الافتراضية = نـص؛
 ```
-<div dir=ltr>
+</div>
 
 ```
 handler this.default = String;
 ```
-</div>
 
 القيمة الافتراضية لهذا الحقل في حال لم يتم إعطاء قيمة.
 
 #### التحقق (check)
 
+<div dir=rtl>
+
 ```
 عرف التحقق(عبارة: مؤشر[مـحرف]، معطيات: ...أي_معطيات_أخرى)؛
 ```
-<div dir=ltr>
+
+</div>
 
 ```
 handler this.check(statement: CharsPtr, args: ...any);
 ```
-</div>
 
 التحقق الذي يجب تطبيقه قبل قبول قيمة لهذا الحقل.
 
@@ -1286,29 +1332,33 @@ db.from[User].where[name = arg1].update[address = arg2];
 
 #### رتب (order)
 
+<div dir=rtl>
+
 ```
 عرف رتب: سند[نمط_هذا]؛
 ```
-<div dir=ltr>
+
+</div>
 
 ```
 handler [exp: ast] this.order:ref[this_type];
 ```
-</div>
 
 يستعمل لوضع الترتيب الخاص باستعلام.
 
 #### حيثما (where)
 
+<div dir=rtl>
+
 ```
 عرف حيثما: ماكرو[هذا، شرط]؛
 ```
-<div dir=ltr>
+
+</div>
 
 ```
 @member macro where [this, condition];
 ```
-</div>
 
 ماكرو يستعمل لوضع الشرط الخاص باستعلام.
 
@@ -1319,15 +1369,17 @@ handler [exp: ast] this.order:ref[this_type];
 
 #### حدث (update)
 
+<div dir=rtl>
+
 ```
 عرف حدث: ماكرو[هذا، عبارة]؛
 ```
-<div dir=ltr>
+
+</div>
 
 ```
 @member macro update [this, expression];
 ```
-</div>
 
 ماكرو يستعمل لتنفيذ تعليمة تحديث على جدول.
 
@@ -1338,29 +1390,32 @@ handler [exp: ast] this.order:ref[this_type];
 
 #### اجلب (select)
 
+<div dir=rtl>
+
 ```
 عرف اجلب(): لـا_مضمون[مـصفوفة[سـندنا[جـدول]]]؛
 ```
-<div dir=ltr>
+
+</div>
 
 ```
 handler this.select(): Possible[Array[SrdRef[Model]]];
 ```
-</div>
 
 يستعمل لجلب أسطر جدول ما.
 
 #### احفظ (save)
 
+<div dir=rtl>
+
 ```
 عرف احفظ(جدول: سند[جـدول]): لـا_مضمون[صـحيح]؛
 ```
-<div dir=ltr>
+</div>
 
 ```
 handler this.save(model: ref[Model]): Possible[Int];
 ```
-</div>
 
 يستعمل لحفظ سطر ما في الجدول.
 
@@ -1370,15 +1425,17 @@ handler this.save(model: ref[Model]): Possible[Int];
 
 #### احذف (delete)
 
+<div dir=rtl>
+
 ```
 عرف احذف(جدول: سند[جـدول]): لـا_مضمون[صـحيح]؛
 ```
-<div dir=ltr>
+
+</div>
 
 ```
 handler this.delete(model: ref[Model]): Possible[Int];
 ```
-</div>
 
 يستعمل للحذف من الجدول.
 
@@ -1447,15 +1504,17 @@ class SchemaBuilder [Model: type] {
 
 #### واكب (migrate)
 
+<div dir=rtl>
+
 ```
 عملية هذا.واكب(): سـندنا[خـطأ]؛
 ```
-<div dir=ltr>
+
+</div>
 
 ```
 handler this.migrate(): SrdRef[Error];
 ```
-</div>
 
 `واكب` هذه الدالة تواكب قاعدة البيانات مع أصناف البيانات المعرفة في الشفرة المصدرية، أو تنشئ
 قاعدة البيانات إن لم تكون موجودة بالأساس.
@@ -1475,13 +1534,14 @@ handler this.migrate(): SrdRef[Error];
 </div>
 
 ```
-    @migration[1, 2]
-    function migrateFromV1ToV2(db: ref[Db]): SrdRef[Error];
+@migration[1, 2]
+function migrateFromV1ToV2(db: ref[Db]): SrdRef[Error];
 ```
 
 الدالة أعلاه تحدث الجدول من الإصدار 1 إلى الإصدار 2. يمكنك إضافة قائمة بالاعتماديات الخاصة بتلك
-الدالة إلى المبدل `مواكبة` (`migration`) لضمان تنفيذ دالات المواكبة بالترتيب الصحيح. على سبيل
-المثال:
+الدالة إلى المبدل `مواكبة` (`migration`) لضمان تنفيذ دالات المواكبة بالترتيب الصحيح. 
+
+علي سبيل المثال :
 
 <div dir=rtl>
 
@@ -1493,8 +1553,8 @@ handler this.migrate(): SrdRef[Error];
 </div>
 
 ```
-    @migration[1, 2, { User: 3 }]
-    function migrateFromV1ToV2(db: ref[Db]): SrdRef[Error];
+@migration[1, 2, { User: 3 }]
+function migrateFromV1ToV2(db: ref[Db]): SrdRef[Error];
 ```
 
 المثال أعلاه يخبر المهيكل أن ينفذ هذه الدالة عندما يكون الجدول `مـستخدم` (`User`) عن الإصدار 3.
@@ -1540,85 +1600,96 @@ class Driver {
 
 #### اتصل (connect)
 
+<div dir=rtl>
+
 ```
 عملية هذا.اتصل(معطيات: سند[مـعطيات_الاتصال]): ثـنائي كمؤشر؛
 ```
-<div dir=ltr>
+
+</div>
 
 ```
 handler this.connect(parmas: ref[ConnectionParams]): Bool as_ptr;
 ```
-</div>
 
 الاتصال بقاعدة البيانات.
 
 #### افصل (disconnect)
 
+<div dir=rtl>
+
 ```
 عملية هذا.افصل() كمؤشر؛
 ```
-<div dir=ltr>
+
+</div>
 
 ```
 handler this.disconnect() as_ptr;
 ```
-</div>
 
 قطع الاتصال بقاعدة البيانات.
 
 #### أمتصل (isConnected)
 
+<div dir=rtl>
+
 ```
 عملية هذا.أمتصل(): ثـنائي كمؤشر؛
 ```
-<div dir=ltr>
+
+</div>
 
 ```
 handler this.isConnected(): Bool as_ptr;
 ```
-</div>
 
 التحقق من الاتصال بقاعدة البيانات.
 
 #### هل_بدئ_الاتصال (isConnectionEstablished)
 
+<div dir=rtl>
+
 ```
 عملية هذا.هل_بدئ_الاتصال(): ثـنائي كمؤشر؛
 ```
-<div dir=ltr>
+
+</div>
 
 ```
 handler this.isConnectionEstablished(): Bool as_ptr;
 ```
-</div>
 
 التحقق من أن الاتصال قد تم.
 
 #### هات_معطيات_الاتصال (getConnectionParams)
 
+<div dir=rtl>
+
 ```
 عملية هذا.هات_معطيات_الاتصال(): مـعطيات_الاتصال كمؤشر؛
 ```
-<div dir=ltr>
+
+</div>
 
 ```
 handler this.getConnectionParams(): ConnectionParams as_ptr;
 ```
-</div>
 
 جلب معطيات الاتصال.
 
 #### هات_آخر_خطأ (getLastError)
 
+<div dir=rtl>
+
 ```
 عملية هذا.هات_آخر_خطأ(): نـص كمؤشر؛
 ```
-<div dir=ltr>
+</div>
 
 ```
 handler this.getLastError(): String as_ptr;
 ```
-</div>
 
 جلب رسالة آخر خطأ.
 
@@ -1682,61 +1753,69 @@ class Db {
 
 #### تدوين (logging)
 
+<div dir=rtl>
+
 ```
 عرف تدوين: ثـنائي = 1؛
 ```
-<div dir=ltr>
+
+</div>
 
 ```
 db.logging: Bool
 ```
-</div>
 
 إعطاء هذا المتغير قيمة 1 يجعل المكتبة تطبع عبارات SQL التي يتم تنفيذها.
 
 #### انتظار_إعادة_الاتصال (reconnectionDelay)
 
+<div dir=rtl>
+
 ```
 عرف انتظار_إعادة_الاتصال: طـبيعي = 2000000؛
 ```
-<div dir=ltr>
+
+</div>
 
 ```
 db.reconnectionDelay: Word
 ```
-</div>
 
 الوقت بالمايكرو ثانية الذي تنتظره المكتبة عند انقطاع
 الاتصال بالخادم قبل معاودة الاتصال.
 
 #### عدد_محاولات_إعادة_الاتصال (reconnectionAttemptCount)
 
+<div dir=rtl>
+
 ```
 عرف عدد_محاولات_إعادة_الاتصال: صـحيح = 3؛
 ```
-<div dir=ltr>
+
+</div>
 
 ```
 db.reconnectionAttemptCount: Int
 ```
-</div>
 
 عدد محاولات إعادة الاتصال قبل أن تتوقف المكتبة
 عن المحاولة وترجع إشعار خطأ.
 
 #### ~هيئ (~init)
 
+<div dir=rtl>
+
 ```
 عملية هذا~هيئ(م: سـندنا[مـشغل])؛
 عملية هذا~هيئ(مهيئ: مغلفة(سند[سـندنا[مـشغل]]))؛
 ```
-<div dir=ltr>
+
+</div>
 
 ```
 handler this~init(d: SrdRef[Driver]);
 handler this~init(initializer: closure(ref[SrdRef[Driver]]));
 ```
-</div>
 
 يهيئ قاعدة البيانات بالمشغل المعطى. نسخة المغلفة من هذه الدالة تستخدم لتمكين استخدام
 كائن `قـاعدة_بيانات` من مسالك متعددة. تُستدعى الدالة لتهيئة مشغل جديد لكل مسلك جديد يستخدم قاعدة
@@ -1744,49 +1823,57 @@ handler this~init(initializer: closure(ref[SrdRef[Driver]]));
 
 #### هيئ (init)
 
+<div dir=rtl>
+
 ```
 عملية هذا.هيئ(م: سـندنا[مـشغل])؛
 عملية هذا.هيئ(مهيئ: مغلفة(سند[سـندنا[مـشغل]]))؛
 ```
-<div dir=ltr>
+
+</div>
 
 ```
 handler this.init(d: SrdRef[Driver]);
 handler this.init(initializer: closure(ref[SrdRef[Driver]]));
 ```
-</div>
 
 يهيئ قاعدة البيانات بالمشغل المعطى. نسخة المغلفة تستخدم لدعم المسالك المتعددة.
 
 #### أمتصل (isConnected)
 
+<div dir=rtl>
+
 ```
 عملية هذا.أمتصل(): ثـنائي؛
 ```
-<div dir=ltr>
+
+</div>
 
 ```
 handler this.isConnected(): Bool;
 ```
-</div>
 
 يستعمل للتحقق فيما إذا كان هناك اتصال مع قاعدة البيانات.
 
 #### هات_آخر_خطأ (getLastError)
 
+<div dir=rtl>
+
 ```
 عملية هذا.هات_آخر_خطأ(): نـص؛
 ```
-<div dir=ltr>
+
+</div>
 
 ```
 handler this.getLastError(): String;
 ```
-</div>
 
 يستعمل لجلب آخر خطأ.
 
 #### نفذ (exec)
+
+<div dir=rtl>
 
 ```
 عملية هذا.نفذ(اجلب: سند[اجـلب]): لـا_مضمون[مـصفوفة[مـصفوفة[نـص]]]؛
@@ -1796,7 +1883,8 @@ handler this.getLastError(): String;
 عملية هذا.نفذ(أنشئ_جـدول: سند[أنـشئ_جدول]): لـا_مضمون[صـحيح]؛
 عملية هذا.نفذ(عبارة: مؤشر[مـحرف]، معطيات: ...أيما): لـا_مضمون[صـحيح]؛
 ```
-<div dir=ltr>
+
+</div>
 
 ```
 handler this.exec(select: ref[Select]): Possible[Array[Array[String]]];
@@ -1806,13 +1894,13 @@ handler this.exec(delete: ref[Delete]): Possible[Int];
 handler this.exec(createTable: ref[CreateTable]): Possible[Int];
 handler this.exec(statement: CharsPtr, args: ...any): Possible[Int];
 ```
-</div>
 
 `نفذ` (`exec`) يستعمل لتنفيذ استعلام ما، و له نسخة لكل نوع من أنواع الاستعلامات بالإضافة
 إلى نسخة لتنفيذ عبارات SQL خام. نسخة تنفيذ عبارات SQL تفصل الهيكل الرئيسي لعبارة SQL
 عن المعطيات التي يمررها المستخدم كمعطيات لاحظة لدالة `نفذ` بطريقة مشابهة لعمل دالة
 الطباعة. تستبدل الدالة الرموز البادئة ب% في SQL بقيمة من قائمة المعطيات تطابق الصنف
 المحدد. الرمز % يتبعه محرف يدل على صنف القيمة المعطاة، وهي كالتالي:
+
 * مـؤشر_محارف (CharsPtr) لاسم حقل أو جدول: %n
 * نـص (String): %s
 * مـؤشر_محارف (CharsPtr): %p
@@ -1829,58 +1917,66 @@ handler this.exec(statement: CharsPtr, args: ...any): Possible[Int];
 
 #### نفذ_جلبا (execSelect)
 
+<div dir=rtl>
+
 ```
 عملية هذا.نفذ_جلبا(عبارة: مـؤشر_محارف, معطيات: ...أيما): لـا_مضمون[مـصفوفة[مـصفوفة[بـعدم[نـص]]]]؛
 ```
-<div dir=ltr>
+
+</div>
 
 ```
 handler this.execSelect(statement: CharsPtr, args: ...any): Possible[Array[Array[Nullable[String]]]];
 ```
-</div>
 
 `نفذ_جلبا` مشابهة لدالة `نفذ` الخاصة بتنفيذ عبارات SQL خامة لكنها تستخدم مع العبارات
 التي تجلب بيانات.
 
 #### من (from)
 
+<div dir=rtl>
+
 ```
 عملية هذا.[جـدول: نمط] من: اسـتعلام[جـدول]؛
 ```
-<div dir=ltr>
+
+</div>
 
 ```
 handler [Model: type] this.from: Query[Model];
 ```
-</div>
 
- يستعمل لإعادة استعلام بناء على المعلومات في هذا الصنف.
+يستعمل لإعادة استعلام بناء على المعلومات في هذا الصنف.
 
 #### احفظ (save)
+
+<div dir=rtl>
 
 ```
 عملية هذا.[جـدول: نمط] احفظ(جدول: سند[جـدول])؛
 ```
-<div dir=ltr>
+
+</div>
 
 ```
 handler [Model: type] this.save(model: ref[Model]);
 ```
-</div>
 
- يستعمل لاستدعاء الوظيفة `احفظ` في الصنف `اسـتعلام`.
+يستعمل لاستدعاء الوظيفة `احفظ` في الصنف `اسـتعلام`.
 
 #### مهيكل (schemaBuilder)
+
+<div dir=rtl>
 
 ```
 عملية هذا.[جـدول: نمط] مهيكل: مـهيكل[جـدول]؛
 ```
-<div dir=ltr>
+
+</div>
 
 ```
 handler [Model: type] this.schemaBuilder: SchemaBuilder[Model];
 ```
-</div>
 
 يستعمل لإعادة مهيكل بناء على المعلومات في هذا الصنف.
 
@@ -1912,11 +2008,8 @@ func getBuildDependencies(): Array[String];
 * `أخـطاء._التصال_مفقود_` (`Errors.CONNECTION_MISSING`): تُرجع عند استدعاء دالتي الحفظ أو الحذف على متغير من
   صنف جدول (model) لكن ذلك المتغير غير مرتبط بكائن `قـاعدة_بيانات`، أي أنه لم يُحمل مسبقًا من قاعدة البيانات.
 
----
-
 ## الرخصة
 
 حقوق النشر © 2026 سرمد خالد عبد الله
 
 هذا المشروع مرخص بموجب رخصة غنو العمومية الصغرى الإصدار 3.0 (LGPL-3.0). راجع ملفات `COPYING` و `COPYING.LESSER` للحصول على التفاصيل.
-</div>
