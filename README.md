@@ -675,7 +675,7 @@ not need to instantiate this manually; instead, it's instantiated through the `D
 For example:
 
 ```
-db.from[User].where[name = arg1].update[address = arg2];
+db.from[User].where[name == arg1].update[address = arg2];
 ```
 
 #### order
