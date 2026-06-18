@@ -1,4 +1,5 @@
 # Rows
+
 [[عربي]](README.ar.md)
 
 An ORM (object relational mapping) library for Alusus.
@@ -11,7 +12,6 @@ We can install this library using the following statements:
 import "Apm";
 Apm.importPackage("Alusus/Rows@0.4", { "Rows.alusus", "<driver>" });
 ```
-
 A driver name must be included in the second argument, unless if you are implementing your own DB
 driver. The driver lets you connect with a specific DB type. Rows does not automatically load all
 drivers because these drivers have system dependencies and including all drivers automatically
@@ -261,7 +261,7 @@ this the user needs to make the following additions to the classes:
 * Add DB type modifiers to the variables.
 * Add modifiers related to indexing, default values, and required fields, if needed.
 
-Example
+Example : 
 
 ```
 @model["cars", 1]
@@ -334,17 +334,47 @@ class ConnectionParams {
 }
 ```
 
-This class contains the required information to connect to the database
+This class contains the required information to connect to the database.
 
-`dbName` the name of the database we want to connect to it.
+#### dbName
 
-`userName` the username for our account in the database.
+```
+def dbName: String = "";
+```
 
-`password` the password of our account in the database
+The name of the database to connect to.
 
-`host` the host address that run the database.
+#### userName
 
-`port` the port on the host that we can access database through it.
+```
+def userName: String = "";
+```
+
+The username for the database account.
+
+#### password
+
+```
+def password: String = "";
+```
+
+The password for the database account.
+
+#### host
+
+```
+def host: String = "";
+```
+
+The host address running the database.
+
+#### port
+
+```
+def port: int = 0;
+```
+
+The port on the host to access the database through.
 
 ### CreateTable class
 
@@ -360,15 +390,45 @@ class CreateTable {
 
 This class is used to create a model with a given information.
 
-`name` the model name.
+#### name
 
-`notExists` specify if we need to create the model only of its not already exist.
+```
+handler this.name = String;
+```
 
-`columns` a map between column name and its information.
+The model name.
 
-`primaryKey` the primary key of the model.
+#### notExists
 
-`foreignKeys` the foreign keys of the model.
+```
+handler this.notExists = Bool;
+```
+
+Specify if the model should only be created if it doesn't already exist.
+
+#### columns
+
+```
+handler this.columns = Map[String, SrdRef[Column]];
+```
+
+A map between column name and its information.
+
+#### primaryKey
+
+```
+handler this.primaryKey = Array[String];
+```
+
+The primary key of the model.
+
+#### foreignKeys
+
+```
+handler this.foreignKeys = Array[SrdRef[ForeignKey]];
+```
+
+The foreign keys of the model.
 
 ### Delete class
 
@@ -381,9 +441,20 @@ class Delete {
 
 This class is used to delete rows from a model based on a condition.
 
-`table` the model name.
+#### table
 
-`condition` the condition the a row must satisfy in order to delete it.
+```
+handler this.table = String;
+```
+The model name.
+
+#### condition
+
+```
+handler this.condition(statement: CharsPtr, args: ...any);
+```
+
+The condition a row must satisfy in order to delete it.
 
 ### Value class
 
@@ -418,12 +489,28 @@ class Insert {
 
 This class is used to insert a row to the model.
 
-`table` the model name.
+#### table
 
-`data` the values of the row we want to add.
+```
+handler this.table = String;
+```
 
-`columns` the names of the columns that corresponds to the values.
+The model name.
 
+#### data
+
+```
+handler this.data = Array[Value];
+```
+
+The values of the row to add.
+
+#### columns
+
+```
+handler this.columns = Array[String];
+```
+The names of the columns that correspond to the values.
 
 ### Select class
 
@@ -438,13 +525,37 @@ class Select {
 
 This class is used to retrieve rows from the model.
 
-`table` the model name.
+#### table
 
-`columns` the names of the columns we want to retrieve.
+```
+handler this.table = Array[String];
+```
 
-`condition` the condition the a row must satisfy in order to select it.
+The model name.
 
-`orderBy` the order of the selected rows.
+#### fields
+
+```
+handler this.fields = Array[String];
+```
+
+The names of the columns to retrieve.
+
+#### condition
+
+```
+handler this.condition(statement: CharsPtr, args: ...any);
+```
+
+The condition a row must satisfy in order to select it.
+
+#### orderBy
+
+```
+handler this.orderBy = Array[String];
+```
+
+The order of the selected rows.
 
 ### Update class
 
@@ -459,13 +570,37 @@ class Update {
 
 This class is used to update a row, or a set of rows in a model.
 
-`table` the model name.
+#### table
 
-`data` the new values of the columns
+```
+handler this.table = String;
+```
 
-`columns` the columns we want to update its values.
+The model name.
 
-`condition` the condition the a row must satisfy in order to update it.
+#### data
+
+```
+handler this.data = Array[Value];
+```
+
+The new values of the columns.
+
+#### columns
+
+```
+handler this.columns = Array[String];
+```
+
+The columns to update their values.
+
+#### condition
+
+```
+handler this.condition(statement: CharsPtr, args: ...any);
+```
+
+The condition a row must satisfy in order to update it.
 
 ### Column class
 
@@ -481,15 +616,45 @@ class Column {
 
 This class holds the column information.
 
-`dataType` the type of data we want to store in the column.
+#### dataType
 
-`notNull` specify if this column value is required, or it can be null.
+```
+handler this.dataType = SrdRef[DataType];
+```
 
-`unique` specify if this column values are unique or not.
+The type of data to store in the column.
 
-`default` the default value for this column when no value is provided.
+#### notNull
 
-`check` the check to apply on the value before insert it.
+```
+handler this.notNull = Bool;
+```
+
+Specify if this column value is required, or it can be null.
+
+#### unique
+
+```
+handler this.unique = Bool;
+```
+
+Specify if this column values are unique or not.
+
+#### default
+
+```
+handler this.default = String;
+```
+
+The default value for this column when no value is provided.
+
+#### check
+
+```
+handler this.check(statement: CharsPtr, args: ...any);
+```
+
+The check to apply on the value before inserting it.
 
 ### Query class
 
@@ -504,43 +669,72 @@ class Query [Model: type] {
 }
 ```
 
-`order` specify the order of the query.
-
-`where` a macro to set the condition of the query.
-
-parameters:
-
-* `this` a pointer to a Query object.
-* `condition` the condition we want to set.
-
-`update` a macro to apply an update query on the model.
-
-parameters:
-
-* `this` a pointer to a Query object.
-* `expression` the update expression.
-
-`select` used to retrieve rows from a model.
-
-`save` used to save a row in the model.
-
-parameters:
-
-* `model` a reference to the model we want to save the row to it.
-
-`delete` used to delete from the model.
-
-parameters:
-
-* `model` a reference to the model we want to delete the row from it.
-
 This class is used to combine the clauses of an operation before execution. Usually the user does
 not need to instantiate this manually; instead, it's instantiated through the `Db.from` method.
+
 For example:
 
 ```
-db.from[User].where[name = arg1].update[address = arg2];
+db.from[User].where[name == arg1].update[address = arg2];
 ```
+
+#### order
+
+```
+handler [exp: ast] this.order: ref[this_type]
+```
+
+Specify the order of the query.
+
+#### where
+
+```
+@member macro where [this, condition]
+```
+
+A macro to set the condition of the query.
+
+* `this`: A pointer to a Query object.
+* `condition`: The condition to set.
+
+#### update
+
+```
+@member macro update [this, expression]
+```
+
+A macro to apply an update query on the model.
+
+* `this`: A pointer to a Query object.
+* `expression`: The update expression.
+
+#### select
+
+```
+handler this.select(): Possible[Array[SrdRef[Model]]]
+```
+
+Used to retrieve rows from a model.
+
+#### save
+
+```
+handler this.save(model: ref[Model]): Possible[Int]
+```
+
+Used to save a row in the model.
+
+* `model`: A reference to the model to save the row to.
+
+#### delete
+
+```
+handler this.delete(model: ref[Model]): Possible[Int]
+```
+
+Used to delete from the model.
+
+* `model`: A reference to the model to delete the row from.
 
 #### Partial Matching (LIKE)
 
@@ -576,7 +770,13 @@ a model class or a comma separated list of all model classes constituting the DB
 will take care of building the database from the schema, or migrating it to the latest version
 by determining what migration functions are needed and running them.
 
-`migrate` Migrates the DB to the current version, or builds it from scratch if it doesn't exist.
+#### migrate
+
+```
+handler this.migrate(): SrdRef[Error]
+```
+
+Migrates the DB to the current version, or builds it from scratch if it doesn't exist.
 
 When a table is not found in the DB, SchemaBuilder will generate that table from the model
 definition. When the table already exists, it looks at the version of the model defined in
@@ -591,31 +791,19 @@ functions have the following signature:
 ```
 
 The upper migrator migrates from version 1 to version 2. You can also specify dependencies
-in those migrations to make sure they are run in a specific order. For example:
+in those migrations to make sure they are run in a specific order.
+
+For example:
 
 ```
     @migration[1, 2, { User: 3 }]
     function migrateFromV1ToV2(db: ref[Db]): SrdRef[Error];
 ```
 
-The upper example tells `SchemaBuilder` to run this migration when the `User` model is
-at version 3. This makes sure that this migration is delayed until User is migrated to
-version 3, and it also makes sure any migration that migrates User from version 3 is
-delayed until this migration is executed. If multiple migrations are needed on a single
-table before it reaches the latest version then `SchemaBuilder` will make sure to run
-all those migrations, and run them in the correct order.
-
-If a model defines a migration that migrates from version 0, then `SchemaBuilder` will
-not generate the table automatically from the model if the table doesn't exist and will
-instead depend on running the migration, effectively allowing the user to create the
-table manually on a new database instead of depending on the default table creator.
+The upper example tells `SchemaBuilder` to run this migration when the `User` model is at version 3. This makes sure that this migration is delayed until User is migrated to version 3, and it also makes sure any migration that migrates User from version 3 is delayed until this migration is executed. If multiple migrations are needed on a singletable before it reaches the latest version then `SchemaBuilder` will make sure to run all those migrations, and run them in the correct order.
+If a model defines a migration that migrates from version 0, then `SchemaBuilder` will not generate the table automatically from the model if the table doesn't exist and will instead depend on running the migration, effectively allowing the user to create the table manually on a new database instead of depending on the default table creator.
 
 ### Driver class
-
-This is the base class for all DB drivers, which are responsible for all communication
-with the database. It has many abstract methods used by `Db` class and the user mostly
-won't need to deal with any of the methods of this class other than connection related
-methods.
 
 ```
 class Driver {
@@ -627,6 +815,56 @@ class Driver {
     handler this.getLastError(): String as_ptr;
 }
 ```
+
+This is the base class for all DB drivers, which are responsible for all communication with the database. It has many abstract methods used by `Db` class and the user mostly won't need to deal with any of the methods of this class other than connection related methods.
+
+#### connect
+
+```
+handler this.connect(parmas: ref[ConnectionParams]): Bool as_ptr
+```
+
+Connect to the database.
+
+#### disconnect
+
+```
+handler this.disconnect() as_ptr
+```
+
+Disconnect from the database.
+
+#### isConnected
+
+```
+handler this.isConnected(): Bool as_ptr
+```
+
+Check if connected to the database.
+
+#### isConnectionEstablished
+
+```
+handler this.isConnectionEstablished(): Bool as_ptr
+```
+
+Check if the connection has been established.
+
+#### getConnectionParams
+
+```
+handler this.getConnectionParams(): ConnectionParams as_ptr
+```
+
+Get the connection parameters.
+
+#### getLastError
+
+```
+handler this.getLastError(): String as_ptr
+```
+
+Get the last error message.
 
 ### Db class
 
@@ -657,94 +895,159 @@ class Db {
 
 This class is used to manage the access to the database and executing many queries on it.
 
-`logging` when set to true the library will print the executed SQL statements to the console.
-
-`reconnectionDelay` the delay in microseconds that the library will wait after the connection
-to the server is lost before trying to reconnect.
-
-`reconnectionAttemptCount` The max number of reconnection retries before the library gives up
-and returns an error.
-
-`init` used to initialize the database with the given driver. The closure version of the `init`
-function and constructor are used for supporting multi-threading, i.e. using the same `Db` object
-from multiple threads. The closure will be used to initialize a new driver for each new thread
-that uses the `Db` object.
-
-`isConnected` used to check if there is a connection with the database.
-
-`getLastError` used to get the last error.
-
-`exec` used to execute a query. There is an overload from this function for each type of queries in
-addition to an overload for executing raw SQL statements. The version for raw SQL splits the SQL
-structure from the data, which are passed as extra args to the function similar to printf. The
-following types of data params are supported by this function:
-* CharsPtr for field or table name: %n
-* String: %s
-* CharsPtr: %p
-* Int: %i
-* Int[64]: %l
-* Float: %f
-* Float[64]: %d
-* Array[String]: %as
-* Array[CharsPtr]: %ap
-* Array[Int]: %ai
-* Array[Int[64]]: %al
-* Array[Float]: %af
-* Array[Float[64]]: %ad
-
-`execSelect` is similar to the `exec` version that uses raw SQL statement, except that it's used
-for SQL statements that fetches data.
-
-For write queries (inset, update, delete) the `exec` function returns the number od affected rows.
-
-`from` used to return a query based on the information of this class.
-
-`save` used to call the method `save` in the class `Query`.
-
-`schemaBuilder` used to return a schemaBuilder based on the information of this class.
-
-### getBuildDependencies Function
+#### logging
 
 ```
-func getBuildDependencies(): Array[String];
+db.logging: Bool
 ```
 
-Each of the available DB drivers defines this function for getting the external build dependencies
-needed to build an executable that connects with the given database type.
+When set to true the library will print the executed SQL statements to the console.
+
+#### reconnectionDelay
+
+```
+db.reconnectionDelay: Word
+```
+
+The delay in microseconds that the library will wait after the connection to the server is lost before trying to reconnect.
+
+#### reconnectionAttemptCount
+
+```
+db.reconnectionAttemptCount: Int
+```
+
+The max number of reconnection retries before the library gives up and returns an error.
+
+#### ~init
+
+```
+handler this~init(d: SrdRef[Driver])
+handler this~init(initializer: closure(ref[SrdRef[Driver]]))
+```
+
+Initialize the database with the given driver. The closure version is used for supporting multi-threading, i.e. using the same `Db` object from multiple threads. The closure will be used to initialize a new driver for each new thread that uses the `Db` object.
+
+#### init
+
+```
+handler this.init(d: SrdRef[Driver])
+handler this.init(initializer: closure(ref[SrdRef[Driver]]))
+```
+Initialize the database with the given driver. The closure version is used for supporting multi-threading.
+
+#### isConnected
+
+```
+handler this.isConnected(): Bool
+```
+
+Check if there is a connection with the database.
+
+#### getLastError
+
+```
+handler this.getLastError(): String
+```
+
+Get the last error.
+
+#### exec
+
+```
+handler this.exec(select: ref[Select]): Possible[Array[Array[String]]]
+handler this.exec(update: ref[Update]): Possible[Int]
+handler this.exec(insert: ref[Insert]): Possible[Int]
+handler this.exec(delete: ref[Delete]): Possible[Int]
+handler this.exec(createTable: ref[CreateTable]): Possible[Int]
+handler this.exec(statement: CharsPtr, args: ...any): Possible[Int]
+```
+
+Execute a query. There is an overload for each type of query in addition to an overload for executing raw SQL statements. The version for raw SQL splits the SQL structure from the data, which are passed as extra args similar to printf. For write queries (insert, update, delete) returns the number of affected rows. The following data param types are supported:
+
+* `%n`: `CharsPtr` 
+* `%s`: `String`
+* `%p`: `CharsPtr`
+* `%i`: `Int`
+* `%l`: `Int[64]`
+* `%f`: `Float`
+* `%d`: `Float[64]`
+* `%as`: `Array[String]`
+* `%ap`: `Array[CharsPtr]`
+* `%ai`: `Array[Int]`
+* `%al`: `Array[Int[64]]`
+* `%af`: `Array[Float]`
+* `%ad`: `Array[Float[64]]`
+
+#### execSelect
+
+```
+handler this.execSelect(statement: CharsPtr, args: ...any): Possible[Array[Array[Nullable[String]]]]
+```
+
+Similar to the raw SQL `exec` overload, except used for SQL statements that fetch data.
+
+#### from
+
+```
+handler [Model: type] this.from: Query[Model]
+```
+
+Return a query based on the information of this class.
+
+#### save
+
+```
+handler [Model: type] this.save(model: ref[Model])
+```
+
+Call the method `save` in the class `Query`.
+
+#### schemaBuilder
+
+```
+handler [Model: type] this.schemaBuilder: SchemaBuilder[Model]
+```
+
+Return a schemaBuilder based on the information of this class.
+
+### getBuildDependencies
+
+```
+func getBuildDependencies(): Array[String]
+```
+
+Each of the available DB drivers defines this function for getting the external build dependencies needed to build an executable that connects with the given database type.
 
 ### Errors
 
 The `Errors` submodule contains error codes for all errors that can be returned by this library.
 
 * `Errors.DB_NOT_INITIALIZED`: Raised when the `Db` class is being used before being initialized.
-* `Errors.DB_NOT_CONNECTED`: Raised when the `Db` is initialized with a DB driver but the driver is not properly
-  connected.
+* `Errors.DB_NOT_CONNECTED`: Raised when the `Db` is initialized with a DB driver but the driver is not properly connected.
 * `Errors.SQL_ERROR`: Raised when an error occurs during the execution of an SQL statement.
-* `Errors.CONNECTION_MISSING`: Raised when `save` or `delete` is called on a model that isn't connected to a `Db`
-  object, i.e. it wasn't previously loaded using a `Db` object.
+* `Errors.CONNECTION_MISSING`: Raised when `save` or `delete` is called on a model that isn't connected to a `Db` object, i.e. it wasn't previously loaded using a `Db` object.
 
 ## To Do
-- [ ] Add remaining DB operations:
-    - [ ] Adding column.
-    - [ ] Removing colum.
-    - [ ] Renaming column.
-    - [ ] Changing column type.
-    - [ ] Adding index.
-    - [ ] Removing index.
-    - [ ] Removing table.
-    - [ ] DB migrations.
-- [ ] Add support for relational operations:
-    - [ ] Includes (eager loading).
-    - [ ] Loading related records.
-    - [ ] Associating and unassociating records.
-- [ ] Add support for async operations.
-- [ ] Add support for error codes for DB errors.
 
----
+* [ ] Add remaining DB operations:
+    * [ ] Adding column.
+    * [ ] Removing colum.
+    * [ ] Renaming column.
+    * [ ] Changing column type.
+    * [ ] Adding index.
+    * [ ] Removing index.
+    * [ ] Removing table.
+    * [ ] DB migrations.
+* [ ] Add support for relational operations:
+    * [ ] Includes (eager loading).
+    * [ ] Loading related records.
+    * [ ] Associating and unassociating records.
+* [ ] Add support for async operations.
+* [ ] Add support for error codes for DB errors.
 
 ## License
 
 Copyright (C) 2026 Sarmad Abdullah
 
 This project is licensed under the GNU Lesser General Public License v3.0 (LGPL-3.0). See the `COPYING` and `COPYING.LESSER` files for details.
-
