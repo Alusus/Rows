@@ -238,6 +238,8 @@ def db: Db(SqliteDriver(ConnectionParams().{
 }
 ```
 
+<div dir=ltr>
+
 ```
 import "Srl/Possible";
 import "Apm";
@@ -358,6 +360,8 @@ for i = 0, i < data.getLength(), i = i + 1 {
 
 ```
 
+</div>
+
 ### استعمال خاصية المطابقة (ORM)
 
 ```
@@ -445,6 +449,8 @@ for i = 0, i < data.getLength(), i = i + 1 {
 }
 ```
 
+<div dir=ltr>
+
 ```
 import "Apm";
 Apm.importPackage("Alusus/Rows@0.4", { "Rows.alusus", "Drivers/Mysql.alusus" });
@@ -517,6 +523,8 @@ func printRows (r: Array[SrdRef[Car]]) {
 }
 
 ```
+
+</div>
 
 ## خاصية المطابقة
 
@@ -792,8 +800,6 @@ handler this.notExists = Bool;
 
 #### الحقول (columns)
 
-<div dir=rtl>
-
 ```
 عملية هذا.الحقول = تـطبيق[نـص، سـندنا[حـقل]]؛
 ```
@@ -809,8 +815,6 @@ handler this.columns = Map[String, SrdRef[Column]];
 تـطبيق يربط بين اسم حقل و المعلومات الخاص به ضمن الصنف `Column`.
 
 #### الفهرس_الرئيسي (primaryKey)
-
-<div dir=rtl>
 
 ```
 عملية هذا.الفهرس_الرئيسي = مـصفوفة[نـص]؛
@@ -844,8 +848,6 @@ handler this.foreignKeys = Array[SrdRef[ForeignKey]];
 
 ### الصنف حـذف (Delete)
 
-<div dir=rtl>
-
 ```
 صنف حـذف {
     عملية هذا.الجدول = نـص؛
@@ -863,11 +865,11 @@ class Delete {
 ```
 
 </div>
+
 صنف يستعمل لحذف أسطر من جدول بناء على شرط معين.
 
 #### الجدول (table)
 
-<div dir=rtl>
 ```
 عملية هذا.الجدول = نـص؛
 ```
@@ -1086,8 +1088,6 @@ handler this.condition(statement: CharsPtr, args: ...any);
 
 #### الترتيب (orderBy)
 
-<div dir=rtl>
-
 ```
 عملية هذا.الترتيب = مـصفوفة[نـص]؛
 ```
@@ -1194,8 +1194,6 @@ handler this.condition(statement: CharsPtr, args: ...any);
 
 ### الصنف حـقل (Column)
 
-<div dir=rtl>
-
 ```
 صنف حـقل {
     عملية هذا.الصنف = سـندنا[صـنف_البيانات]؛
@@ -1256,8 +1254,6 @@ handler this.notNull = Bool;
 
 #### فريد (unique)
 
-<div dir=rtl>
-
 ```
 عملية هذا.فريد = ثـنائي؛
 ```
@@ -1274,8 +1270,6 @@ handler this.unique = Bool;
 
 #### القيمة_الافتراضية (default)
 
-<div dir=rtl>
-
 ```
 عملية هذا.القيمة_الافتراضية = نـص؛
 ```
@@ -1291,8 +1285,6 @@ handler this.default = String;
 القيمة الافتراضية لهذا الحقل في حال لم يتم إعطاء قيمة.
 
 #### التحقق (check)
-
-<div dir=rtl>
 
 ```
 عملية هذا.التحقق(عبارة: مـؤشر_محارف، معطيات: ...أيما)؛
@@ -1446,8 +1438,6 @@ handler this.save(model: ref[Model]): Possible[Int];
 * `جدول` (`model`) سند إلى الجدول المراد حفظ السطر فيه.
 
 #### احذف (delete)
-
-<div dir=rtl>
 
 ```
 عملية هذا.احذف(جدول: سند[جـدول]): لـا_مضمون[صـحيح]؛
@@ -1719,8 +1709,6 @@ handler this.getLastError(): String as_ptr;
 جلب رسالة آخر خطأ.
 
 ### الصنف قـاعدة_بيانات (Db)
-
-<div dir=rtl>
 
 ```
 صنف قـاعدة_بيانات {
