@@ -2268,3 +2268,20 @@ select * from vehicles
 
 
 
+>>>>>> escaping_length_test.alusus
+
+plain text | stopAtPlaceholder=0 | calculatedLength=11 | actualLength=11 | output="hello world" | OK
+single quote | stopAtPlaceholder=0 | calculatedLength=12 | actualLength=12 | output="it''s a test" | OK
+multiple quotes | stopAtPlaceholder=0 | calculatedLength=10 | actualLength=10 | output="a''b''c''d" | OK
+sub byte (0x1A) | stopAtPlaceholder=0 | calculatedLength=6 | actualLength=6 | output="abcdef" | OK
+percent, not a placeholder | stopAtPlaceholder=0 | calculatedLength=7 | actualLength=7 | output="50% off" | OK
+valid placeholder %s | stopAtPlaceholder=1 | calculatedLength=8 | actualLength=8 | output="value = " | OK
+valid array placeholder %as | stopAtPlaceholder=1 | calculatedLength=11 | actualLength=11 | output="values in (" | OK
+escaped percent %% | stopAtPlaceholder=1 | calculatedLength=7 | actualLength=7 | output="50% off" | OK
+trailing lone percent | stopAtPlaceholder=1 | calculatedLength=17 | actualLength=17 | output="trailing percent%" | OK
+trailing %a with nothing after | stopAtPlaceholder=1 | calculatedLength=16 | actualLength=16 | output="trailing array%a" | OK
+empty string | stopAtPlaceholder=1 | calculatedLength=0 | actualLength=0 | output="" | OK
+quote + escaped percent + trailing quote | stopAtPlaceholder=1 | calculatedLength=12 | actualLength=12 | output="it''s 100%''" | OK
+
+
+

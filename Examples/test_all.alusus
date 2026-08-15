@@ -33,6 +33,7 @@ def files: Array[String]({
     String("مطابقة_سكويلايت.أسس"),
     String("migrations.alusus"),
     String("مواكبات.أسس"),
+    String("escaping_length_test.alusus"),
 });
 
 def i: Int;
