@@ -1,0 +1,41 @@
+import "Apm";
+Apm.importPackage("Alusus/Rows@0.4", { "Rows.alusus" });
+use Srl;
+use Rows;
+
+// Verifies that Rows.getEscapedStringLength never returns a length shorter
+// than the number of bytes Rows.escapeString actually writes, since callers
+// use the former to size the buffer passed to the latter. A shorter length
+// would mean a buffer overflow.
+func check (label: ptr[Char], input: ptr[Char], stopAtPlaceholder: Bool) {
+    def calculatedLength: ArchInt = Rows.getEscapedStringLength(input, stopAtPlaceholder);
+    def output: String;
+    output.alloc(calculatedLength);
+    Rows.escapeString(input, output.buf, stopAtPlaceholder);
+    def actualLength: ArchInt = output.getLength();
+
+    Console.print(
+        "%s | stopAtPlaceholder=%d | calculatedLength=%d | actualLength=%d | output=\"%s\" | ",
+        label, stopAtPlaceholder~cast[Int], calculatedLength~cast[Int], actualLength~cast[Int], output.buf
+    );
+    if actualLength > calculatedLength {
+        Console.print("OVERFLOW\n");
+    } else if actualLength < calculatedLength {
+        Console.print("UNDER_COUNT\n");
+    } else {
+        Console.print("OK\n");
+    }
+}
+
+check("plain text", "hello world", false);
+check("single quote", "it's a test", false);
+check("multiple quotes", "a'b'c'd", false);
+check("sub byte (0x1A)", "abc\x1adef", false);
+check("percent, not a placeholder", "50% off", false);
+check("valid placeholder %s", "value = %s", true);
+check("valid array placeholder %as", "values in (%as)", true);
+check("escaped percent %%", "50%% off", true);
+check("trailing lone percent", "trailing percent%", true);
+check("trailing %a with nothing after", "trailing array%a", true);
+check("empty string", "", true);
+check("quote + escaped percent + trailing quote", "it's 100%%'", true);
