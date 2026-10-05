@@ -1,5 +1,5 @@
 import "Apm";
-Apm.importPackage("Alusus/Rows@0.4", { "Rows.alusus" });
+Apm.importPackage("Alusus/Rows@0.5", { "Rows.alusus" });
 use Srl;
 use Rows;
 

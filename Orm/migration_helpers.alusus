@@ -18,9 +18,9 @@
  */
 
 @merge module Rows {
-    function generateMigrationsList(astRef: ref[TiObject]) {
-        if isDerivedFrom[astRef, Core.Data.Ast.List] {
-            def container: ContainerOf[astRef];
+    function generateMigrationsList(astRef: ref[Node]) {
+        if isDerivedFrom[astRef, List] {
+            def container: ContainerOf[astRef, Node];
             def i: Word;
             for i = 0, i < container.getElementCount(), ++i {
                 generateMigrationsList(container.getElement(i));
@@ -30,18 +30,17 @@
         }
     }
 
-    function insertModelMigrations(modelRef: ref[TiObject]) {
-        def model: ref[TiObject](Spp.astMgr.traceType(modelRef));
+    function insertModelMigrations(modelRef: ref[Node]) {
+        def model: ref[Node](Spp.astMgr.traceType(modelRef));
         if model~ptr == 0 return;
         // Parse the model modifier.
-        def modifier: ref[TiObject](Spp.astMgr.findModifierForElement(model, "model", modifierKeywordTranslations));
-        if modifier~ptr == 0 {
+        def modifierParams: Array[ref[Node]];
+        if not getMetadataParams(model, "model", modifierParams) {
             Spp.buildMgr.raiseBuildNotice("ROWS1001", 1, model);
             return;
         }
-        def modifierParams: Array[ref[TiObject]];
-        if not Spp.astMgr.getModifierParams(modifier, modifierParams) or modifierParams.getLength() != 2 {
-            Spp.buildMgr.raiseBuildNotice("ROWS1006", 1, modifier);
+        if modifierParams.getLength() != 2 {
+            Spp.buildMgr.raiseBuildNotice("ROWS1006", 1, model);
             return;
         }
         def tableNameLiteral: ref[Ast.StringLiteral](dynCastRef[modifierParams(0), Ast.StringLiteral]);
@@ -58,31 +57,31 @@
         def skipDefaultMigration: Bool = false;
 
         // Insert manual migrations
-        def migrationFuncs: Array[ref[TiObject]] = Spp.astMgr.getClassFuncs(
-            model, "migration", modifierKeywordTranslations
+        processModelBody(model);
+        def migrationFuncs: Array[ref[Node]] = Spp.astMgr.findElements(
+            (ast elementType == "function" && metadata == "migration"),
+            model,
+            Spp.SeekerFlags.SKIP_OWNERS | Spp.SeekerFlags.SKIP_USES | Spp.SeekerFlags.SKIP_CHILDREN
         );
         def i: Int;
         for i = 0, i < migrationFuncs.getLength(), ++i {
-            def modifier: ref[TiObject](
-                Spp.astMgr.findModifierForElement(migrationFuncs(i), "migration", modifierKeywordTranslations)
-            );
-            // modifier should never be null at this point since we are looping on functions having
+            // The modifier should never be missing at this point since we are looping on functions having
             // the modifier.
-            def modifierParams: Array[ref[TiObject]]
-            if not Spp.astMgr.getModifierParams(modifier, modifierParams) or modifierParams.getLength() < 2 {
-                Spp.buildMgr.raiseBuildNotice("ROWS1008", 1, modifier);
+            def modifierParams: Array[ref[Node]];
+            if not getMetadataParams(migrationFuncs(i), "migration", modifierParams) or modifierParams.getLength() < 2 {
+                Spp.buildMgr.raiseBuildNotice("ROWS1008", 1, migrationFuncs(i));
                 continue;
             }
             def fromVersionLiteral: ref[Ast.IntegerLiteral](dynCastRef[modifierParams(0), Ast.IntegerLiteral]);
             def toVersionLiteral: ref[Ast.IntegerLiteral](dynCastRef[modifierParams(1), Ast.IntegerLiteral]);
             if fromVersionLiteral~ptr == 0 or toVersionLiteral~ptr == 0 {
-                Spp.buildMgr.raiseBuildNotice("ROWS1009", 1, modifier);
+                Spp.buildMgr.raiseBuildNotice("ROWS1009", 1, migrationFuncs(i));
                 continue;
             }
             def modelFromVersion: Int = String.parseInt(fromVersionLiteral.value.value);
             def modelToVersion: Int = String.parseInt(toVersionLiteral.value.value);
             if modelFromVersion < 0 or modelToVersion <= 0 or modelToVersion <= modelFromVersion {
-                Spp.buildMgr.raiseBuildNotice("ROWS1009", 1, modifier);
+                Spp.buildMgr.raiseBuildNotice("ROWS1009", 1, migrationFuncs(i));
                 continue;
             }
             // Skip the auto table generation migration if we have a migration starting from version 0.
@@ -97,7 +96,7 @@
                     tableDependencies = tableDepsMap;
                 }),
                 AstTemplateMap()
-                    .set(String("fn"), Core.Data.Ast.Passage(migrationFuncs(i)))
+                    .set(String("fn"), Passage(migrationFuncs(i)))
                     .set(String("tableNameLiteral"), tableNameLiteral)
                     .set(String("modelFromVersion"), fromVersionLiteral)
                     .set(String("modelToVersion"), toVersionLiteral)
@@ -108,9 +107,9 @@
         // Insert auto table generation migration, if needed.
         if not skipDefaultMigration {
             def list: SrdRef[Ast.List] = newSrdObj[Ast.List];
-            def listContainer: DynContainerOf[list.obj];
-            listContainer.addElement(Core.Data.Ast.Passage.create(model));
-            def instance: SrdRef[TiObject];
+            def listContainer: DynContainerOf[list.obj, Node];
+            listContainer.addElement(Passage.create(model));
+            def instance: SrdRef[Node];
             Spp.astMgr.matchTemplateInstance(createTableForModel~ast~cast[ref[Spp.Ast.Template]], list.obj, instance);
             Spp.astMgr.insertAst(
                 (ast Migration().{
@@ -120,18 +119,18 @@
                     toVersion = modelVersion;
                 }),
                 AstTemplateMap()
-                    .set(String("fn"), Core.Data.Ast.Passage(instance.obj))
+                    .set(String("fn"), Passage(instance.obj))
                     .set(String("tableNameLiteral"), tableNameLiteral)
                     .set(String("modelVersion"), modelVersionLiteral)
             );
         }
     }
 
-    function buildModelMigrationDependencies(dependencies: ref[TiObject]): TioSrdRef {
-        def result: TioSrdRef = Spp.astMgr.buildAst((ast Map[String, Int]()), AstTemplateMap());
+    function buildModelMigrationDependencies(dependencies: ref[Node]): SrdRef[Node] {
+        def result: SrdRef[Node] = Spp.astMgr.buildAst((ast Map[String, Int]()), AstTemplateMap());
         if dependencies~ptr != 0 {
-            if isDerivedFrom[dependencies, Core.Data.Ast.List] {
-                def container: ContainerOf[dependencies];
+            if isDerivedFrom[dependencies, List] {
+                def container: ContainerOf[dependencies, Node];
                 def i: Word;
                 for i = 0, i < container.getElementCount(), ++i {
                     result = Spp.astMgr.buildAst(
@@ -153,24 +152,24 @@
         return result;
     }
 
-    function buildModelMigrationDependencyArgs(dependency: ref[TiObject]): TioSrdRef {
+    function buildModelMigrationDependencyArgs(dependency: ref[Node]): SrdRef[Node] {
         def linkOp: ref[Ast.LinkOperator](dynCastRef[dependency, Ast.LinkOperator]);
         if linkOp~ptr == 0 {
             Spp.buildMgr.raiseBuildNotice("ROWS1009", 1, dependency);
             return Spp.astMgr.buildAst((ast set(String("INVALID"), 0)), AstTemplateMap());
         }
-        def container: MapContainerOf[linkOp];
+        def container: MapContainerOf[linkOp, Node];
         return Spp.astMgr.buildAst(
             (ast String("{{name}}"), version),
             AstTemplateMap()
-                .set(String("name"), TiStr(getTableName(Spp.astMgr.traceType(container.getElement("first")))))
+                .set(String("name"), StringLiteral(getTableName(Spp.astMgr.traceType(container.getElement("first")))))
                 .set(String("version"), container.getElement("second"))
         );
     }
 
-    function buildModelVersionsMapSetStatements(obj: TioSrdRef, astRef: ref[TiObject]): TioSrdRef {
-        if isDerivedFrom[astRef, Core.Data.Ast.List] {
-            def container: ContainerOf[astRef];
+    function buildModelVersionsMapSetStatements(obj: SrdRef[Node], astRef: ref[Node]): SrdRef[Node] {
+        if isDerivedFrom[astRef, List] {
+            def container: ContainerOf[astRef, Node];
             def i: Word;
             for i = 0, i < container.getElementCount(), ++i {
                 obj = buildModelVersionsMapSetStatements(obj, container.getElement(i));
@@ -186,13 +185,12 @@
         }
     }
 
-    function buildModelVersionSetStatementArgs(modelRef: ref[TiObject]): TioSrdRef {
-        def model: ref[TiObject](Spp.astMgr.traceType(modelRef));
-        if model~ptr == 0 return TioSrdRef();
+    function buildModelVersionSetStatementArgs(modelRef: ref[Node]): SrdRef[Node] {
+        def model: ref[Node](Spp.astMgr.traceType(modelRef));
+        if model~ptr == 0 return SrdRef[Node]();
         // We can skip validation since we are doing it previously in insertModelMigrations.
-        def modifier: ref[TiObject](Spp.astMgr.findModifierForElement(model, "model", modifierKeywordTranslations));
-        def modifierParams: Array[ref[TiObject]];
-        Spp.astMgr.getModifierParams(modifier, modifierParams);
+        def modifierParams: Array[ref[Node]];
+        getMetadataParams(model, "model", modifierParams);
         def tableNameLiteral: ref[Ast.StringLiteral](dynCastRef[modifierParams(0), Ast.StringLiteral]);
         def modelVersionLiteral: ref[Ast.IntegerLiteral](dynCastRef[modifierParams(1), Ast.IntegerLiteral]);
         return Spp.astMgr.buildAst(

@@ -59,7 +59,7 @@
         }
 
         function generateModelVersionsMap() {
-            def result: TioSrdRef = Spp.astMgr.buildAst((ast Map[String, Int]()), AstTemplateMap());
+            def result: SrdRef[Node] = Spp.astMgr.buildAst((ast Map[String, Int]()), AstTemplateMap());
             result = buildModelVersionsMapSetStatements(result, schema~ast);
             Spp.astMgr.insertAst(result.obj);
         }

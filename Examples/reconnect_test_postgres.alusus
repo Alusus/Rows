@@ -1,5 +1,5 @@
 import "Apm";
-Apm.importPackage("Alusus/Rows@0.4", { "Rows.alusus", "Drivers/Postgresql.alusus" });
+Apm.importPackage("Alusus/Rows@0.5", { "Rows.alusus", "Drivers/Postgresql.alusus" });
 use Srl;
 use Rows;
 
@@ -9,24 +9,24 @@ class Car {
 
     @notNull
     @primaryKey
-    @Integer
+    @IntDataType
     @column
     def id: Int;
 
-    @VarChar["50"]
+    @VarCharDataType["50"]
     @defult["My Car"]
     @column
     def name: String;
 
-    @Float
+    @FloatDataType
     @column
     def price: Nullable[Float];
 
-    @VarChar["50"]
+    @VarCharDataType["50"]
     @column
     def fullName: Nullable[String];
 
-    @Boolean
+    @BoolDataType
     @column
     def electrical: Bool;
 }

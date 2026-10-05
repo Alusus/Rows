@@ -144,21 +144,21 @@ import "libsqlite3.so.0";
     }
 
     def sqliteDataTypeMap: Map[String, String](Map[String, String]().{
-        set(String("Integer"), String("INTEGER"));
-        set(String("BigInteger"), String("INTEGER"));
-        set(String("SmallInteger"), String("INTEGER"));
-        set(String("TinyInteger"), String("INTEGER"));
-        set(String("Boolean"), String("INTEGER"));
-        set(String("Real"), String("REAL"));
-        set(String("Float"), String("REAL"));
-        set(String("Decimal"), String("REAL"));
-        set(String("Xml"), String("TEXT"));
-        set(String("VarChar"), String("TEXT"));
-        set(String("CharType"), String("TEXT"));
-        set(String("Text"), String("TEXT"));
-        set(String("Date"), String("TEXT"));
-        set(String("DateTime"), String("TEXT"));
-        set(String("Uuid"), String("TEXT"));
+        set(String("IntDataType"), String("INTEGER"));
+        set(String("BigIntDataType"), String("INTEGER"));
+        set(String("SmallIntDataType"), String("INTEGER"));
+        set(String("TinyIntDataType"), String("INTEGER"));
+        set(String("BoolDataType"), String("INTEGER"));
+        set(String("RealDataType"), String("REAL"));
+        set(String("FloatDataType"), String("REAL"));
+        set(String("DecimalDataType"), String("REAL"));
+        set(String("XmlDataType"), String("TEXT"));
+        set(String("VarCharDataType"), String("TEXT"));
+        set(String("CharDataType"), String("TEXT"));
+        set(String("TextDataType"), String("TEXT"));
+        set(String("DateDataType"), String("TEXT"));
+        set(String("DateTimeDataType"), String("TEXT"));
+        set(String("UuidDataType"), String("TEXT"));
     });
 
     module Sqlite {

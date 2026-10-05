@@ -7,7 +7,7 @@ import "Srl/String";
 import "Srl/Possible";
 import "Srl/Nullable";
 
-import "Core/Data";
+import "Core/Ast";
 import "Spp";
 import "Spp/Ast";
 
@@ -17,11 +17,11 @@ Apm.importPackage("Alusus/Threading@0.1");
 @merge module Rows {
     use Srl;
     use Core.Basic;
-    use Core.Data;
-    use Core.Data.Ast;
+    use Core.Ast;
 
-    def TioSrdRef: alias SrdRef[Core.Basic.TiObject];
-    def AstTemplateMap: alias Map[String, ref[TiObject]];
+    def Ast: alias Core.Ast;
+
+    def AstTemplateMap: alias Map[String, ref[Node]];
 
     func parseBool(v: CharsPtr): Bool {
         return v != 0 and (v~cnt(0) == 't' or v~cnt(0) == 'T' or v~cnt(0) == '1');

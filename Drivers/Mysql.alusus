@@ -168,21 +168,21 @@ import "libmysqlclient.so.21";
     }
 
     def mysqlDataTypeMap: Map[String, String](Map[String, String]().{
-        set(String("Integer"), String("INT"));
-        set(String("BigInteger"), String("BIGINT"));
-        set(String("SmallInteger"), String("SMALLINT"));
-        set(String("TinyInteger"), String("TINYINT"));
-        set(String("Boolean"), String("BOOLEAN"));
-        set(String("Real"), String("REAL"));
-        set(String("Float"), String("FLOAT"));
-        set(String("Decimal"), String("DECIMAL"));
-        set(String("Xml"), String("XML"));
-        set(String("VarChar"), String("VARCHAR"));
-        set(String("CharType"), String("CHAR"));
-        set(String("Text"), String("TEXT"));
-        set(String("Date"), String("DATE"));
-        set(String("DateTime"), String("DATETIME"));
-        set(String("Uuid"), String("VARCHAR(36)"));
+        set(String("IntDataType"), String("INT"));
+        set(String("BigIntDataType"), String("BIGINT"));
+        set(String("SmallIntDataType"), String("SMALLINT"));
+        set(String("TinyIntDataType"), String("TINYINT"));
+        set(String("BoolDataType"), String("BOOLEAN"));
+        set(String("RealDataType"), String("REAL"));
+        set(String("FloatDataType"), String("FLOAT"));
+        set(String("DecimalDataType"), String("DECIMAL"));
+        set(String("XmlDataType"), String("XML"));
+        set(String("VarCharDataType"), String("VARCHAR"));
+        set(String("CharDataType"), String("CHAR"));
+        set(String("TextDataType"), String("TEXT"));
+        set(String("DateDataType"), String("DATE"));
+        set(String("DateTimeDataType"), String("DATETIME"));
+        set(String("UuidDataType"), String("VARCHAR(36)"));
     });
 
     module Mysql {

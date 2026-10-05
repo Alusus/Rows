@@ -1,5 +1,5 @@
 import "Apm";
-Apm.importPackage("Alusus/Rows@0.4", { "Rows.alusus", "Drivers/Mysql.alusus" });
+Apm.importPackage("Alusus/Rows@0.5", { "Rows.alusus", "Drivers/Mysql.alusus" });
 use Srl;
 use Rows;
 
@@ -23,18 +23,18 @@ if !!db.exec(CreateTable().{
     notExists = true;
     columns = Map[String, SrdRef[Column]]().{
         set(String("id"), Column().{
-            dataType = Integer();
+            dataType = IntDataType();
             notNull = true;
             unique = true;
         });
         set(String("name"), Column().{
-            dataType = VarChar(90);
+            dataType = VarCharDataType(90);
             notNull = true;
             unique = true;
             default = String("me");
         });
         set(String("address"), Column().{
-            dataType = VarChar(200);
+            dataType = VarCharDataType(200);
         });
     };
     primaryKey = String("id");
@@ -47,18 +47,18 @@ def res: Possible[Int] = db.exec(CreateTable().{
     notExists = true;
     columns = Map[String, SrdRef[Column]]().{
         set(String("id"), Column().{
-            dataType = Integer();
+            dataType = IntDataType();
             notNull = true;
             unique = true;
         });
         set(String("name"), Column().{
-            dataType = VarChar(90);
+            dataType = VarCharDataType(90);
             notNull = true;
             unique = true;
             default = String("viewer");
         });
         set(String("userId"), Column().{
-            dataType = Integer();
+            dataType = IntDataType();
         });
     };
     primaryKey = String("id");

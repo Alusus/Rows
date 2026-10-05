@@ -23,142 +23,187 @@
         handler this.generateSqlString(driver: ref[Driver]): String as_ptr;
     }
 
-    class Integer {
+    class IntDataType {
         @injection def dataType: DataType;
         handler (this:DataType).isString(): Bool set_ptr {
             return false;
         }
         handler (this:DataType).generateSqlString(driver: ref[Driver]): String set_ptr {
-            return driver.mapDataType(String(1, "Integer"));
+            return driver.mapDataType(String(1, "IntDataType"));
         }
         handler this_type(): SrdRef[DataType] {
-            def d: SrdRef[Integer];
+            def d: SrdRef[IntDataType];
             d.construct();
             return castSrdRef[d, DataType];
         }
+
+        // Modifier handler
+        handler this_type(node: ref[Node], params: ref[Node]) {
+            storeDbDataType(node, "IntDataType", params);
+        }
     }
 
-    class BigInteger {
+    class BigIntDataType {
         @injection def dataType: DataType;
         handler (this:DataType).isString(): Bool set_ptr {
             return false;
         }
         handler (this:DataType).generateSqlString(driver: ref[Driver]): String set_ptr {
-            return driver.mapDataType(String(1, "BigInteger"));
+            return driver.mapDataType(String(1, "BigIntDataType"));
         }
         handler this_type(): SrdRef[DataType] {
-            def d: SrdRef[BigInteger];
+            def d: SrdRef[BigIntDataType];
             d.construct();
             return castSrdRef[d, DataType];
         }
+
+        // Modifier handler
+        handler this_type(node: ref[Node], params: ref[Node]) {
+            storeDbDataType(node, "BigIntDataType", params);
+        }
     }
 
-    class SmallInteger {
+    class SmallIntDataType {
         @injection def dataType: DataType;
         handler (this:DataType).isString(): Bool set_ptr {
             return false;
         }
         handler (this:DataType).generateSqlString(driver: ref[Driver]): String set_ptr {
-            return driver.mapDataType(String(1, "SmallInteger"));
+            return driver.mapDataType(String(1, "SmallIntDataType"));
         }
         handler this_type(): SrdRef[DataType] {
-            def d: SrdRef[SmallInteger];
+            def d: SrdRef[SmallIntDataType];
             d.construct();
             return castSrdRef[d, DataType];
         }
+
+        // Modifier handler
+        handler this_type(node: ref[Node], params: ref[Node]) {
+            storeDbDataType(node, "SmallIntDataType", params);
+        }
     }
 
-    class TinyInteger {
+    class TinyIntDataType {
         @injection def dataType: DataType;
         handler (this:DataType).isString(): Bool set_ptr {
             return false;
         }
         handler (this:DataType).generateSqlString(driver: ref[Driver]): String set_ptr {
-            return driver.mapDataType(String(1, "TinyInteger"));
+            return driver.mapDataType(String(1, "TinyIntDataType"));
         }
         handler this_type(): SrdRef[DataType] {
-            def d: SrdRef[TinyInteger];
+            def d: SrdRef[TinyIntDataType];
             d.construct();
             return castSrdRef[d, DataType];
         }
+
+        // Modifier handler
+        handler this_type(node: ref[Node], params: ref[Node]) {
+            storeDbDataType(node, "TinyIntDataType", params);
+        }
     }
 
-    class Boolean {
+    class BoolDataType {
         @injection def dataType: DataType;
         handler (this:DataType).isString(): Bool set_ptr {
             return false;
         }
         handler (this:DataType).generateSqlString(driver: ref[Driver]): String set_ptr {
-            return driver.mapDataType(String(1, "Boolean"));
+            return driver.mapDataType(String(1, "BoolDataType"));
         }
         handler this_type(): SrdRef[DataType] {
-            def d: SrdRef[Boolean];
+            def d: SrdRef[BoolDataType];
             d.construct();
             return castSrdRef[d, DataType];
         }
+
+        // Modifier handler
+        handler this_type(node: ref[Node], params: ref[Node]) {
+            storeDbDataType(node, "BoolDataType", params);
+        }
     }
 
-    class Real {
+    class RealDataType {
         @injection def dataType: DataType;
         handler (this:DataType).isString(): Bool set_ptr {
             return false;
         }
         handler (this:DataType).generateSqlString(driver: ref[Driver]): String set_ptr {
-            return driver.mapDataType(String(1, "Real"));
+            return driver.mapDataType(String(1, "RealDataType"));
         }
         handler this_type(): SrdRef[DataType] {
-            def d: SrdRef[Real];
+            def d: SrdRef[RealDataType];
             d.construct();
             return castSrdRef[d, DataType];
         }
+
+        // Modifier handler
+        handler this_type(node: ref[Node], params: ref[Node]) {
+            storeDbDataType(node, "RealDataType", params);
+        }
     }
 
-    class Float {
+    class FloatDataType {
         @injection def dataType: DataType;
         handler (this:DataType).isString(): Bool set_ptr {
             return false;
         }
         handler (this:DataType).generateSqlString(driver: ref[Driver]): String set_ptr {
-            return driver.mapDataType(String(1, "Float"));
+            return driver.mapDataType(String(1, "FloatDataType"));
         }
         handler this_type(): SrdRef[DataType] {
-            def d: SrdRef[Float];
+            def d: SrdRef[FloatDataType];
             d.construct();
             return castSrdRef[d, DataType];
         }
+
+        // Modifier handler
+        handler this_type(node: ref[Node], params: ref[Node]) {
+            storeDbDataType(node, "FloatDataType", params);
+        }
     }
 
-    class Decimal {
+    class DecimalDataType {
         @injection def dataType: DataType;
         handler (this:DataType).isString(): Bool set_ptr {
             return false;
         }
         handler (this:DataType).generateSqlString(driver: ref[Driver]): String set_ptr {
-            return driver.mapDataType(String(1, "Decimal"));
+            return driver.mapDataType(String(1, "DecimalDataType"));
         }
         handler this_type(): SrdRef[DataType] {
-            def d: SrdRef[Decimal];
+            def d: SrdRef[DecimalDataType];
             d.construct();
             return castSrdRef[d, DataType];
         }
+
+        // Modifier handler
+        handler this_type(node: ref[Node], params: ref[Node]) {
+            storeDbDataType(node, "DecimalDataType", params);
+        }
     }
 
-    class Xml {
+    class XmlDataType {
         @injection def dataType: DataType;
         handler (this:DataType).isString(): Bool set_ptr {
             return true;
         }
         handler (this:DataType).generateSqlString(driver: ref[Driver]): String set_ptr {
-            return driver.mapDataType(String(1, "Xml"));
+            return driver.mapDataType(String(1, "XmlDataType"));
         }
         handler this_type(): SrdRef[DataType] {
-            def d: SrdRef[Xml];
+            def d: SrdRef[XmlDataType];
             d.construct();
             return castSrdRef[d, DataType];
         }
+
+        // Modifier handler
+        handler this_type(node: ref[Node], params: ref[Node]) {
+            storeDbDataType(node, "XmlDataType", params);
+        }
     }
 
-    class VarChar {
+    class VarCharDataType {
         @injection def dataType: DataType;
         def length: int = 50;
 
@@ -173,21 +218,26 @@
         }
 
         handler (this:DataType).generateSqlString(driver: ref[Driver]): String set_ptr {
-            return driver.mapDataType(String(1, "VarChar")) + "(" + this.length + ")";
+            return driver.mapDataType(String(1, "VarCharDataType")) + "(" + this.length + ")";
         }
 
         handler this_type(length: int): SrdRef[DataType] {
-            def d: SrdRef[VarChar];
+            def d: SrdRef[VarCharDataType];
             d.construct();
             d.length = length;
             return castSrdRef[d, DataType];
         }
         handler this_type(): SrdRef[DataType] {
-            return VarChar(50);
+            return VarCharDataType(50);
+        }
+
+        // Modifier handler
+        handler this_type(node: ref[Node], params: ref[Node]) {
+            storeDbDataType(node, "VarCharDataType", params);
         }
     }
 
-    class CharType {
+    class CharDataType {
         @injection def dataType: DataType;
         def length: int = 1;
 
@@ -202,18 +252,18 @@
         }
 
         handler (this:DataType).generateSqlString(driver: ref[Driver]): String set_ptr {
-            return driver.mapDataType(String(1, "CharType")) + "(" + this.length + ")";
+            return driver.mapDataType(String(1, "CharDataType")) + "(" + this.length + ")";
         }
 
         handler this_type(length: int): SrdRef[DataType] {
-            def d: SrdRef[CharType];
+            def d: SrdRef[CharDataType];
             d.construct();
             d.length = length;
             return castSrdRef[d, DataType];
         }
     }
 
-    class Text {
+    class TextDataType {
         @injection def dataType: DataType;
         def length: int = -1;
 
@@ -228,66 +278,86 @@
         }
 
         handler (this:DataType).generateSqlString(driver: ref[Driver]): String set_ptr {
-            if this.length == -1 return driver.mapDataType(String(1, "Text"))
-            else return driver.mapDataType(String(1, "Text")) + "(" + this.length + ")";
+            if this.length == -1 return driver.mapDataType(String(1, "TextDataType"))
+            else return driver.mapDataType(String(1, "TextDataType")) + "(" + this.length + ")";
         }
 
         handler this_type(): SrdRef[DataType] {
-            def d: SrdRef[Text];
+            def d: SrdRef[TextDataType];
             d.construct();
             return castSrdRef[d, DataType];
         }
 
         handler this_type(length: int): SrdRef[DataType] {
-            def d: SrdRef[Text];
+            def d: SrdRef[TextDataType];
             d.construct();
             d.length = length;
             return castSrdRef[d, DataType];
         }
+
+        // Modifier handler
+        handler this_type(node: ref[Node], params: ref[Node]) {
+            storeDbDataType(node, "TextDataType", params);
+        }
     }
 
-    class Date {
+    class DateDataType {
         @injection def dataType: DataType;
         handler (this:DataType).isString(): Bool set_ptr {
             return true;
         }
         handler (this:DataType).generateSqlString(driver: ref[Driver]): String set_ptr {
-            return driver.mapDataType(String(1, "Date"));
+            return driver.mapDataType(String(1, "DateDataType"));
         }
         handler this_type(): SrdRef[DataType] {
-            def d: SrdRef[Date];
+            def d: SrdRef[DateDataType];
             d.construct();
             return castSrdRef[d, DataType];
         }
+
+        // Modifier handler
+        handler this_type(node: ref[Node], params: ref[Node]) {
+            storeDbDataType(node, "DateDataType", params);
+        }
     }
 
-    class DateTime {
+    class DateTimeDataType {
         @injection def dataType: DataType;
         handler (this:DataType).isString(): Bool set_ptr {
             return true;
         }
         handler (this:DataType).generateSqlString(driver: ref[Driver]): String set_ptr {
-            return driver.mapDataType(String(1, "DateTime"));
+            return driver.mapDataType(String(1, "DateTimeDataType"));
         }
         handler this_type(): SrdRef[DataType] {
-            def d: SrdRef[DateTime];
+            def d: SrdRef[DateTimeDataType];
             d.construct();
             return castSrdRef[d, DataType];
         }
+
+        // Modifier handler
+        handler this_type(node: ref[Node], params: ref[Node]) {
+            storeDbDataType(node, "DateTimeDataType", params);
+        }
     }
 
-    class Uuid {
+    class UuidDataType {
         @injection def dataType: DataType;
         handler (this:DataType).isString(): Bool set_ptr {
             return true;
         }
         handler (this:DataType).generateSqlString(driver: ref[Driver]): String set_ptr {
-            return driver.mapDataType(String(1, "Uuid"));
+            return driver.mapDataType(String(1, "UuidDataType"));
         }
         handler this_type(): SrdRef[DataType] {
-            def d: SrdRef[Uuid];
+            def d: SrdRef[UuidDataType];
             d.construct();
             return castSrdRef[d, DataType];
+        }
+
+        // Modifier handler
+        handler this_type(node: ref[Node], params: ref[Node]) {
+            storeDbDataType(node, "UuidDataType", params);
         }
     }
 }

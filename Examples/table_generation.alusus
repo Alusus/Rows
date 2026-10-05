@@ -1,5 +1,5 @@
 import "Apm";
-Apm.importPackage("Alusus/Rows@0.4", { "Rows.alusus", "Drivers/Mysql.alusus" });
+Apm.importPackage("Alusus/Rows@0.5", { "Rows.alusus", "Drivers/Mysql.alusus" });
 use Srl;
 use Rows;
 
@@ -8,28 +8,28 @@ class Property {
     @defult["10"]
     @notNull
     @primaryKey
-    @Integer
+    @IntDataType
     @column
     def id: int;
 
     def i: String;
 
-    @Integer
+    @IntDataType
     @default["10"]
     @column
     def ssd: int;
 
-    @VarChar
+    @VarCharDataType
     @column
     def ss: String;
 
     @defult["Baghdad"]
-    @VarChar["250"]
+    @VarCharDataType["250"]
     @column
     def address: String;
 
     @foreignKey["users", "id"]
-    @Integer
+    @IntDataType
     @column
     def userId: int;
 }

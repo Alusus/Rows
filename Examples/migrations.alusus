@@ -1,5 +1,5 @@
 import "Apm";
-Apm.importPackage("Alusus/Rows@0.4", { "Rows.alusus", "Drivers/Postgresql.alusus" });
+Apm.importPackage("Alusus/Rows@0.5", { "Rows.alusus", "Drivers/Postgresql.alusus" });
 use Srl;
 use Rows;
 
@@ -44,16 +44,16 @@ module Test1 {
 
         @notNull
         @primaryKey
-        @Integer
+        @IntDataType
         @column
         def id: int;
 
-        @VarChar["50"]
+        @VarCharDataType["50"]
         @defult["My Car"]
         @column
         def name: String;
 
-        @Float
+        @FloatDataType
         @column["the_price"]
         def price: Float;
     }
@@ -87,20 +87,20 @@ module Test2 {
 
         @notNull
         @primaryKey
-        @Integer
+        @IntDataType
         @column
         def id: int;
 
-        @VarChar["50"]
+        @VarCharDataType["50"]
         @defult["My Car"]
         @column
         def name: String;
 
-        @Float
+        @FloatDataType
         @column["the_price"]
         def price: Float;
 
-        @Integer
+        @IntDataType
         @column["year"]
         def year: Int;
 
@@ -132,16 +132,16 @@ module Test3 {
 
         @notNull
         @primaryKey
-        @Integer
+        @IntDataType
         @column
         def id: int;
 
-        @VarChar["50"]
+        @VarCharDataType["50"]
         @defult["My Car"]
         @column
         def name: String;
 
-        @Integer
+        @IntDataType
         @column["year"]
         def year: Int;
 
@@ -162,11 +162,11 @@ module Test3 {
 
         @notNull
         @primaryKey
-        @Integer
+        @IntDataType
         @column["price_id"]
         def priceId: int;
 
-        @Float
+        @FloatDataType
         @column["price"]
         def price: Float;
     }
@@ -192,16 +192,16 @@ module Test4 {
 
         @notNull
         @primaryKey
-        @Integer
+        @IntDataType
         @column
         def id: int;
 
-        @VarChar["50"]
+        @VarCharDataType["50"]
         @defult["My Car"]
         @column
         def name: String;
 
-        @Integer
+        @IntDataType
         @column["year"]
         def year: Int;
 
@@ -222,11 +222,11 @@ module Test4 {
 
         @notNull
         @primaryKey
-        @Integer
+        @IntDataType
         @column["price_id"]
         def priceId: int;
 
-        @Float
+        @FloatDataType
         @column["price"]
         def price: Float;
     }
@@ -280,16 +280,16 @@ module Test5 {
 
         @notNull
         @primaryKey
-        @Integer
+        @IntDataType
         @column
         def id: int;
 
-        @VarChar["50"]
+        @VarCharDataType["50"]
         @defult["My Car"]
         @column
         def name: String;
 
-        @Integer
+        @IntDataType
         @column["year"]
         def year: Int;
 
@@ -310,11 +310,11 @@ module Test5 {
 
         @notNull
         @primaryKey
-        @Integer
+        @IntDataType
         @column["price_id"]
         def priceId: int;
 
-        @Float
+        @FloatDataType
         @column["price"]
         def price: Float;
     }
@@ -338,16 +338,16 @@ module Test6 {
 
         @notNull
         @primaryKey
-        @Integer
+        @IntDataType
         @column
         def id: int;
 
-        @VarChar["50"]
+        @VarCharDataType["50"]
         @defult["My Car"]
         @column
         def name: String;
 
-        @Integer
+        @IntDataType
         @column["year"]
         def year: Int;
 
@@ -363,11 +363,11 @@ module Test6 {
 
         @notNull
         @primaryKey
-        @Integer
+        @IntDataType
         @column["price_id"]
         def priceId: int;
 
-        @Float
+        @FloatDataType
         @column["price"]
         def price: Float;
 

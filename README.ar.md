@@ -12,14 +12,14 @@
 
 ```
 اشمل "مـحا"؛
-مـحا.اشمل_حزمة("Alusus/Rows@0.4"، { "صـفوف.أسس"، "<المشغل>" })؛
+مـحا.اشمل_حزمة("Alusus/Rows@0.5"، { "صـفوف.أسس"، "<المشغل>" })؛
 ```
 
 <div dir=ltr>
 
 ```
 import "Apm";
-Apm.importPackage("Alusus/Rows@0.4", { "Rows.alusus", "<driver>" });
+Apm.importPackage("Alusus/Rows@0.5", { "Rows.alusus", "<driver>" });
 ```
 
 </div>
@@ -33,7 +33,7 @@ Apm.importPackage("Alusus/Rows@0.4", { "Rows.alusus", "<driver>" });
 ### قاعدة بيانات بوستغرس (PostgreSQL)
 
 ```
-مـحا.اشمل_حزمة("Alusus/Rows@0.4"، { "صـفوف.أسس"، "مـشغلات/بـوستغرس.أسس" })؛
+مـحا.اشمل_حزمة("Alusus/Rows@0.5"، { "صـفوف.أسس"، "مـشغلات/بـوستغرس.أسس" })؛
 استخدم صـفوف؛
 عرف قب: قـاعدة_بيانات(مـشغل_بوستغرس(مـعطيات_الاتصال().{
     اسم_قاعدة_البيانات = "alusus"؛
@@ -46,7 +46,7 @@ Apm.importPackage("Alusus/Rows@0.4", { "Rows.alusus", "<driver>" });
 <div dir=ltr>
 
 ```
-Apm.importPackage("Alusus/Rows@0.4", { "Rows.alusus", "Drivers/Postgresql.alusus" });
+Apm.importPackage("Alusus/Rows@0.5", { "Rows.alusus", "Drivers/Postgresql.alusus" });
 use Rows;
 def db: Db(PostgresqlDriver(ConnectionParams().{
     dbName = "alusus";
@@ -61,7 +61,7 @@ def db: Db(PostgresqlDriver(ConnectionParams().{
 ### قاعدة بيانات مايسكويل (MySQL)
 
 ```
-مـحا.اشمل_حزمة("Alusus/Rows@0.4"، { "صـفوف.أسس"، "مـشغلات/مـايسكويل.أسس" })؛
+مـحا.اشمل_حزمة("Alusus/Rows@0.5"، { "صـفوف.أسس"، "مـشغلات/مـايسكويل.أسس" })؛
 استخدم صـفوف؛
 عرف قب: قـاعدة_بيانات(مـشغل_مايسكويل(مـعطيات_الاتصال().{
     اسم_قاعدة_البيانات = "alusus"؛
@@ -74,7 +74,7 @@ def db: Db(PostgresqlDriver(ConnectionParams().{
 <div dir=ltr>
 
 ```
-Apm.importPackage("Alusus/Rows@0.4", { "Rows.alusus", "Drivers/Mysql.alusus" });
+Apm.importPackage("Alusus/Rows@0.5", { "Rows.alusus", "Drivers/Mysql.alusus" });
 use Rows;
 def db: Db(MysqlDriver(ConnectionParams().{
     dbName = "alusus";
@@ -89,7 +89,7 @@ def db: Db(MysqlDriver(ConnectionParams().{
 ### قاعدة بيانات سكويلايت (Sqlite)
 
 ```
-مـحا.اشمل_حزمة("Alusus/Rows@0.4"، { "صـفوف.أسس"، "مـشغلات/سـكويلايت.أسس" })؛
+مـحا.اشمل_حزمة("Alusus/Rows@0.5"، { "صـفوف.أسس"، "مـشغلات/سـكويلايت.أسس" })؛
 استخدم صـفوف؛
 عرف قب: قـاعدة_بيانات(مـشغل_سكويلايت(مـعطيات_الاتصال().{
     اسم_قاعدة_البيانات = "الأسس.قب"؛
@@ -99,7 +99,7 @@ def db: Db(MysqlDriver(ConnectionParams().{
 <div dir=ltr>
 
 ```
-Apm.importPackage("Alusus/Rows@0.4", { "Rows.alusus", "Drivers/Sqlite.alusus" });
+Apm.importPackage("Alusus/Rows@0.5", { "Rows.alusus", "Drivers/Sqlite.alusus" });
 use Rows;
 def db: Db(SqliteDriver(ConnectionParams().{
     dbName = "alusus.db";
@@ -119,7 +119,7 @@ def db: Db(SqliteDriver(ConnectionParams().{
 اشمل "مـتم/تـطبيق"؛
 اشمل "مـتم/سندات"؛
 اشمل "مـحا"؛
-مـحا.اشمل_حزمة("Alusus/Rows@0.4"، { "صـفوف.أسس"، "مـشغلات/مـايسكويل.أسس" })؛
+مـحا.اشمل_حزمة("Alusus/Rows@0.5"، { "صـفوف.أسس"، "مـشغلات/مـايسكويل.أسس" })؛
 استخدم مـتم؛
 استخدم صـفوف؛
 
@@ -146,18 +146,18 @@ def db: Db(SqliteDriver(ConnectionParams().{
     // معلومات الحقول
     الحقول = تـطبيق[نـص, سـندنا[حـقل]]().{
         حدد(نـص("id"), حـقل().{
-            الصنف = عـدد_صحيح()؛
+            الصنف = صـنف_بيانات_صحيح()؛
             إلزامي = 1؛
             فريد = 1؛
         })؛
         حدد(نـص("name"), حـقل().{
-            الصنف = مـحارف_مرنة(90)؛
+            الصنف = صـنف_بيانات_محارف_مرنة(90)؛
             إلزامي = 1؛
             فريد = 1؛
             القيمة_الافتراضية = نـص("me")؛
         })؛
         حدد(نـص("address"), حـقل().{
-            الصنف = مـحارف_مرنة(200)؛
+            الصنف = صـنف_بيانات_محارف_مرنة(200)؛
         })؛
     }؛
     // الفهرس الرئيسي
@@ -174,18 +174,18 @@ def db: Db(SqliteDriver(ConnectionParams().{
     جديد_فقط = 1؛
     الحقول = تـطبيق[نـص, سـندنا[حـقل]]().{
         حدد(نـص("id"), حـقل().{
-            الصنف = عـدد_صحيح()؛
+            الصنف = صـنف_بيانات_صحيح()؛
             إلزامي = 1؛
             فريد = 1؛
         })؛
         حدد(نـص("name"), حـقل().{
-            الصنف = مـحارف_مرنة(90)؛
+            الصنف = صـنف_بيانات_محارف_مرنة(90)؛
             إلزامي = 1؛
             فريد = 1؛
             القيمة_الافتراضية = نـص("viewer")؛
         })؛
         حدد(نـص("userId"), حـقل().{
-            الصنف = عـدد_صحيح()؛
+            الصنف = صـنف_بيانات_صحيح()؛
         })؛
     }؛
     الفهرس_الرئيسي = نـص("id")؛
@@ -243,7 +243,7 @@ def db: Db(SqliteDriver(ConnectionParams().{
 ```
 import "Srl/Possible";
 import "Apm";
-Apm.importPackage("Alusus/Rows@0.4", { "Rows.alusus", "Drivers/Mysql.alusus" });
+Apm.importPackage("Alusus/Rows@0.5", { "Rows.alusus", "Drivers/Mysql.alusus" });
 use Srl;
 use Rows;
 
@@ -267,18 +267,18 @@ if !!db.exec(CreateTable().{
     // معلومات الحقول
     columns = Map[String, SrdRef[Column]]().{
         set(String("id"), Column().{
-            dataType = Integer();
+            dataType = IntDataType();
             notNull = true;
             unique = true;
         });
         set(String("name"), Column().{
-            dataType = VarChar(90);
+            dataType = VarCharDataType(90);
             notNull = true;
             unique = true;
             default = String("me");
         });
         set(String("address"), Column().{
-            dataType = VarChar(200);
+            dataType = VarCharDataType(200);
         });
     };
     primaryKey = String("id");  // الفهرس الرئيسي
@@ -293,18 +293,18 @@ def res: Possible[Int] = db.exec(CreateTable().{
     notExists = true;
     columns = Map[String, SrdRef[Column]]().{
         set(String("id"), Column().{
-            dataType = Integer();
+            dataType = IntDataType();
             notNull = true;
             unique = true;
         });
         set(String("name"), Column().{
-            dataType = VarChar(90);
+            dataType = VarCharDataType(90);
             notNull = true;
             unique = true;
             default = String("viewer");
         });
         set(String("userId"), Column().{
-            dataType = Integer();
+            dataType = IntDataType();
         });
     };
     primaryKey = String("id");
@@ -372,7 +372,7 @@ for i = 0, i < data.getLength(), i = i + 1 {
 اشمل "مـتم/نـظام"؛
 اشمل "مـتم/سندات"؛
 اشمل "مـحا"؛
-مـحا.اشمل_حزمة("Alusus/Rows@0.4"، { "صـفوف.أسس"، "مـشغلات/مـايسكويل.أسس" })؛
+مـحا.اشمل_حزمة("Alusus/Rows@0.5"، { "صـفوف.أسس"، "مـشغلات/مـايسكويل.أسس" })؛
 استخدم مـتم؛
 استخدم صـفوف؛
 
@@ -387,21 +387,21 @@ for i = 0, i < data.getLength(), i = i + 1 {
     // مبدل الفهرس الرئيسي
     @فهرس_رئيسي
     // مبدل عدد صحيح، لتحديد أن الحقل هنا له النمط عدد صحيح،
-    @عـدد_صحيح
+    @صـنف_بيانات_صحيح
     // مبدل يحدد أنه لدينا حقل
     @حقل
     عرف المعرف: صحيح؛
 
     // اسم السيارة
     // مبدل لتحديد أن الحقل هنا هو سلسلة من المحارف متغيرة الطول بطول أعظمي 50
-    @مـحارف_مرنة["50"]
+    @صـنف_بيانات_محارف_مرنة["50"]
     //  مبدل لتحديد القيمة الافتراضية في حال عدم وجود قيمة
     @مبدئي["سيارتي"]
     @حقل
     عرف الاسم: نـص؛
 
     // مبدل لتحديد أن قيم الحقل هي من النمط عـائم
-    @عـدد_عائم
+    @صـنف_بيانات_عائم
     @حقل["سعر_السيارة"]
     عرف السعر: عائم؛
 }
@@ -453,7 +453,7 @@ for i = 0, i < data.getLength(), i = i + 1 {
 
 ```
 import "Apm";
-Apm.importPackage("Alusus/Rows@0.4", { "Rows.alusus", "Drivers/Mysql.alusus" });
+Apm.importPackage("Alusus/Rows@0.5", { "Rows.alusus", "Drivers/Mysql.alusus" });
 use Srl;
 use Rows;
 
@@ -465,17 +465,17 @@ class Car {
     // عمود المعرف
     @notNull  // مبدل قيمة غير فارغة
     @primaryKey  // مبدل الفهرس الرئيسي
-    @Integer  // مبدل عدد صحيح، لتحديد أن الحقل هنا له النمط عدد صحيح،
+    @IntDataType  // مبدل عدد صحيح، لتحديد أن الحقل هنا له النمط عدد صحيح،
     @column  // مبدل يحدد أنه لدينا حقل
     def id: Int;
 
     // اسم السيارة 
-    @VarChar["50"]  // مبدل لتحديد أن الحقل هنا هو سلسلة من المحارف متغيرة الطول بطول أعظمي 50
+    @VarCharDataType["50"]  // مبدل لتحديد أن الحقل هنا هو سلسلة من المحارف متغيرة الطول بطول أعظمي 50
     @defult["My Car"]  //  مبدل لتحديد القيمة الافتراضية في حال عدم وجود قيمة
     @column
     def name: String;
 
-    @Float  // مبدل لتحديد أن قيم الحقل هي من النمط عـائم
+    @FloatDataType  // مبدل لتحديد أن قيم الحقل هي من النمط عـائم
     @column
     def price: Float;
 }
@@ -547,20 +547,20 @@ func printRows (r: Array[SrdRef[Car]]) {
 
     @إلزامي
     @فهرس_رئيسي
-    @عـدد_صحيح
+    @صـنف_بيانات_صحيح
     @حقل
     عرف المعرف: صحيح؛
 
-    @مـحارف_مرنة["50"]
+    @صـنف_بيانات_محارف_مرنة["50"]
     @مبدئي["سيارتي"]
     @حقل
     عرف الاسم: نـص؛
 
-    @عـدد_عائم
+    @صـنف_بيانات_عائم
     @حقل["سعر_السيارة"]
     عرف السعر: عائم؛
     
-    @مـحارف_مرنة["50"]
+    @صـنف_بيانات_محارف_مرنة["50"]
     @حقل
     عرف الاسم_الكامل: بـعدم[نـص]؛
 }
@@ -575,20 +575,20 @@ class Car {
 
     @notNull
     @primaryKey
-    @Integer
+    @IntDataType
     @column
     def id: int;
 
-    @VarChar["50"]
+    @VarCharDataType["50"]
     @defult["My Car"]
     @column
     def name: String;
 
-    @Float
+    @FloatDataType
     @column["the_price"]
     def price: Float;
 
-    @VarChar["50"]
+    @VarCharDataType["50"]
     @column
     def fullName: Nullable[String];
 }
@@ -613,20 +613,20 @@ class Car {
 
 ### مبدلات أصناف البيانات
 
-* `@عـدد_صحيح` (`@Integer`)
-* `@صـحيح_كبير` (`@BigInteger`)
-* `@صـحيح_صغير` (`@SmallInteger`)
-* `@صـحيح_ضئيل` (`@TinyInteger`)
-* `@ثـنائية` (`@Boolean`)
-* `@عـدد_حقيقي` (`@Real`)
-* `@عـدد_عائم` (`@Float`)
-* `@عـدد_عشري` (`@Decimal`)
-* `@إكـسمل` (`@Xml`)
-* `@مـحارف_مرنة` (`@VarChar`)
-* `@مـحارف_محددة` (`@CharType`)
-* `@نـص_كبير` (`@Text`)
-* `@تـاريخ` (`@Date`)
-* `@تـاريخ_ووقت` (`@DateTime`)
+* `@صـنف_بيانات_صحيح` (`@IntDataType`)
+* `@صـنف_بيانات_صحيح_كبير` (`@BigIntDataType`)
+* `@صـنف_بيانات_صحيح_صغير` (`@SmallIntDataType`)
+* `@صـنف_بيانات_صحيح_ضئيل` (`@TinyIntDataType`)
+* `@صـنف_بيانات_ثنائي` (`@BoolDataType`)
+* `@صـنف_بيانات_حقيقي` (`@RealDataType`)
+* `@صـنف_بيانات_عائم` (`@FloatDataType`)
+* `@صـنف_بيانات_عشري` (`@DecimalDataType`)
+* `@صـنف_بيانات_إكسمل` (`@XmlDataType`)
+* `@صـنف_بيانات_محارف_مرنة` (`@VarCharDataType`)
+* `@صـنف_بيانات_محارف` (`@CharDataType`)
+* `@صـنف_بيانات_نص_كبير` (`@TextDataType`)
+* `@صـنف_بيانات_تاريخ` (`@DateDataType`)
+* `@صـنف_بيانات_تاريخ_ووقت` (`@DateTimeDataType`)
 
 ## الأصناف والتوابع
 

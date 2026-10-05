@@ -1,6 +1,6 @@
 import "Srl/Time";
 import "Apm";
-Apm.importPackage("Alusus/Rows@0.4", { "Rows.alusus", "Drivers/Mysql.alusus" });
+Apm.importPackage("Alusus/Rows@0.5", { "Rows.alusus", "Drivers/Mysql.alusus" });
 use Srl;
 use Rows;
 

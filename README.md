@@ -10,7 +10,7 @@ We can install this library using the following statements:
 
 ```
 import "Apm";
-Apm.importPackage("Alusus/Rows@0.4", { "Rows.alusus", "<driver>" });
+Apm.importPackage("Alusus/Rows@0.5", { "Rows.alusus", "<driver>" });
 ```
 A driver name must be included in the second argument, unless if you are implementing your own DB
 driver. The driver lets you connect with a specific DB type. Rows does not automatically load all
@@ -20,7 +20,7 @@ forces the user to install system dependencies that he might not need.
 ### PostgreSQL
 
 ```
-Apm.importPackage("Alusus/Rows@0.4", { "Rows.alusus", "Drivers/Postgresql.alusus" });
+Apm.importPackage("Alusus/Rows@0.5", { "Rows.alusus", "Drivers/Postgresql.alusus" });
 use Rows;
 def db: Db(PostgresqlDriver(ConnectionParams().{
     dbName = "alusus";
@@ -33,7 +33,7 @@ def db: Db(PostgresqlDriver(ConnectionParams().{
 ### MySql
 
 ```
-Apm.importPackage("Alusus/Rows@0.4", { "Rows.alusus", "Drivers/Mysql.alusus" });
+Apm.importPackage("Alusus/Rows@0.5", { "Rows.alusus", "Drivers/Mysql.alusus" });
 use Rows;
 def db: Db(MysqlDriver(ConnectionParams().{
     dbName = "alusus";
@@ -46,7 +46,7 @@ def db: Db(MysqlDriver(ConnectionParams().{
 ### Sqlite
 
 ```
-Apm.importPackage("Alusus/Rows@0.4", { "Rows.alusus", "Drivers/Sqlite.alusus" });
+Apm.importPackage("Alusus/Rows@0.5", { "Rows.alusus", "Drivers/Sqlite.alusus" });
 use Rows;
 def db: Db(SqliteDriver(ConnectionParams().{
     dbName = "alusus.db";
@@ -59,7 +59,7 @@ def db: Db(SqliteDriver(ConnectionParams().{
 
 ```
 import "Apm";
-Apm.importPackage("Alusus/Rows@0.4", { "Rows.alusus", "Drivers/Mysql.alusus" });
+Apm.importPackage("Alusus/Rows@0.5", { "Rows.alusus", "Drivers/Mysql.alusus" });
 use Srl;
 use Rows;
 
@@ -83,18 +83,18 @@ if !!db.exec(CreateTable().{
     // columns information
     columns = Map[String, SrdRef[Column]]().{
         set(String("id"), Column().{
-            dataType = Integer();
+            dataType = IntDataType();
             notNull = true;
             unique = true;
         });
         set(String("name"), Column().{
-            dataType = VarChar(90);
+            dataType = VarCharDataType(90);
             notNull = true;
             unique = true;
             default = String("me");
         });
         set(String("address"), Column().{
-            dataType = VarChar(200);
+            dataType = VarCharDataType(200);
         });
     };
     primaryKey = String("id");  // primary key
@@ -109,18 +109,18 @@ def res: Possible[Int] = db.exec(CreateTable().{
     notExists = true;
     columns = Map[String, SrdRef[Column]]().{
         set(String("id"), Column().{
-            dataType = Integer();
+            dataType = IntDataType();
             notNull = true;
             unique = true;
         });
         set(String("name"), Column().{
-            dataType = VarChar(90);
+            dataType = VarCharDataType(90);
             notNull = true;
             unique = true;
             default = String("viewer");
         });
         set(String("userId"), Column().{
-            dataType = Integer();
+            dataType = IntDataType();
         });
     };
     primaryKey = String("id");
@@ -178,7 +178,7 @@ for i = 0, i < data.getLength(), i = i + 1 {
 
 ```
 import "Apm";
-Apm.importPackage("Alusus/Rows@0.4", { "Rows.alusus", "Drivers/Mysql.alusus" });
+Apm.importPackage("Alusus/Rows@0.5", { "Rows.alusus", "Drivers/Mysql.alusus" });
 use Srl;
 use Rows;
 
@@ -190,17 +190,17 @@ class Car {
     // id column
     @notNull  // modifier to ensure the value is not null
     @primaryKey  // primary key modifier
-    @Integer  // integer value column modifier
+    @IntDataType  // integer value column modifier
     @column  // column modifier, to make what follows as column
     def id: Int;
 
     // car name column
-    @VarChar["50"]  // variable length char column value modifier with max length == 50
+    @VarCharDataType["50"]  // variable length char column value modifier with max length == 50
     @defult["My Car"]  // default value modifier, if no value provided
     @column
     def name: String;
 
-    @Float  // float column value modifier
+    @FloatDataType  // float column value modifier
     @column
     def price: Float;
 }
@@ -270,20 +270,20 @@ class Car {
 
     @notNull
     @primaryKey
-    @Integer
+    @IntDataType
     @column
     def id: int;
 
-    @VarChar["50"]
+    @VarCharDataType["50"]
     @defult["My Car"]
     @column
     def name: String;
 
-    @Float
+    @FloatDataType
     @column["the_price"]
     def price: Float;
 
-    @VarChar["50"]
+    @VarCharDataType["50"]
     @column
     def fullName: Nullable[String];
 }
@@ -305,20 +305,20 @@ or `Db.save` or `SchemaBuilder.migrate`.
 
 ### Data Type Modifiers
 
-* `@Integer`
-* `@BigInteger`
-* `@SmallInteger`
-* `@TinyInteger`
-* `@Boolean`
-* `@Real`
-* `@Float`
-* `@Decimal`
-* `@Xml`
-* `@VarChar`
-* `@CharType`
-* `@Text`
-* `@Date`
-* `@DateTime`
+* `@IntDataType`
+* `@BigIntDataType`
+* `@SmallIntDataType`
+* `@TinyIntDataType`
+* `@BoolDataType`
+* `@RealDataType`
+* `@FloatDataType`
+* `@DecimalDataType`
+* `@XmlDataType`
+* `@VarCharDataType`
+* `@CharDataType`
+* `@TextDataType`
+* `@DateDataType`
+* `@DateTimeDataType`
 
 ## Functions and Types
 

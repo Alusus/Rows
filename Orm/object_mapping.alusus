@@ -45,10 +45,10 @@
         this(String("||")) = "&&";
     };
 
-    func generateWhere (obj: ref[TiObject]): TioSrdRef {
-        def result: TioSrdRef;
-        def result2: TioSrdRef;
-        def resultArray: Array[TioSrdRef];
+    func generateWhere (obj: ref[Node]): SrdRef[Node] {
+        def result: SrdRef[Node];
+        def result2: SrdRef[Node];
+        def resultArray: Array[SrdRef[Node]];
 
         if obj~ptr == 0 {
             System.fail(1, "generateWhere: obj is null.\n");
@@ -60,7 +60,7 @@
             if operator != "not" and operator != "!" {
                 Spp.buildMgr.raiseBuildNotice("SPPG1002", 1, obj);
             }
-            def mapContaining: ref[MapContaining](getInterface[obj, MapContaining]);
+            def mapContaining: ref[MapContaining[Node]](getInterface[obj, MapContaining[Node]]);
             if !Spp.astMgr.buildAst(
                 ast { Srl.String("NOT ") + (cond) },
                 AstTemplateMap()
@@ -72,7 +72,7 @@
             return result2
         } else if isDerivedFrom[obj, ComparisonOperator] or isDerivedFrom[obj, AssignmentOperator] {
             def binding: ref[Binding](getInterface[obj, Binding]);
-            def mapContaining: ref[MapContaining](getInterface[obj, MapContaining]);
+            def mapContaining: ref[MapContaining[Node]](getInterface[obj, MapContaining[Node]]);
             def operator: String = castRef[binding.getMember("type"), TiStr].value;
             if infixOperators(operator) == "" {
                 Spp.buildMgr.raiseBuildNotice("SPPG1002", 1, obj);
@@ -122,7 +122,7 @@
                     },
                     AstTemplateMap()
                         .set(String("name"), mapContaining.getElement("first"))
-                        .set(String("op"), TiStr(operator))
+                        .set(String("op"), StringLiteral(operator))
                         .set(String("val"), mapContaining.getElement("second")),
                     result
                 ) {
@@ -131,19 +131,22 @@
             }
         } else if isDerivedFrom[obj, LogOperator] {
             def binding: ref[Binding](getInterface[obj, Binding]);
-            def mapContaining: ref[MapContaining](getInterface[obj, MapContaining]);
+            def mapContaining: ref[MapContaining[Node]](getInterface[obj, MapContaining[Node]]);
             if !Spp.astMgr.buildAst(
                 ast { (cond1) + Srl.String(" {{op}} ") + (cond2) },
                 AstTemplateMap()
                     .set(String("cond1"), generateWhere(mapContaining.getElement("first")).obj)
-                    .set(String("op"), binding.getMember("type"))
+                    .set(
+                        String("op"),
+                        StringLiteral(castRef[binding.getMember("type"), TiStr].value)
+                    )
                     .set(String("cond2"), generateWhere(mapContaining.getElement("second")).obj),
                 result
             ) {
                 System.fail(1, "Unexpected error while processing LogOperator in generateWhere.\n");
             }
         } else if isDerivedFrom[obj, Bracket] {
-            def mapContaining: ref[MapContaining](getInterface[obj, MapContaining]);
+            def mapContaining: ref[MapContaining[Node]](getInterface[obj, MapContaining[Node]]);
             if !Spp.astMgr.buildAst(
                 ast { Srl.String("(") + (cond) + Srl.String(")") },
                 AstTemplateMap()
@@ -153,7 +156,7 @@
                 System.fail(1, "Unexpected error while processing Bracket in generateWhere.\n");
             }
         } else if isDerivedFrom[obj, LinkOperator] {
-            def mapContaining: ref[MapContaining](getInterface[obj, MapContaining]);
+            def mapContaining: ref[MapContaining[Node]](getInterface[obj, MapContaining[Node]]);
             def binding: ref[Binding](getInterface[obj, Binding]);
             def operator: String = castRef[binding.getMember("type"), TiStr].value;
             if operator == "::" {
@@ -174,8 +177,12 @@
                     System.fail(1, "Unexpected error while processing InfixOperator in generateWhere.\n");
                 }
             } else if operator == "in" {
-                def mapContaining2: ref[MapContaining](getInterface[mapContaining.getElement("second"), MapContaining]);
-                def containing: ref[Containing](getInterface[mapContaining2.getElement("operand"), Containing]);
+                def mapContaining2: ref[MapContaining[Node]](
+                    getInterface[mapContaining.getElement("second"), MapContaining[Node]]
+                );
+                def containing: ref[Containing[Node]](
+                    getInterface[mapContaining2.getElement("operand"), Containing[Node]]
+                );
 
                 if !Spp.astMgr.buildAst(
                     ast {
@@ -243,8 +250,8 @@
         return result;
     }
 
-    func generateOrder (obj: ref[TiObject]): TioSrdRef {
-        def result: TioSrdRef;
+    func generateOrder (obj: ref[Node]): SrdRef[Node] {
+        def result: SrdRef[Node];
 
         if obj~ptr == 0 {
             System.fail(1, "generateOrder: obj is null.\n");
@@ -266,7 +273,7 @@
             if operator != "-" {
                 Spp.buildMgr.raiseBuildNotice("SPPG1002", 1, obj);
             }
-            def mapContaining: ref[MapContaining](getInterface[obj, MapContaining]);
+            def mapContaining: ref[MapContaining[Node]](getInterface[obj, MapContaining[Node]]);
             obj~no_deref = mapContaining.getElement(0);
             if !isDerivedFrom[obj, Identifier] {
                 Spp.buildMgr.raiseBuildNotice("SPPG1002", 1, obj);
@@ -282,14 +289,14 @@
                 System.fail(1, "Unexpected error while processing PrefixOperator in generateOrder.\n");
             }
         } else if isDerivedFrom[obj, Bracket] {
-            def mapContainer: MapContainerOf[obj];
+            def mapContainer: MapContainerOf[obj, Node];
             result = generateOrder(mapContainer.getElement("operand"));
-        } else if isDerivedFrom[obj, Core.Data.Ast.List] {
-            def container: ContainerOf[obj];
+        } else if isDerivedFrom[obj, List] {
+            def container: ContainerOf[obj, Node];
             result = generateOrder(container.getElement(0));
             def i: Int;
             for i = 1, i < container.getElementCount()~cast[Int], ++i {
-                def combinedResult: TioSrdRef;
+                def combinedResult: SrdRef[Node];
                 if !Spp.astMgr.buildAst(
                     ast { prevResult; result; },
                     AstTemplateMap()
@@ -314,8 +321,8 @@
         return result;
     }
 
-    func generateUpdate (obj: ref[TiObject]): TioSrdRef {
-        def result: TioSrdRef;
+    func generateUpdate (obj: ref[Node]): SrdRef[Node] {
+        def result: SrdRef[Node];
 
         if obj~ptr == 0 {
             System.fail(1, "generateUpdate: obj is null.\n");
@@ -324,7 +331,7 @@
             def binding: ref[Binding](getInterface[obj, Binding]);
             def opType: String = castRef[binding.getMember("type"), Core.Basic.TiStr].value;
             if opType == "=" {
-                def mapContainer: MapContainerOf[obj];
+                def mapContainer: MapContainerOf[obj, Node];
                 if !Spp.astMgr.buildAst(
                     ast {
                         columns.add(_this.getColumnNameForVar(Srl.String("{{name}}")));
@@ -345,14 +352,14 @@
                 }
             }
         } else if isDerivedFrom[obj, Bracket] {
-            def mapContainer: MapContainerOf[obj];
+            def mapContainer: MapContainerOf[obj, Node];
             result = generateUpdate(mapContainer.getElement("operand"));
-        } else if isDerivedFrom[obj, Core.Data.Ast.List] {
-            def container: ContainerOf[obj];
+        } else if isDerivedFrom[obj, List] {
+            def container: ContainerOf[obj, Node];
             result = generateUpdate(container.getElement(0));
             def i: Int;
             for i = 1, i < container.getElementCount()~cast[Int], ++i {
-                def combinedResult: TioSrdRef;
+                def combinedResult: SrdRef[Node];
                 if !Spp.astMgr.buildAst(
                     ast { prevResult; result; },
                     AstTemplateMap()
@@ -373,7 +380,7 @@
         return result;
     }
 
-    func generateParsing (varNames: Array[String], varElements: Array[ref[Core.Basic.TiObject]]) {
+    func generateParsing (varNames: Array[String], varElements: Array[ref[Node]]) {
         @shared def strType: ref[Spp.Ast.Type](Spp.astMgr.traceType(ast Root.Srl.String));
         @shared def nullableStrType: ref[Spp.Ast.Type](Spp.astMgr.traceType(ast Root.Srl.Nullable[Root.Srl.String]));
         @shared def boolType: ref[Spp.Ast.Type](Spp.astMgr.traceType(ast Root.Bool));
@@ -390,8 +397,8 @@
                     if not data(j).isNull this = parser(data(j))
                 }),
                 AstTemplateMap()
-                    .set(String("j"), Core.Data.Ast.IntegerLiteral(String("") + i))
-                    .set(String("varName"), Core.Data.Ast.Identifier(varNames(i)))
+                    .set(String("j"), IntegerLiteral(String("") + i))
+                    .set(String("varName"), Identifier(varNames(i)))
             ) {
                 System.fail(1, "Unexpected error while processing generateParsing.\n");
             }
@@ -405,21 +412,21 @@
             } else if varType~ptr == nullableStrType~ptr {
                 generateParseBlock[Srl.Nullable[Srl.String]];
             } else if varType~ptr == boolType~ptr {
-                generateParseBlock[Root.Bool, Rows.parseBool];
+                generateParseBlock[Bool, Rows.parseBool];
             } else if varType~ptr == nullableBoolType~ptr {
-                generateParseBlock[Srl.Nullable[Root.Bool], Rows.parseBool];
+                generateParseBlock[Srl.Nullable[Bool], Rows.parseBool];
             } else if varType.getMyTypeInfo().typeName == "IntegerType" {
-                generateParseBlock[Root.Int[64], String.parseInt];
+                generateParseBlock[Int[64], String.parseInt];
             } else if varType~ptr == nullableInt32Type~ptr {
-                generateParseBlock[Srl.Nullable[Root.Int[32]], String.parseInt];
+                generateParseBlock[Srl.Nullable[Int[32]], String.parseInt];
             } else if varType~ptr == nullableInt64Type~ptr {
-                generateParseBlock[Srl.Nullable[Root.Int[64]], String.parseInt];
+                generateParseBlock[Srl.Nullable[Int[64]], String.parseInt];
             } else if varType.getMyTypeInfo().typeName == "FloatType" {
-                generateParseBlock[Root.Float[64], String.parseFloat];
+                generateParseBlock[Float[64], String.parseFloat];
             } else if varType~ptr == nullableFloat32Type~ptr {
-                generateParseBlock[Srl.Nullable[Root.Float[32]], String.parseFloat];
+                generateParseBlock[Srl.Nullable[Float[32]], String.parseFloat];
             } else if varType~ptr == nullableFloat64Type~ptr {
-                generateParseBlock[Srl.Nullable[Root.Float[64]], String.parseFloat];
+                generateParseBlock[Srl.Nullable[Float[64]], String.parseFloat];
             } else {
                 Spp.buildMgr.raiseBuildNotice("ROWS1002", 1, varElements(i));
             }
@@ -438,10 +445,10 @@
         }
     }
 
-    func generateTableName (classAst: ref[Core.Basic.TiObject]) {
+    func generateTableName (classAst: ref[Node]) {
         Spp.astMgr.insertAst(
             (ast Srl.String("{{className}}")),
-            Srl.Map[Srl.String, ref[Core.Basic.TiObject]]().set(Srl.String("className"), TiStr(getTableName(classAst)))
+            Srl.Map[Srl.String, ref[Node]]().set(Srl.String("className"), StringLiteral(getTableName(classAst)))
         );
     }
 }

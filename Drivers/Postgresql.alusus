@@ -159,21 +159,21 @@ import "libpq.so.5";
     }
 
     def postgresqlDataTypeMap: Map[String, String](Map[String, String]().{
-        set(String("Integer"), String("integer"));
-        set(String("BigInteger"), String("bigint"));
-        set(String("SmallInteger"), String("smallint"));
-        set(String("TinyInteger"), String("smallint"));
-        set(String("Boolean"), String("boolean"));
-        set(String("Real"), String("real"));
-        set(String("Float"), String("double precision"));
-        set(String("Decimal"), String("double precision"));
-        set(String("Xml"), String("xml"));
-        set(String("VarChar"), String("varchar"));
-        set(String("CharType"), String("char"));
-        set(String("Text"), String("text"));
-        set(String("Date"), String("date"));
-        set(String("DateTime"), String("timestamp"));
-        set(String("Uuid"), String("uuid"));
+        set(String("IntDataType"), String("integer"));
+        set(String("BigIntDataType"), String("bigint"));
+        set(String("SmallIntDataType"), String("smallint"));
+        set(String("TinyIntDataType"), String("smallint"));
+        set(String("BoolDataType"), String("boolean"));
+        set(String("RealDataType"), String("real"));
+        set(String("FloatDataType"), String("double precision"));
+        set(String("DecimalDataType"), String("double precision"));
+        set(String("XmlDataType"), String("xml"));
+        set(String("VarCharDataType"), String("varchar"));
+        set(String("CharDataType"), String("char"));
+        set(String("TextDataType"), String("text"));
+        set(String("DateDataType"), String("date"));
+        set(String("DateTimeDataType"), String("timestamp"));
+        set(String("UuidDataType"), String("uuid"));
     });
 
     module Postgresql {

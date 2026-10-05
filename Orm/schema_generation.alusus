@@ -28,40 +28,29 @@
         ).error;
     }
 
-    func generateTable (classAst: ref[Core.Basic.TiObject]): TioSrdRef {
+    func generateTable (classAst: ref[Node]): SrdRef[Node] {
         use Core.Basic;
-        def result: TioSrdRef;
-        def columnResult: TioSrdRef;
+        def result: SrdRef[Node];
+        def columnResult: SrdRef[Node];
         def columnResults: Spp.Ast.Block;
-        def columnResultsContainer: DynContainerOf[columnResults];
-        def pkResults: Core.Data.Ast.List;
-        def pkResultsContainer: DynContainerOf[pkResults];
+        def columnResultsContainer: DynContainerOf[columnResults, Node];
+        def pkResults: List;
+        def pkResultsContainer: DynContainerOf[pkResults, Node];
         def fkResults: Spp.Ast.Block;
-        def fkResultsContainer: DynContainerOf[fkResults];
+        def fkResultsContainer: DynContainerOf[fkResults, Node];
 
-        def vars: Array[ref[Core.Basic.TiObject]] = getVars(classAst, 0);
+        def vars: Array[ref[Node]] = getVars(classAst, 0);
 
         def i: int;
-        def j: int;
 
         for i = 0, i < vars.getLength(), i += 1 {
-            def modsKeywords: Array[String];
-            def modsParams: Array[Array[String]];
-            getVarModifiers(vars(i), modsKeywords, modsParams);
-
             def dataTypeName: String;
-            for j = 0, j < modsKeywords.getLength(), j += 1 {
-                if isDataType(modsKeywords(j)) != -1 {
-                    dataTypeName = modsKeywords(j);
-                    break;
-                }
-            }
-
-            if dataTypeName == "" continue;
+            def dataTypeParams: Array[String];
+            if not getDbDataType(vars(i), dataTypeName, dataTypeParams) continue;
 
             def columnName: String = getColumnName(vars(i));
 
-            if modsParams(j).getLength() == 0 {
+            if dataTypeParams.getLength() == 0 {
                 if !Spp.astMgr.buildAst(
                     (ast dataType = Rows.dataTypeName()),
                     AstTemplateMap().set(String("dataTypeName"), Ast.Identifier(dataTypeName)),
@@ -74,52 +63,55 @@
                     (ast dataType = Rows.dataTypeName(size)),
                     AstTemplateMap()
                         .set(String("dataTypeName"), Ast.Identifier(dataTypeName))
-                        .set(String("size"), Ast.IntegerLiteral(modsParams(j)(0))),
+                        .set(String("size"), Ast.IntegerLiteral(dataTypeParams(0))),
                     columnResult
                 ) {
                     System.fail(1, "Unexpected error while processing data type in generateTable.\n");
                 }
             }
 
-            for j = 0, j < modsKeywords.getLength(), j += 1 {
-                if modsKeywords(j) == "notNull" {
-                    if !Spp.astMgr.buildAst(
-                        ast {
-                            prevResult;
-                            notNull = true;
-                        },
-                        AstTemplateMap().set(String("prevResult"), columnResult),
-                        result
-                    ) {
-                        System.fail(1, "Unexpected error while processing not-null in generateTable.\n");
-                    }
-                    columnResult = result;
-                } else if modsKeywords(j) == "unique" {
-                    if !Spp.astMgr.buildAst(
-                        ast {
-                            prevResult;
-                            unique = true;
-                        },
-                        AstTemplateMap().set(String("prevResult"), columnResult),
-                        result
-                    ) {
-                        System.fail(1, "Unexpected error while processing unique in generateTable.\n");
-                    }
-                    columnResult = result;
-                } else if modsKeywords(j) == "primaryKey" {
-                    if !Spp.astMgr.buildAst(
-                        (ast Srl.String("{{varname}}")),
-                        AstTemplateMap().set(String("varname"), Ast.Identifier(columnName)),
-                        result
-                    ) {
-                        System.fail(1, "Unexpected error while processing primary-key in generateTable.\n");
-                    }
-                    pkResultsContainer.addElement(result);
-                } else if modsKeywords(j) == "defult" {
-                    if modsParams(j).getLength() == 0 {
-                        Spp.buildMgr.raiseBuildNotice("ROWS1003", 1, vars(i));
-                        continue;
-                    }
+            def params: Array[String];
+
+            if hasMetadata(vars(i), "notNull") {
+                if !Spp.astMgr.buildAst(
+                    ast {
+                        prevResult;
+                        notNull = true;
+                    },
+                    AstTemplateMap().set(String("prevResult"), columnResult),
+                    result
+                ) {
+                    System.fail(1, "Unexpected error while processing not-null in generateTable.\n");
+                }
+                columnResult = result;
+            }
+            if hasMetadata(vars(i), "unique") {
+                if !Spp.astMgr.buildAst(
+                    ast {
+                        prevResult;
+                        unique = true;
+                    },
+                    AstTemplateMap().set(String("prevResult"), columnResult),
+                    result
+                ) {
+                    System.fail(1, "Unexpected error while processing unique in generateTable.\n");
+                }
+                columnResult = result;
+            }
+            if hasMetadata(vars(i), "primaryKey") {
+                if !Spp.astMgr.buildAst(
+                    (ast Srl.String("{{varname}}")),
+                    AstTemplateMap().set(String("varname"), Ast.Identifier(columnName)),
+                    result
+                ) {
+                    System.fail(1, "Unexpected error while processing primary-key in generateTable.\n");
+                }
+                pkResultsContainer.addElement(result);
+            }
+            if getMetadataStringParams(vars(i), "defult", params) {
+                if params.getLength() == 0 {
+                    Spp.buildMgr.raiseBuildNotice("ROWS1003", 1, vars(i));
+                } else {
                     if !Spp.astMgr.buildAst(
                         ast {
                             prevResult;
@@ -127,17 +119,19 @@
                         },
                         AstTemplateMap()
                             .set(String("prevResult"), columnResult)
-                            .set(String("param"), Ast.Identifier(modsParams(j)(0))),
+                            .set(String("param"), Ast.Identifier(params(0))),
                         result
                     ) {
                         System.fail(1, "Unexpected error while processing default in generateTable.\n");
                     }
                     columnResult = result;
-                } else if modsKeywords(j) == "check" {
-                    if modsParams(j).getLength() == 0 {
-                        Spp.buildMgr.raiseBuildNotice("ROWS1004", 1, vars(i));
-                        continue;
-                    }
+                }
+            }
+            params.clear();
+            if getMetadataStringParams(vars(i), "check", params) {
+                if params.getLength() == 0 {
+                    Spp.buildMgr.raiseBuildNotice("ROWS1004", 1, vars(i));
+                } else {
                     if !Spp.astMgr.buildAst(
                         ast {
                             prevResult;
@@ -145,18 +139,20 @@
                         },
                         AstTemplateMap()
                             .set(String("prevResult"), columnResult)
-                            .set(String("param"), Ast.Identifier(modsParams(j)(0))),
+                            .set(String("param"), Ast.Identifier(params(0))),
                         result
                     ) {
                         System.fail(1, "Unexpected error while processing check in generateTable.\n");
                     }
                     columnResult = result;
-                } else if modsKeywords(j) == "foreignKey" {
-                    if modsParams(j).getLength() < 2 {
-                        Spp.buildMgr.raiseBuildNotice("ROWS1005", 1, vars(i));
-                        continue;
-                    }
-                    def fkResult: TioSrdRef;
+                }
+            }
+            params.clear();
+            if getMetadataStringParams(vars(i), "foreignKey", params) {
+                if params.getLength() < 2 {
+                    Spp.buildMgr.raiseBuildNotice("ROWS1005", 1, vars(i));
+                } else {
+                    def fkResult: SrdRef[Node];
                     if !Spp.astMgr.buildAst(
                         (ast Rows.ForeignKey(
                             Srl.String("{{col}}"),
@@ -165,8 +161,8 @@
                         )),
                         AstTemplateMap()
                             .set(String("col"), Ast.Identifier(columnName))
-                            .set(String("refTbl"), Ast.Identifier(modsParams(j)(0)))
-                            .set(String("refCol"), Ast.Identifier(modsParams(j)(1))),
+                            .set(String("refTbl"), Ast.Identifier(params(0)))
+                            .set(String("refCol"), Ast.Identifier(params(1))),
                         fkResult
                     ) {
                         System.fail(1, "Unexpected error while processing foreign-key in generateTable.\n");
@@ -178,7 +174,7 @@
             if !Spp.astMgr.buildAst(
                 (ast set(Srl.String("{{varName}}"), Rows.Column().{ columnDesc })),
                 AstTemplateMap()
-                    .set(String("varName"), TiStr(columnName))
+                    .set(String("varName"), StringLiteral(columnName))
                     .set(String("columnDesc"), columnResult),
                 result
             ) {
@@ -206,33 +202,4 @@
         }
         return result;
     }
-
-    function isDataType (varType : String): int {
-        @shared def dataTypeArray:Array[String]({
-            String("Integer"),
-            String("BigInteger"),
-            String("SmallInteger"),
-            String("TinyInteger"),
-            String("Boolean"),
-            String("Real"),
-            String("Float"),
-            String("Decimal"),
-            String("Xml"),
-            String("VarChar"),
-            String("CharType"),
-            String("Text"),
-            String("Date"),
-            String("DateTime"),
-	        String("Uuid")
-        });
-
-        def si : int ;
-        for si = 0, si < dataTypeArray.getLength(), ++si {
-            if dataTypeArray(si) == varType {
-                return si;
-            }
-        }
-        return -1;
-    }
 }
-
