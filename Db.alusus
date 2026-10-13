@@ -79,7 +79,7 @@
                 def success: Bool = this.driver.exec(sql, true);
                 def attempts: Int = this.reconnectionAttemptCount;
                 while not success and --attempts >= 0 and not this.driver.isConnected() {
-                    System.sleep(this.reconnectionDelay);
+                    System.usleep(this.reconnectionDelay);
                     if this.driver.connect(this.driver.getConnectionParams()) {
                         success = this.driver.exec(sql, true);
                     }
@@ -120,7 +120,7 @@
                 def success: Bool = this.driver.exec(sql, false);
                 def attempts: Int = this.reconnectionAttemptCount;
                 while not success and --attempts >= 0 and not this.driver.isConnected() {
-                    System.sleep(this.reconnectionDelay);
+                    System.usleep(this.reconnectionDelay);
                     if this.driver.connect(this.driver.getConnectionParams()) {
                         success = this.driver.exec(sql, false);
                     }
